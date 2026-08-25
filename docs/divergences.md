@@ -116,6 +116,19 @@ references, never gospel (AGENTS.md §2).
   twilight-color convention itself is not re-derived here — treated as
   EXPERIMENTAL until independently documented.
 
+### D14. Lunar view polar sampling is flagged, not hidden
+- When sunset is uncomputable (polar regions) `LunarCalendarView` samples at
+  18:00 local and sets `LunarDayFact.sampledAtFallback = true`. The phase shown
+  for such evenings is an approximation anchored mid-evening; hosts should
+  surface the flag rather than silently trusting the row.
+
+### D15. Event-pack curation ownership
+- The engine EXPORTS the canonical core pack (`EventRegistry.builtInPackJson()`)
+  into khushu-quran-data (`assets/islamic_calendar/islamic_events.json`). That
+  file's content review belongs to the data-project maintainers; the engine
+  treats whatever JSON it is given as input. Community/Aladhan-derived
+  definitions always carry `confidence = COMMUNITY` so UIs can distinguish.
+
 ## Maintenance log
 
 (Not divergences — environment and dependency decisions recorded for traceability.)

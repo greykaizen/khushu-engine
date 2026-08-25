@@ -215,5 +215,6 @@ public final class com/khushu/engine/MonthApi {
 	public final fun hijriYearMap (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/SortedMap;
 	public final fun monthMatrix (Ljava/time/YearMonth;Lcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/Map;
 	public final fun yearMatrix (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/Map;
+	public final fun yearMatrixLazy (ILcom/khushu/engine/calendar/CalendarConfiguration;)Lkotlin/sequences/Sequence;
 }
 

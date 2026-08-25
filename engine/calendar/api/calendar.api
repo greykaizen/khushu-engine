@@ -363,8 +363,9 @@ public final class com/khushu/engine/calendar/LunarCalendarView {
 }
 
 public final class com/khushu/engine/calendar/LunarCalendarView$LunarDayFact {
-	public fun <init> (ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZ)V
+	public fun <init> (ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZZ)V
 	public final fun component1 ()I
+	public final fun component10 ()Z
 	public final fun component2 ()Ljava/time/LocalDate;
 	public final fun component3 ()Ljava/time/Instant;
 	public final fun component4 ()D
@@ -373,8 +374,8 @@ public final class com/khushu/engine/calendar/LunarCalendarView$LunarDayFact {
 	public final fun component7 ()D
 	public final fun component8 ()D
 	public final fun component9 ()Z
-	public final fun copy (ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZ)Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;
-	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZILjava/lang/Object;)Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;
+	public final fun copy (ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZZ)Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZZILjava/lang/Object;)Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAboveHorizon ()Z
 	public final fun getAltitudeDeg ()D
@@ -385,6 +386,7 @@ public final class com/khushu/engine/calendar/LunarCalendarView$LunarDayFact {
 	public final fun getHijriDay ()I
 	public final fun getIlluminationFraction ()D
 	public final fun getPhaseAngleDeg ()D
+	public final fun getSampledAtFallback ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

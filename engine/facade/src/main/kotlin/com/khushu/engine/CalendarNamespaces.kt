@@ -84,10 +84,20 @@ class MonthApi internal constructor() {
         return out
     }
 
+    /**
+     * Eager full-year matrix — 365–366 DualDate entries (~tens of KB). Fine for
+     * year views; for widgets or multi-year spans prefer [yearMatrixLazy].
+     */
     fun yearMatrix(civilYear: Int, config: CalendarConfiguration): Map<LocalDate, DualDate> =
         (1..12).flatMap { m ->
             monthMatrix(YearMonth.of(civilYear, m), config).entries
         }.associate { it.key to it.value }
+
+    /** Lazy variant: dates materialize on iteration; nothing is retained. */
+    fun yearMatrixLazy(civilYear: Int, config: CalendarConfiguration): Sequence<Pair<LocalDate, DualDate>> =
+        generateSequence(LocalDate.of(civilYear, 1, 1)) { it.plusDays(1) }
+            .takeWhile { it.year == civilYear }
+            .map { it to bothDates(it, config) }
 
     fun hijriYearMap(hijriYear: Int, config: CalendarConfiguration): java.util.SortedMap<HijriDate, LocalDate> {
         val out = java.util.TreeMap<HijriDate, LocalDate>(compareBy({ it.year }, { it.month }, { it.day }))

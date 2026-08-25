@@ -251,6 +251,10 @@ object Prayer {
      * Up to `before` prayers before, the covering/current one, and up to `after`
      * prayers after [now] — e.g. before=1, after=2 gives previous, current,
      * next, next+1. Spans midnight boundaries transparently.
+     *
+     * Edge contract: near uncomputable boundaries (polar) the result may contain
+     * FEWER than `before + after + 1` entries — truncation is silent by design;
+     * callers needing strict sizes should check `size`.
      */
     fun navigation(
         location: Location,
@@ -263,7 +267,6 @@ object Prayer {
         require(before >= 0 && after >= 0)
         val civilToday = LocalDate.ofInstant(now, zoneId)
 
-        // Collect occurrences across a window of days around `now`.
         fun dayOccurrences(date: LocalDate): List<Entry> {
             val t = times(location, date, config)
             return buildList {
@@ -276,19 +279,139 @@ object Prayer {
             }.sortedBy { it.instant }
         }
 
-        val all = (-2..2).flatMap { off -> dayOccurrences(civilToday.plusDays(off.toLong())) }
-            .sortedBy { it.instant }
-        if (all.isEmpty()) return emptyList()
-
-        // Index of the last occurrence at-or-before now; -1 when now precedes all.
-        var currentIdx = all.indexOfLast { it.instant <= now }
-        if (currentIdx < 0) currentIdx = 0 else if (all[currentIdx].instant < now && currentIdx + 1 < all.size && all[currentIdx].instant.toEpochMilli() == now.toEpochMilli()) currentIdx += 1
+        // Grow the day-window only as far as the requested slice demands.
+        val wanted = before + after + 1
+        var radius = 1
+        var all = emptyList<Entry>()
+        var currentIdx = -1
+        while (radius <= MAX_NAVIGATION_RADIUS_DAYS) {
+            all = (-radius..radius).flatMap { off -> dayOccurrences(civilToday.plusDays(off.toLong())) }
+                .sortedBy { it.instant }
+            if (all.isEmpty()) return emptyList()
+            // Current = last occurrence at-or-before now (an exact hit IS current).
+            currentIdx = all.indexOfLast { it.instant <= now }
+            if (currentIdx < 0) currentIdx = 0
+            val satisfied = (currentIdx >= before || currentIdx == 0) &&
+                (all.size - 1 - currentIdx >= after || currentIdx == all.size - 1)
+            if (all.size >= wanted && satisfied) break
+            radius++
+        }
 
         val from = (currentIdx - before).coerceAtLeast(0)
         val to = (currentIdx + after).coerceAtMost(all.size - 1)
         if (from > to) return emptyList()
         return all.subList(from, to + 1)
     }
+
+    private const val MAX_NAVIGATION_RADIUS_DAYS = 15
+
+    // ── Observance statistics: pure functions over caller-supplied logs ────
+
+    /** One logged prayer check-mark. Persistence lives entirely in the host. */
+    data class PrayerLogRecord(
+        val date: LocalDate,
+        val kind: PrayerStatus.Prayer,
+        val completed: Boolean,
+    )
+
+    /**
+     * Streak/rate statistics computed over explicitly-passed logs.
+     *
+     * Day semantics (documented contract):
+     * - Applicable prayers per day: FAJR, DHUHR, ASR, MAGHRIB, ISHA
+     *   (SUNRISE is a boundary event and never affects day completeness).
+     * - A day is COMPLETE when all applicable kinds are logged completed.
+     * - A day within any [excusedRanges] range (travel/illness/menses — host
+     *   decides) is EXCUSED: it neither extends nor breaks a streak.
+     * - A day with any uncompleted obligatory record and not excused BREAKS.
+     * - A day inside the logged span with NO records counts as incomplete
+     *   (breaks) unless excused — silence is not success.
+     * - Days outside the logged span are ignored entirely.
+     *
+     * No persistence, no Clock: the same inputs always yield the same output.
+     */
+    fun streakStats(
+        records: List<PrayerLogRecord>,
+        excusedRanges: List<ClosedRange<LocalDate>> = emptyList(),
+        config: PrayerConfiguration = PrayerConfiguration(),
+    ): StreakStats {
+        require(records.isNotEmpty()) { "records must not be empty" }
+        val applicable = setOf(
+            PrayerStatus.Prayer.FAJR,
+            PrayerStatus.Prayer.DHUHR,
+            PrayerStatus.Prayer.ASR,
+            PrayerStatus.Prayer.MAGHRIB,
+            PrayerStatus.Prayer.ISHA,
+        )
+
+        data class DayState(val complete: Boolean, val excused: Boolean)
+
+        val byDate = records.groupBy { it.date }
+        val firstDate = byDate.keys.min()
+        val lastDate = byDate.keys.max()
+
+        fun isExcused(date: LocalDate) = excusedRanges.any { date in it }
+
+        // Classify every civil day in the logged span.
+        val days = mutableListOf<DayState>()
+        var d = firstDate
+        while (!d.isAfter(lastDate)) {
+            if (isExcused(d)) {
+                days += DayState(complete = false, excused = true)
+            } else {
+                val recs = byDate[d].orEmpty().filter { it.kind in applicable }
+                val complete = recs.isNotEmpty() &&
+                    applicable.all { kind -> recs.any { it.kind == kind && it.completed } }
+                days += DayState(complete = complete, excused = false)
+            }
+            d = d.plusDays(1)
+        }
+
+        // Longest run of complete-or-excused days; current = trailing such run
+        // ending at the last logged date.
+        var longest = 0
+        var running = 0
+        for (day in days) {
+            if (day.complete || day.excused) {
+                running++
+                if (running > longest) longest = running
+            } else {
+                running = 0
+            }
+        }
+        var current = 0
+        for (day in days.reversed()) {
+            if (day.complete || day.excused) current++ else break
+        }
+
+        // Per-prayer completion rates over non-excused days only.
+        val rates = applicable.associateWith { kind ->
+            val logged = records.filter { it.kind == kind && !isExcused(it.date) }
+            if (logged.isEmpty()) {
+                Double.NaN
+            } else {
+                logged.count { it.completed }.toDouble() / logged.size
+            }
+        }
+
+        return StreakStats(
+            currentStreakDays = current,
+            longestStreakDays = longest,
+            perPrayerCompletionRate = rates,
+            spanDaysNonExcused = days.count { !it.excused },
+            excusedDaysCount = days.count { it.excused },
+        )
+    }
+
+    data class StreakStats(
+        val currentStreakDays: Int,
+        val longestStreakDays: Int,
+        /** Fraction completed among non-excused logged days; NaN when never logged. */
+        val perPrayerCompletionRate: Map<PrayerStatus.Prayer, Double>,
+        /** Civil days within the logged span that were not excused (silent days included). */
+    val spanDaysNonExcused: Int,
+        val excusedDaysCount: Int,
+    )
 
     // ── Windows: fiqh-relevant intervals as raw facts ───────────────────────
 
