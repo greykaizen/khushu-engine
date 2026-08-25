@@ -48,7 +48,7 @@ class BreadthTest {
         assertEquals(cached.hijri(date), cached.hijri(date))
 
         // Different params → different key → different (correct) result.
-        val hanafi = com.khushu.engine.prayer.PrayerParams(madhab = com.khushu.engine.prayer.Madhab.HANAFI)
+        val hanafi = com.khushu.engine.prayer.PrayerConfiguration(madhab = com.khushu.engine.prayer.Madhab.HANAFI)
         assertEquals(
             engine.prayer.times(london, date, hanafi).asr,
             cached.prayerTimes(london, date, hanafi).asr,

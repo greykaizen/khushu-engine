@@ -3,7 +3,7 @@ package com.khushu.engine.facadetest
 import com.khushu.engine.KhushuEngine
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Madhab
-import com.khushu.engine.prayer.PrayerParams
+import com.khushu.engine.prayer.PrayerConfiguration
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -38,7 +38,7 @@ class KhushuEngineTest {
 
     @Test
     fun facadeAddsNoBehaviourOnlyDelegation() {
-        val params = PrayerParams(madhab = Madhab.HANAFI)
+        val params = PrayerConfiguration(madhab = Madhab.HANAFI)
         assertEquals(
             engine.prayer.times(london, LocalDate.of(2025, 10, 1), params),
             engine.prayer.times(london, LocalDate.of(2025, 10, 1), params),

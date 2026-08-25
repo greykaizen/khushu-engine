@@ -16,6 +16,41 @@ public final class com/khushu/engine/prayer/Convention : java/lang/Enum {
 	public static fun values ()[Lcom/khushu/engine/prayer/Convention;
 }
 
+public final class com/khushu/engine/prayer/ConventionInfo {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/khushu/engine/prayer/ConventionInfo;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/ConventionInfo;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/khushu/engine/prayer/ConventionInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAuthority ()Ljava/lang/String;
+	public final fun getFajrRule ()Ljava/lang/String;
+	public final fun getIdentifier ()Ljava/lang/String;
+	public final fun getImplementedVia ()Ljava/lang/String;
+	public final fun getIshaRule ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/ConventionInfoKt {
+	public static final fun polarAnomalyFlag (Lcom/khushu/engine/prayer/PrayerTimesResult;)Z
+}
+
+public final class com/khushu/engine/prayer/HighLatitudeResolution : java/lang/Enum {
+	public static final field COMPUTED_WITH_REQUESTED_RULE Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public static final field RESOLVED_BY_MIDDLE_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public static final field RESOLVED_BY_SEVENTH_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public static final field RESOLVED_BY_TWILIGHT_ANGLE Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public static final field UNAVAILABLE Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public static fun values ()[Lcom/khushu/engine/prayer/HighLatitudeResolution;
+}
+
 public final class com/khushu/engine/prayer/HighLatitudeRule : java/lang/Enum {
 	public static final field MIDDLE_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeRule;
 	public static final field SEVENTH_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeRule;
@@ -37,12 +72,66 @@ public final class com/khushu/engine/prayer/Madhab : java/lang/Enum {
 
 public final class com/khushu/engine/prayer/Prayer {
 	public static final field INSTANCE Lcom/khushu/engine/prayer/Prayer;
-	public final fun status (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerParams;)Lcom/khushu/engine/prayer/PrayerStatus;
-	public static synthetic fun status$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerParams;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerStatus;
-	public final fun tahajjudWindow (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerParams;)Lcom/khushu/engine/prayer/TahajjudWindow;
-	public static synthetic fun tahajjudWindow$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerParams;ILjava/lang/Object;)Lcom/khushu/engine/prayer/TahajjudWindow;
-	public final fun times (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerParams;)Lcom/khushu/engine/prayer/PrayerTimesResult;
-	public static synthetic fun times$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerParams;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public final fun month (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun month$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun status (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerStatus;
+	public static synthetic fun status$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerStatus;
+	public final fun tahajjudWindow (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/TahajjudWindow;
+	public static synthetic fun tahajjudWindow$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/TahajjudWindow;
+	public final fun times (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public static synthetic fun times$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public final fun timesForRange (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun timesForRange$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/prayer/PrayerAudit {
+	public fun <init> (Lcom/khushu/engine/prayer/ConventionInfo;Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/HighLatitudeResolution;Lcom/khushu/engine/prayer/PrayerOffsets;Ljava/util/List;)V
+	public final fun component1 ()Lcom/khushu/engine/prayer/ConventionInfo;
+	public final fun component2 ()Lcom/khushu/engine/prayer/Madhab;
+	public final fun component3 ()Lcom/khushu/engine/prayer/HighLatitudeRule;
+	public final fun component4 ()Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public final fun component5 ()Lcom/khushu/engine/prayer/PrayerOffsets;
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Lcom/khushu/engine/prayer/ConventionInfo;Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/HighLatitudeResolution;Lcom/khushu/engine/prayer/PrayerOffsets;Ljava/util/List;)Lcom/khushu/engine/prayer/PrayerAudit;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/PrayerAudit;Lcom/khushu/engine/prayer/ConventionInfo;Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/HighLatitudeResolution;Lcom/khushu/engine/prayer/PrayerOffsets;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerAudit;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConventionInfo ()Lcom/khushu/engine/prayer/ConventionInfo;
+	public final fun getHighLatitudeResolution ()Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public final fun getHighLatitudeRule ()Lcom/khushu/engine/prayer/HighLatitudeRule;
+	public final fun getMadhab ()Lcom/khushu/engine/prayer/Madhab;
+	public final fun getOffsetsApplied ()Lcom/khushu/engine/prayer/PrayerOffsets;
+	public final fun getWarnings ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/PrayerConfiguration {
+	public fun <init> ()V
+	public fun <init> (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;)V
+	public synthetic fun <init> (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/prayer/Madhab;
+	public final fun component2 ()Lcom/khushu/engine/prayer/Convention;
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()I
+	public final fun component6 ()Lcom/khushu/engine/prayer/HighLatitudeRule;
+	public final fun component7 ()Lcom/khushu/engine/prayer/PrayerOffsets;
+	public final fun component8 ()Lcom/khushu/engine/prayer/Shafaq;
+	public final fun component9 ()Lcom/khushu/engine/prayer/RoundingPolicy;
+	public final fun copy (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;)Lcom/khushu/engine/prayer/PrayerConfiguration;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerConfiguration;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConvention ()Lcom/khushu/engine/prayer/Convention;
+	public final fun getFajrAngle ()D
+	public final fun getHighLatitudeRule ()Lcom/khushu/engine/prayer/HighLatitudeRule;
+	public final fun getIshaAngle ()D
+	public final fun getIshaIntervalMinutes ()I
+	public final fun getMadhab ()Lcom/khushu/engine/prayer/Madhab;
+	public final fun getOffsets ()Lcom/khushu/engine/prayer/PrayerOffsets;
+	public final fun getRounding ()Lcom/khushu/engine/prayer/RoundingPolicy;
+	public final fun getShafaq ()Lcom/khushu/engine/prayer/Shafaq;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/khushu/engine/prayer/PrayerOffsets {
@@ -66,31 +155,6 @@ public final class com/khushu/engine/prayer/PrayerOffsets {
 	public final fun getMaghrib ()I
 	public final fun getSunrise ()I
 	public final fun getSunset ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/khushu/engine/prayer/PrayerParams {
-	public fun <init> ()V
-	public fun <init> (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;)V
-	public synthetic fun <init> (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/khushu/engine/prayer/Madhab;
-	public final fun component2 ()Lcom/khushu/engine/prayer/Convention;
-	public final fun component3 ()D
-	public final fun component4 ()D
-	public final fun component5 ()I
-	public final fun component6 ()Lcom/khushu/engine/prayer/HighLatitudeRule;
-	public final fun component7 ()Lcom/khushu/engine/prayer/PrayerOffsets;
-	public final fun copy (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;)Lcom/khushu/engine/prayer/PrayerParams;
-	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/PrayerParams;Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/engine/prayer/PrayerOffsets;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerParams;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getConvention ()Lcom/khushu/engine/prayer/Convention;
-	public final fun getFajrAngle ()D
-	public final fun getHighLatitudeRule ()Lcom/khushu/engine/prayer/HighLatitudeRule;
-	public final fun getIshaAngle ()D
-	public final fun getIshaIntervalMinutes ()I
-	public final fun getMadhab ()Lcom/khushu/engine/prayer/Madhab;
-	public final fun getOffsets ()Lcom/khushu/engine/prayer/PrayerOffsets;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -129,7 +193,7 @@ public final class com/khushu/engine/prayer/PrayerStatus$Prayer : java/lang/Enum
 }
 
 public final class com/khushu/engine/prayer/PrayerTimesResult {
-	public fun <init> (Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ZZ)V
+	public fun <init> (Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ZLcom/khushu/engine/prayer/PrayerAudit;)V
 	public final fun component1 ()Ljava/time/LocalDate;
 	public final fun component10 ()Ljava/time/Instant;
 	public final fun component11 ()Ljava/time/Instant;
@@ -137,36 +201,67 @@ public final class com/khushu/engine/prayer/PrayerTimesResult {
 	public final fun component13 ()Ljava/time/Instant;
 	public final fun component14 ()Ljava/time/Instant;
 	public final fun component15 ()Z
-	public final fun component16 ()Z
-	public final fun component2 ()Ljava/time/Instant;
-	public final fun component3 ()Ljava/time/Instant;
-	public final fun component4 ()Ljava/time/Instant;
-	public final fun component5 ()Ljava/time/Instant;
-	public final fun component6 ()Ljava/time/Instant;
-	public final fun component7 ()Ljava/time/Instant;
-	public final fun component8 ()Ljava/time/Instant;
+	public final fun component16 ()Lcom/khushu/engine/prayer/PrayerAudit;
+	public final fun component2 ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun component3 ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun component4 ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun component5 ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun component6 ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun component7 ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun component8 ()Lcom/khushu/engine/prayer/PrayerTiming;
 	public final fun component9 ()Ljava/time/Instant;
-	public final fun copy (Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ZZ)Lcom/khushu/engine/prayer/PrayerTimesResult;
-	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/PrayerTimesResult;Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ZZILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public final fun copy (Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ZLcom/khushu/engine/prayer/PrayerAudit;)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/PrayerTimesResult;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Lcom/khushu/engine/prayer/PrayerTiming;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ZLcom/khushu/engine/prayer/PrayerAudit;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAsr ()Ljava/time/Instant;
+	public final fun getAsr ()Lcom/khushu/engine/prayer/PrayerTiming;
 	public final fun getAstronomicalMidnight ()Ljava/time/Instant;
+	public final fun getAudit ()Lcom/khushu/engine/prayer/PrayerAudit;
 	public final fun getDate ()Ljava/time/LocalDate;
-	public final fun getDhuhr ()Ljava/time/Instant;
+	public final fun getDhuhr ()Lcom/khushu/engine/prayer/PrayerTiming;
 	public final fun getDhuhrEnters ()Ljava/time/Instant;
-	public final fun getFajr ()Ljava/time/Instant;
-	public final fun getIsha ()Ljava/time/Instant;
+	public final fun getFajr ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun getIsha ()Lcom/khushu/engine/prayer/PrayerTiming;
 	public final fun getIshraq ()Ljava/time/Instant;
 	public final fun getLastThirdOfNight ()Ljava/time/Instant;
-	public final fun getMaghrib ()Ljava/time/Instant;
+	public final fun getMaghrib ()Lcom/khushu/engine/prayer/PrayerTiming;
 	public final fun getMidnight ()Ljava/time/Instant;
-	public final fun getPolarAnomaly ()Z
-	public final fun getSunrise ()Ljava/time/Instant;
-	public final fun getSunset ()Ljava/time/Instant;
+	public final fun getSunrise ()Lcom/khushu/engine/prayer/PrayerTiming;
+	public final fun getSunset ()Lcom/khushu/engine/prayer/PrayerTiming;
 	public final fun getZawaalStart ()Ljava/time/Instant;
 	public fun hashCode ()I
 	public final fun isIntervalIsha ()Z
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/PrayerTiming {
+	public fun <init> (Ljava/time/Instant;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/time/Instant;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun copy (Ljava/time/Instant;Ljava/time/Instant;)Lcom/khushu/engine/prayer/PrayerTiming;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/PrayerTiming;Ljava/time/Instant;Ljava/time/Instant;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTiming;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdjusted ()Ljava/time/Instant;
+	public final fun getRaw ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/RoundingPolicy : java/lang/Enum {
+	public static final field NEAREST Lcom/khushu/engine/prayer/RoundingPolicy;
+	public static final field NONE Lcom/khushu/engine/prayer/RoundingPolicy;
+	public static final field UP Lcom/khushu/engine/prayer/RoundingPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/RoundingPolicy;
+	public static fun values ()[Lcom/khushu/engine/prayer/RoundingPolicy;
+}
+
+public final class com/khushu/engine/prayer/Shafaq : java/lang/Enum {
+	public static final field ABYAD Lcom/khushu/engine/prayer/Shafaq;
+	public static final field AHMER Lcom/khushu/engine/prayer/Shafaq;
+	public static final field GENERAL Lcom/khushu/engine/prayer/Shafaq;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/Shafaq;
+	public static fun values ()[Lcom/khushu/engine/prayer/Shafaq;
 }
 
 public final class com/khushu/engine/prayer/TahajjudWindow {

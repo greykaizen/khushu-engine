@@ -6,17 +6,21 @@ import com.batoulapps.adhan2.CalculationMethod
 import com.batoulapps.adhan2.CalculationParameters
 import com.batoulapps.adhan2.Coordinates
 import com.batoulapps.adhan2.HighLatitudeRule
-import com.batoulapps.adhan2.Madhab
+import com.batoulapps.adhan2.Madhab as AdhanMadhab
 import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.SunnahTimes
 import com.batoulapps.adhan2.data.DateComponents
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Convention
+import com.khushu.engine.prayer.ConventionInfo
+import com.khushu.engine.prayer.HighLatitudeResolution
 import com.khushu.engine.prayer.HighLatitudeRule as EngineHighLatitudeRule
 import com.khushu.engine.prayer.Madhab as EngineMadhab
-import com.khushu.engine.prayer.PrayerParams
+import com.khushu.engine.prayer.PrayerAudit
+import com.khushu.engine.prayer.PrayerConfiguration
 import com.khushu.engine.prayer.PrayerStatus
+import com.khushu.engine.prayer.PrayerTiming
 import com.khushu.engine.prayer.PrayerTimesResult
 import java.time.Instant
 import java.time.LocalDate
@@ -24,101 +28,139 @@ import java.time.ZoneId
 
 private fun kotlin.time.Instant.toJavaInstant(): Instant = Instant.ofEpochMilli(this.toEpochMilliseconds())
 
-@OptIn(kotlin.time.ExperimentalTime::class)
 internal object PrayerCalculator {
 
-    fun compute(location: Location, date: LocalDate, params: PrayerParams): PrayerTimesResult {
-        val adhanParams = toAdhanParams(params)
+    fun compute(location: Location, date: LocalDate, config: PrayerConfiguration): PrayerTimesResult {
+        val adhanParams = toAdhanParams(config)
+        // Raw pass: identical configuration minus USER offsets — the pure output.
+        val rawParams = adhanParams.copy(prayerAdjustments = PrayerAdjustments())
         val coords = Coordinates(location.latitude.degrees, location.longitude.degrees)
         val dc = DateComponents(date.year, date.monthValue, date.dayOfMonth)
 
-        val primary = runCatching { PrayerTimes(coords, dc, adhanParams) }.getOrNull()
-        val nextDay = runCatching {
+        val adjustedDay = runCatching { PrayerTimes(coords, dc, adhanParams) }.getOrNull()
+        val rawDay = runCatching { PrayerTimes(coords, dc, rawParams) }.getOrNull()
+        val nextAdjusted = runCatching {
             val nd = date.plusDays(1)
             PrayerTimes(coords, DateComponents(nd.year, nd.monthValue, nd.dayOfMonth), adhanParams)
         }.getOrNull()
 
-        val sunnah = if (primary != null) runCatching { SunnahTimes(primary) }.getOrNull() else null
+        val sunnah = if (adjustedDay != null) runCatching { SunnahTimes(adjustedDay) }.getOrNull() else null
 
         // Astronomical midnight needs sunset today and sunrise tomorrow.
         val astronomicalMidnight: Instant? =
-            if (primary?.maghrib != null && nextDay?.sunrise != null) {
-                roundedMiddle(primary.maghrib!!.toEpochMilliseconds(), nextDay.sunrise!!.toEpochMilliseconds())
+            if (adjustedDay?.maghrib != null && nextAdjusted?.sunrise != null) {
+                roundedMiddle(adjustedDay.maghrib!!.toEpochMilliseconds(), nextAdjusted.sunrise!!.toEpochMilliseconds())
                     .let(Instant::ofEpochMilli)
             } else {
                 null
             }
 
-        val transitMs = SolarGeometry.transitEpochMs(date, location.longitude.degrees)
-        // Anchor derived fiqh windows on the best available transit:
-        // adhan2's (minute-rounded, golden-locked) when present, exact NOAA otherwise.
-        val anchorTransitMs = primary?.dhuhr?.toEpochMilliseconds()
-            ?.let { it - params.offsets.dhuhr * 60_000L } // undo the internal adjustment
-            ?: transitMs
+        // Transit anchor for derived fiqh windows: best available transit,
+        // exact NOAA geometry when adhan2 refused to compute (polar).
+        val anchorTransitMs = rawDay?.dhuhr?.toEpochMilliseconds()
+            ?: SolarGeometry.transitEpochMs(date, location.longitude.degrees)
 
         val ishraq = SolarGeometry.morningAltitudeCrossingEpochMs(
             date, location.latitude.degrees, location.longitude.degrees, ISHRAQ_ALTITUDE_DEG,
         )?.let(Instant::ofEpochMilli)
 
-        val maghribBaseMs = primary?.maghrib?.toEpochMilliseconds()
+        fun timing(raw: Instant?, adjusted: Instant?, sunsetOffsetFallbackMs: Long? = null): PrayerTiming =
+            PrayerTiming(
+                raw = raw,
+                adjusted = adjusted ?: sunsetOffsetFallbackMs?.let { Instant.ofEpochMilli(it) },
+            )
+
+        val maghribRaw = rawDay?.maghrib?.toJavaInstant()
+        val maghribAdj = adjustedDay?.maghrib?.toJavaInstant()
+        // Sunset anchors on the raw maghrib instant so display offsets stay independent (D3).
+        val sunsetAdjusted = maghribRaw?.let {
+            Instant.ofEpochMilli(applyOffset(it.toEpochMilli(), config.offsets.sunset))
+        }
+
+        val warnings = buildList {
+            if (anchorTransitMs == SolarGeometry.transitEpochMs(date, location.longitude.degrees) && adjustedDay == null) {
+                add("polar day/night: solar-noon-derived windows computed via NOAA interim geometry (see divergences D1/D2)")
+            }
+        }
 
         return PrayerTimesResult(
             date = date,
-            // adhan2 applies prayerAdjustments internally before rounding — do not re-apply.
-            fajr = primary?.fajr?.toJavaInstant(),
-            sunrise = primary?.sunrise?.toJavaInstant(),
-            dhuhr = Instant.ofEpochMilli(applyOffset(anchorTransitMs, params.offsets.dhuhr)),
-            asr = primary?.asr?.toJavaInstant(),
-            maghrib = maghribBaseMs?.let(Instant::ofEpochMilli),
-            // Sunset anchors on the UNADJUSTED maghrib instant so display offsets stay independent.
-            sunset = maghribBaseMs?.let {
-                Instant.ofEpochMilli(applyOffset(it - params.offsets.maghrib * 60_000L, params.offsets.sunset))
-            },
-            isha = primary?.isha?.toJavaInstant(),
+            fajr = timing(rawDay?.fajr?.toJavaInstant(), adjustedDay?.fajr?.toJavaInstant()),
+            sunrise = timing(rawDay?.sunrise?.toJavaInstant(), adjustedDay?.sunrise?.toJavaInstant()),
+            dhuhr = timing(
+                rawDay?.dhuhr?.toJavaInstant(),
+                adjustedDay?.dhuhr?.toJavaInstant(),
+                sunsetOffsetFallbackMs = applyOffset(anchorTransitMs, config.offsets.dhuhr),
+            ),
+            asr = timing(rawDay?.asr?.toJavaInstant(), adjustedDay?.asr?.toJavaInstant()),
+            maghrib = timing(maghribRaw, maghribAdj),
+            sunset = PrayerTiming(
+                raw = maghribRaw,
+                adjusted = sunsetAdjusted,
+            ),
+            isha = timing(rawDay?.isha?.toJavaInstant(), adjustedDay?.isha?.toJavaInstant()),
             midnight = sunnah?.middleOfTheNight?.toEpochMilliseconds()?.let(Instant::ofEpochMilli),
             astronomicalMidnight = astronomicalMidnight,
             lastThirdOfNight = sunnah?.lastThirdOfTheNight?.toEpochMilliseconds()?.let(Instant::ofEpochMilli),
             ishraq = ishraq,
             zawaalStart = Instant.ofEpochMilli(anchorTransitMs - ZAWAAL_MARGIN_MS),
             dhuhrEnters = Instant.ofEpochMilli(anchorTransitMs + DHUHR_IHTIYAT_MS),
-            isIntervalIsha = params.ishaIntervalMinutes > 0,
-            // Polar day (adhan2 throws), polar night (adhan2 returns unphysical
-            // times, e.g. Asr before Dhuhr) and partial failures all count as
-            // anomalies. Extremes are grounded in real solar geometry.
-            polarAnomaly = primary == null || nextDay == null ||
-                primary.sunrise == null || primary.maghrib == null ||
-                run {
-                    val (minAltDeg, maxAltDeg) = SolarGeometry.sunAltitudeExtremesDeg(
-                        date, location.latitude.degrees,
-                    )
-                    val midnightSun = minAltDeg >= 0.0
-                    val polarNight = maxAltDeg <= 0.0
-                    // Asr is degenerate when its required altitude sits within
-                    // rounding noise of the day's maximum solar altitude.
-                    val shadowFactor = if (params.madhab == EngineMadhab.HANAFI) 2.0 else 1.0
-                    val maxAltRad = Math.toRadians(maxAltDeg)
-                    val asrAltRad = Math.atan(1.0 / (shadowFactor + 1.0 / Math.tan(maxAltRad)))
-                    val asrDegenerate = maxAltDeg > 0.0 &&
-                        (maxAltRad - asrAltRad) < Math.toRadians(ASR_DEGENERACY_TOLERANCE_DEG)
-                    midnightSun || polarNight || asrDegenerate
-                },
+            isIntervalIsha = config.ishaIntervalMinutes > 0,
+            audit = PrayerAudit(
+                conventionInfo = ConventionMetadata.info(config.convention),
+                madhab = config.madhab,
+                highLatitudeRule = config.highLatitudeRule,
+                highLatitudeResolution = resolution(config, adjustedDay, date, location),
+                offsetsApplied = config.offsets,
+                warnings = warnings,
+            ),
         )
+    }
+
+    private fun resolution(
+        config: PrayerConfiguration,
+        day: PrayerTimes?,
+        date: LocalDate,
+        location: Location,
+    ): HighLatitudeResolution {
+        val fajrNull = day?.fajr == null
+        val ishaNull = day?.isha == null
+        return if (day == null || fajrNull || ishaNull ||
+            SolarGeometry.sunAltitudeExtremesDeg(date, location.latitude.degrees).let { (minAlt, maxAlt) ->
+                minAlt >= 0.0 || maxAlt <= 0.0 || asrDegenerate(config, maxAlt)
+            }
+        ) {
+            HighLatitudeResolution.UNAVAILABLE
+        } else {
+            when (config.highLatitudeRule) {
+                EngineHighLatitudeRule.MIDDLE_OF_NIGHT -> HighLatitudeResolution.RESOLVED_BY_MIDDLE_OF_NIGHT
+                EngineHighLatitudeRule.SEVENTH_OF_NIGHT -> HighLatitudeResolution.RESOLVED_BY_SEVENTH_OF_NIGHT
+                EngineHighLatitudeRule.TWILIGHT_ANGLE -> HighLatitudeResolution.RESOLVED_BY_TWILIGHT_ANGLE
+            }
+        }
+    }
+
+    private fun asrDegenerate(config: PrayerConfiguration, maxAltDeg: Double): Boolean {
+        val shadowFactor = if (config.madhab == EngineMadhab.HANAFI) 2.0 else 1.0
+        val maxAltRad = Math.toRadians(maxAltDeg)
+        val asrAltRad = Math.atan(1.0 / (shadowFactor + 1.0 / Math.tan(maxAltRad)))
+        return maxAltDeg > 0.0 && (maxAltRad - asrAltRad) < Math.toRadians(ASR_DEGENERACY_TOLERANCE_DEG)
     }
 
     fun status(
         location: Location,
         now: Instant,
         zoneId: ZoneId,
-        params: PrayerParams,
+        params: PrayerConfiguration,
     ): PrayerStatus {
         val today = compute(location, LocalDate.ofInstant(now, zoneId), params)
         val windows: List<Pair<PrayerStatus.Prayer, Long>> = buildList {
-            today.fajr?.let { add(PrayerStatus.Prayer.FAJR to it.toEpochMilli()) }
-            today.sunrise?.let { add(PrayerStatus.Prayer.SUNRISE to it.toEpochMilli()) }
+            today.fajr.adjusted?.let { add(PrayerStatus.Prayer.FAJR to it.toEpochMilli()) }
+            today.sunrise.adjusted?.let { add(PrayerStatus.Prayer.SUNRISE to it.toEpochMilli()) }
             today.dhuhrEnters?.let { add(PrayerStatus.Prayer.DHUHR to it.toEpochMilli()) }
-            today.asr?.let { add(PrayerStatus.Prayer.ASR to it.toEpochMilli()) }
-            today.maghrib?.let { add(PrayerStatus.Prayer.MAGHRIB to it.toEpochMilli()) }
-            today.isha?.let { add(PrayerStatus.Prayer.ISHA to it.toEpochMilli()) }
+            today.asr.adjusted?.let { add(PrayerStatus.Prayer.ASR to it.toEpochMilli()) }
+            today.maghrib.adjusted?.let { add(PrayerStatus.Prayer.MAGHRIB to it.toEpochMilli()) }
+            today.isha.adjusted?.let { add(PrayerStatus.Prayer.ISHA to it.toEpochMilli()) }
         }.sortedBy { it.second }
 
         val nowMs = now.toEpochMilli()
@@ -128,9 +170,9 @@ internal object PrayerCalculator {
             val civilToday = LocalDate.ofInstant(now, zoneId)
             val yesterday = compute(location, civilToday.minusDays(1), params)
             return PrayerStatus(
-                current = if (yesterday.isha != null) PrayerStatus.Prayer.ISHA else null,
+                current = if (yesterday.isha.adjusted != null) PrayerStatus.Prayer.ISHA else null,
                 next = windows.firstOrNull()?.first,
-                currentStart = yesterday.isha,
+                currentStart = yesterday.isha.adjusted,
                 nextStart = windows.firstOrNull()?.second?.let(Instant::ofEpochMilli),
                 now = now,
             )
@@ -142,8 +184,8 @@ internal object PrayerCalculator {
         if (nextEntry == null) {
             // After Isha today: the next prayer is tomorrow's Fajr.
             val tomorrow = compute(location, LocalDate.ofInstant(now, zoneId).plusDays(1), params)
-            nextPrayer = if (tomorrow.fajr != null) PrayerStatus.Prayer.FAJR else null
-            nextStart = tomorrow.fajr
+            nextPrayer = if (tomorrow.fajr.adjusted != null) PrayerStatus.Prayer.FAJR else null
+            nextStart = tomorrow.fajr.adjusted
         }
         return PrayerStatus(
             current = currentPrayer,
@@ -164,7 +206,7 @@ internal object PrayerCalculator {
         return Math.round(middle / minuteMs).toLong() * 60_000L
     }
 
-    private fun toAdhanParams(params: PrayerParams): CalculationParameters {
+    private fun toAdhanParams(params: PrayerConfiguration): CalculationParameters {
         val base = when (params.convention) {
             Convention.MUSLIM_WORLD_LEAGUE -> CalculationMethod.MUSLIM_WORLD_LEAGUE
             Convention.ISNA -> CalculationMethod.NORTH_AMERICA
@@ -188,8 +230,8 @@ internal object PrayerCalculator {
 
         return angles.copy(
             madhab = when (params.madhab) {
-                EngineMadhab.HANAFI -> Madhab.HANAFI
-                EngineMadhab.SHAFII, EngineMadhab.MALIKI, EngineMadhab.HANBALI -> Madhab.SHAFI
+                EngineMadhab.HANAFI -> AdhanMadhab.HANAFI
+                EngineMadhab.SHAFII, EngineMadhab.MALIKI, EngineMadhab.HANBALI -> AdhanMadhab.SHAFI
             },
             highLatitudeRule = when (params.highLatitudeRule) {
                 EngineHighLatitudeRule.MIDDLE_OF_NIGHT -> HighLatitudeRule.MIDDLE_OF_THE_NIGHT
@@ -205,6 +247,20 @@ internal object PrayerCalculator {
                 params.offsets.isha,
             ),
             ishaInterval = params.ishaIntervalMinutes,
+            shafaq = params.shafaq?.let {
+                when (it) {
+                    com.khushu.engine.prayer.Shafaq.GENERAL -> com.batoulapps.adhan2.model.Shafaq.GENERAL
+                    com.khushu.engine.prayer.Shafaq.AHMER -> com.batoulapps.adhan2.model.Shafaq.AHMER
+                    com.khushu.engine.prayer.Shafaq.ABYAD -> com.batoulapps.adhan2.model.Shafaq.ABYAD
+                }
+            } ?: base.shafaq,
+            rounding = params.rounding?.let {
+                when (it) {
+                    com.khushu.engine.prayer.RoundingPolicy.NEAREST -> com.batoulapps.adhan2.model.Rounding.NEAREST
+                    com.khushu.engine.prayer.RoundingPolicy.UP -> com.batoulapps.adhan2.model.Rounding.UP
+                    com.khushu.engine.prayer.RoundingPolicy.NONE -> com.batoulapps.adhan2.model.Rounding.NONE
+                }
+            } ?: base.rounding,
         )
     }
 
@@ -212,4 +268,22 @@ internal object PrayerCalculator {
     private const val ZAWAAL_MARGIN_MS = 5L * 60_000
     private const val DHUHR_IHTIYAT_MS = 1L * 60_000
     private const val ASR_DEGENERACY_TOLERANCE_DEG = 1.0
+}
+
+/** Provenance records for each convention — a method is an institution, not a ruling. */
+internal object ConventionMetadata {
+    fun info(convention: Convention): ConventionInfo? = when (convention) {
+        Convention.MUSLIM_WORLD_LEAGUE -> ConventionInfo("MWL", "Muslim World League", "18.0°", "17.0°")
+        Convention.ISNA -> ConventionInfo("ISNA", "Islamic Society of North America", "15.0°", "15.0°")
+        Convention.EGYPTIAN -> ConventionInfo("EGYPT", "Egyptian General Authority of Survey", "19.5°", "17.5°")
+        Convention.UMM_AL_QURA -> ConventionInfo("MAKKAH", "Umm al-Qura University, Makkah", "18.0°", "90 minutes after maghrib")
+        Convention.KARACHI -> ConventionInfo("KARACHI", "University of Islamic Sciences, Karachi", "18.0°", "18.0°")
+        Convention.DUBAI -> ConventionInfo("DUBAI", "Dubai (UAE)", "18.2°", "18.2°")
+        Convention.KUWAIT -> ConventionInfo("KUWAIT", "Kuwait", "18.0°", "17.5°")
+        Convention.QATAR -> ConventionInfo("QATAR", "Qatar", "18.0°", "90 minutes after maghrib")
+        Convention.SINGAPORE -> ConventionInfo("SINGAPORE", "Majlis Ugama Islam Singapura", "20.0°", "18.0°")
+        Convention.TURKEY -> ConventionInfo("TURKEY", "Diyanet İşleri Başkanlığı, Turkey", "18.0°", "17.0°")
+        Convention.MOON_SIGHTING_COMMITTEE -> ConventionInfo("MOON_SIGHTING", "Moon Sighting Committee", "18.0°", "18.0°")
+        Convention.CUSTOM -> null
+    }
 }

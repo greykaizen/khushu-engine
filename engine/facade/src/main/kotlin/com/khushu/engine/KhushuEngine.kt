@@ -15,7 +15,7 @@ import com.khushu.engine.calendar.HijriDate
 import com.khushu.engine.calendar.IslamicEvent
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Prayer
-import com.khushu.engine.prayer.PrayerParams
+import com.khushu.engine.prayer.PrayerConfiguration
 import com.khushu.engine.prayer.PrayerStatus
 import com.khushu.engine.prayer.PrayerTimesResult
 import com.khushu.engine.prayer.TahajjudWindow
@@ -60,13 +60,13 @@ class KhushuEngine {
     // ── Namespaces: pure delegation, zero logic ─────────────────────────────
 
     class PrayerApi internal constructor() {
-        fun times(location: Location, date: LocalDate, params: PrayerParams = PrayerParams()): PrayerTimesResult =
+        fun times(location: Location, date: LocalDate, params: PrayerConfiguration = PrayerConfiguration()): PrayerTimesResult =
             Prayer.times(location, date, params)
 
-        fun status(location: Location, now: Instant, zoneId: ZoneId, params: PrayerParams = PrayerParams()): PrayerStatus =
+        fun status(location: Location, now: Instant, zoneId: ZoneId, params: PrayerConfiguration = PrayerConfiguration()): PrayerStatus =
             Prayer.status(location, now, zoneId, params)
 
-        fun tahajjudWindow(location: Location, date: LocalDate, params: PrayerParams = PrayerParams()): TahajjudWindow? =
+        fun tahajjudWindow(location: Location, date: LocalDate, params: PrayerConfiguration = PrayerConfiguration()): TahajjudWindow? =
             Prayer.tahajjudWindow(location, date, params)
     }
 

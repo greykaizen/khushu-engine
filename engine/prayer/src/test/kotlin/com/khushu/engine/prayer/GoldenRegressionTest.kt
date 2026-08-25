@@ -50,7 +50,7 @@ class GoldenRegressionTest {
             )
     }
 
-    private fun Case.toParams(): PrayerParams {
+    private fun Case.toParams(): PrayerConfiguration {
         val madhab = if (madhab == "HANAFI") Madhab.HANAFI else Madhab.SHAFII
         val hlr = when (hlr) {
             "SEVENTH_OF_THE_NIGHT" -> HighLatitudeRule.SEVENTH_OF_NIGHT
@@ -72,7 +72,7 @@ class GoldenRegressionTest {
             "MOON_SIGHTING" -> Convention.MOON_SIGHTING_COMMITTEE
             else -> throw IllegalStateException("unknown convention $convention")
         }
-        return PrayerParams(
+        return PrayerConfiguration(
             madhab = madhab,
             convention = convention,
             fajrAngle = fajrAngle ?: 18.0,
@@ -104,16 +104,16 @@ class GoldenRegressionTest {
                 "UNCOMPUTABLE" -> {
                     // Donor path threw outright; engine degrades gracefully:
                     // adhan2-sourced facts are null, transit-derived facts survive.
-                    assertTrue(result.polarAnomaly, "${case.site} ${case.date}")
-                    assertNull(result.fajr); assertNull(result.sunrise)
-                    assertNull(result.asr); assertNull(result.maghrib); assertNull(result.isha)
+                    assertTrue(result.audit.highLatitudeResolution == HighLatitudeResolution.UNAVAILABLE, "${case.site} ${case.date}")
+                    assertNull(result.fajr.adjusted); assertNull(result.sunrise.adjusted)
+                    assertNull(result.asr.adjusted); assertNull(result.maghrib.adjusted); assertNull(result.isha.adjusted)
                     assertNull(result.midnight); assertNull(result.lastThirdOfNight)
                 }
                 else -> {
                     val fields = linkedMapOf(
-                        "fajr" to result.fajr, "sunrise" to result.sunrise,
-                        "dhuhr" to result.dhuhr, "asr" to result.asr,
-                        "maghrib" to result.maghrib, "isha" to result.isha,
+                        "fajr" to result.fajr.adjusted, "sunrise" to result.sunrise.adjusted,
+                        "dhuhr" to result.dhuhr.adjusted, "asr" to result.asr.adjusted,
+                        "maghrib" to result.maghrib.adjusted, "isha" to result.isha.adjusted,
                         "middleOfNight" to result.midnight, "lastThirdOfNight" to result.lastThirdOfNight,
                     )
                     for ((name, engineMs) in fields) {
@@ -122,6 +122,13 @@ class GoldenRegressionTest {
                             "${case.site} ${case.date} ${case.madhab}/${case.convention} $name",
                         )
                     }
+                }
+            }
+            // Raw values must be independent of user offsets: raw fajr equals
+            // adjusted minus the configured offset for offset-carrying cases.
+            case.offsets?.let { o ->
+                if (result.fajr.raw != null && result.fajr.adjusted != null && o[0] != 0) {
+                    assertEquals(o[0] * 60_000L, result.fajr.adjusted.toEpochMilli() - result.fajr.raw.toEpochMilli())
                 }
             }
         }

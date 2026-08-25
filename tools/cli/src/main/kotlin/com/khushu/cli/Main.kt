@@ -2,7 +2,8 @@ package com.khushu.cli
 
 import com.khushu.engine.KhushuEngine
 import com.khushu.engine.core.geo.Location
-import com.khushu.engine.prayer.PrayerParams
+import com.khushu.engine.prayer.PrayerConfiguration
+import com.khushu.engine.prayer.polarAnomalyFlag
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
@@ -118,7 +119,7 @@ fun main(args: Array<String>) {
 private fun prayer(a: Args) {
     val loc = location(a)
     val zoneId = zone(a)
-    val params = PrayerParams(
+    val params = PrayerConfiguration(
         madhab = when (a["madhab"]?.lowercase()) {
             "hanafi" -> com.khushu.engine.prayer.Madhab.HANAFI
             "maliki" -> com.khushu.engine.prayer.Madhab.MALIKI
@@ -129,15 +130,16 @@ private fun prayer(a: Args) {
     val t = engine.prayer.times(loc, date(a), params)
     println("prayer times ${t.date} @ (${loc.latitude.degrees}, ${loc.longitude.degrees}) [${params.madhab}]")
     val rows = listOf(
-        "Fajr" to t.fajr, "Sunrise" to t.sunrise, "Dhuhr" to t.dhuhrEnters,
-        "Asr" to t.asr, "Sunset" to t.sunset, "Maghrib" to t.maghrib, "Isha" to t.isha,
+        "Fajr" to t.fajr.adjusted, "Sunrise" to t.sunrise.adjusted, "Dhuhr" to t.dhuhrEnters,
+        "Asr" to t.asr.adjusted, "Sunset" to t.sunset.adjusted, "Maghrib" to t.maghrib.adjusted,
+        "Isha" to t.isha.adjusted,
         "Midnight" to t.midnight, "Last third" to t.lastThirdOfNight,
         "Ishraq (Duha)" to t.ishraq, "Zawaal from" to t.zawaalStart,
     )
+    if (t.polarAnomalyFlag()) println("  ⚠ polar anomaly — some timings uncomputable (${t.audit.highLatitudeResolution})")
     for ((name, instant) in rows) {
         println("  %-14s %s".format(name, instant?.let { fmtTime(it.toEpochMilli(), zoneId) } ?: "(uncomputable)"))
     }
-    if (t.polarAnomaly) println("  ⚠ polar anomaly — some timings uncomputable")
 }
 
 private fun sun(a: Args) {
@@ -231,7 +233,7 @@ private fun verify(a: Args) {
         for (case in golden.cases) {
             val s = golden.sites.getValue(case.site)
             val loc = Location.of(s.lat, s.lon, s.alt)
-            val params = PrayerParams(
+            val params = PrayerConfiguration(
                 madhab = if (case.madhab == "HANAFI") com.khushu.engine.prayer.Madhab.HANAFI else com.khushu.engine.prayer.Madhab.SHAFII,
                 convention = conventionOf(case.convention),
                 fajrAngle = case.fajrAngle ?: 18.0,
@@ -244,16 +246,17 @@ private fun verify(a: Args) {
             )
             val result = engine.prayer.times(loc, LocalDate.parse(case.date), params)
             val actual = linkedMapOf(
-                "fajr" to result.fajr, "sunrise" to result.sunrise, "dhuhr" to result.dhuhr,
-                "asr" to result.asr, "maghrib" to result.maghrib, "isha" to result.isha,
+                "fajr" to result.fajr.adjusted, "sunrise" to result.sunrise.adjusted,
+                "dhuhr" to result.dhuhr.adjusted, "asr" to result.asr.adjusted,
+                "maghrib" to result.maghrib.adjusted, "isha" to result.isha.adjusted,
                 "middleOfNight" to result.midnight, "lastThirdOfNight" to result.lastThirdOfNight,
             )
             if (case.error == "UNCOMPUTABLE") {
                 // Engine degrades gracefully: adhan2-sourced facts are null,
                 // transit-derived facts (dhuhr/zawaal/dhuhrEnters) survive.
-                if (!result.polarAnomaly ||
-                    result.fajr != null || result.sunrise != null || result.asr != null ||
-                    result.maghrib != null || result.isha != null ||
+                if (!(result.audit.highLatitudeResolution == com.khushu.engine.prayer.HighLatitudeResolution.UNAVAILABLE) ||
+                    result.fajr.raw != null || result.sunrise.raw != null || result.asr.raw != null ||
+                    result.maghrib.raw != null || result.isha.raw != null ||
                     result.midnight != null || result.lastThirdOfNight != null
                 ) failed++
             } else {

@@ -11,7 +11,7 @@ import com.khushu.engine.calendar.HijriDate
 import com.khushu.engine.calendar.IslamicEvent
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Prayer
-import com.khushu.engine.prayer.PrayerParams
+import com.khushu.engine.prayer.PrayerConfiguration
 import com.khushu.engine.prayer.PrayerTimesResult
 import java.time.Duration
 import java.time.Instant
@@ -49,7 +49,7 @@ class DayApi internal constructor() {
         location: Location,
         date: LocalDate,
         zoneId: ZoneId,
-        prayerParams: PrayerParams = PrayerParams(),
+        prayerParams: PrayerConfiguration = PrayerConfiguration(),
         calendarParams: CalendarParams = CalendarParams(),
     ): DaySummary {
         // Each fact below is computed exactly once; nothing delegates twice.
@@ -100,7 +100,7 @@ class DayApi internal constructor() {
 /**
  * Opt-in memoization decorator around any [KhushuEngine]. Deterministic
  * capabilities only, keyed by their own semantic keys (AGENTS.md §6):
- *   prayer times → (Location, LocalDate, PrayerParams)
+ *   prayer times → (Location, LocalDate, PrayerConfiguration)
  *   sun position → (Location, Instant)
  *   moon state   → (Location, Instant)
  *   hijri        → (LocalDate, offsetDays)
@@ -118,7 +118,7 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine()) {
         latitude.degrees, longitude.degrees, altitudeMeters.meters,
     )
 
-    fun prayerTimes(location: Location, date: LocalDate, params: PrayerParams = PrayerParams()) =
+    fun prayerTimes(location: Location, date: LocalDate, params: PrayerConfiguration = PrayerConfiguration()) =
         prayerCache.getOrPut("${location.key()}|$date|${params.hashCode()}") {
             delegate.prayer.times(location, date, params)
         }
