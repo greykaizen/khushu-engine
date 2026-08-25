@@ -1,11 +1,11 @@
+rootProject.name = "khushu-engine"
+
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
         maven { url = uri("https://jitpack.io") } // io.github.cosinekitty:astronomy
     }
 }
-
-rootProject.name = "khushu-engine"
 
 include(
     ":engine:core",
@@ -14,5 +14,6 @@ include(
     ":engine:prayer",
     ":engine:qibla",
     ":engine:zakat",
+    ":engine:facade",
     ":tools:cli",
 )
