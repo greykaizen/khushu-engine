@@ -36,10 +36,10 @@ class BreadthTest {
     @Test
     fun moonStateCarriesAgeAndWaxing() {
         val s = Astronomy.moon.state(london, Instant.parse("2025-06-11T07:44:00Z")) // full moon
-        assertEquals(true, s.isWaxing || !s.isWaxing) // field exists
-        assertTrue(s.moonAgeDays >= 0.0 && s.moonAgeDays <= 30.0)
+        val age = assertNotNull(s.moonAgeDays, "age must be computable at full moon")
+        assertTrue(age >= 0.0 && age <= 30.0)
         // At full moon age should be ~14.77 days (half synodic month).
-        assertTrue(s.moonAgeDays in 14.0..16.0, "age at full moon was ${s.moonAgeDays}")
+        assertTrue(age in 14.0..16.0, "age at full moon was $age")
     }
 
     @Test

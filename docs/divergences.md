@@ -129,6 +129,25 @@ references, never gospel (AGENTS.md §2).
   treats whatever JSON it is given as input. Community/Aladhan-derived
   definitions always carry `confidence = COMMUNITY` so UIs can distinguish.
 
+### D16. Dual sunset facts — resolved by labeling, not merging
+- The long-pending adhan2-vs-cosinekitty sunrise/sunset divergence is RESOLVED
+  as a product decision: both computations remain, each a distinct named fact —
+  prayer times anchor on the **prayer-convention calculation** (adhan2 0.0.7);
+  astronomy exposes the **astronomical ephemeris calculation** (cosinekitty
+  2.1.19). Consumers pick explicitly; nothing silently overrides. Measured
+  deltas across golden sites are ~0–2 minutes (model difference: Meeus-based
+  solar equations vs Astronomy Engine's VSOP87-derivations).
+- Altitude-band thresholds (blue [−6,−4), golden [−4,+6), twilights −6/−12/−18,
+  horizon −0.833) are pinned in `AltitudeConventions` and labeled CONVENTIONS
+  in every KDoc/audit.
+
+### M3. Reference vs regression fixtures
+- astro_golden.json now has TWO sections: `cases` = donor-derived REGRESSION
+  lock (Osprey call path); `solarDayReference` = SELF-GENERATED REFERENCE
+  change-detectors for v1.2 endpoints (solar day phases, solar midnight). Only
+  the former proves donor-parity; correctness of the latter rests on almanac
+  spot-checks (seasons ±5 min vs NASA/TimeAndDate 2026 values).
+
 ## Maintenance log
 
 (Not divergences — environment and dependency decisions recorded for traceability.)

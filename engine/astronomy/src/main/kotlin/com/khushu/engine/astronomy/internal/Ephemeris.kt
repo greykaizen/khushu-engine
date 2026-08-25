@@ -80,8 +80,13 @@ internal object Ephemeris {
             time(afterEpochMs), windowDays, degrees,
         )?.toMillisecondsSince1970()
 
-    fun hourAngleTransitMs(body: Body, afterEpochMs: Long, location: com.khushu.engine.core.geo.Location): Long =
-        searchHourAngle(body, observer(location), 0.0, time(afterEpochMs)).time.toMillisecondsSince1970()
+    fun hourAngleTransitMs(
+        body: Body,
+        afterEpochMs: Long,
+        location: com.khushu.engine.core.geo.Location,
+        hourAngleDeg: Double = 0.0,
+    ): Long =
+        searchHourAngle(body, observer(location), hourAngleDeg, time(afterEpochMs)).time.toMillisecondsSince1970()
 
     fun moonPhaseAngleDeg(epochMs: Long): Double = moonPhase(time(epochMs))
 

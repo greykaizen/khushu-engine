@@ -80,14 +80,20 @@ KhushuEngine()
 
 ### astronomy
 ```
-moon.state(...) → MoonState now includes moonAgeDays, isWaxing
-sun.dayLength(location, date, zoneId): Duration?
-moon.nextPhase(0|90|180|270, after): UpcomingMoonPhase?
-moon.nextNewMoon(after) / moon.nextFullMoon(after): UpcomingMoonPhase?
-moon.distanceExtremes(from, to): List<MoonDistanceExtreme>   // geocentric perigee/apogee
-moon.nextGlobalSolarEclipse(after): GlobalSolarEclipse?
-moon.nextLunarEclipse(after): LunarEclipse?
-hilal.forecast(location, from, zoneId, nights = 8): List<Pair<LocalDate, HilalReport?>>
+sun.position/riseSet/events/dayLength/nightLength/phases/track/conventions/audit
+sun.phases(location, date, zoneId): SolarDayPhases   // threshold-segment bands:
+  lateNight/earlyNight/morning{Astro,Nautical,Civil,Blue,Golden}/daylight/
+  evening{...} + SolarAltitudeCrossings raw primitives + AstroAudit
+sun.track(location, yearMonth, zoneId, includePath=false): SunTrack
+moon.state → MoonState(moonAgeDays: Double? — null when conjunction search fails)
+moon.track / nextPhase / nextNewMoon / nextFullMoon / distanceExtremes /
+  nextGlobalSolarEclipse / nextLunarEclipse
+seasons(year): Seasons (equinoxes/solstices)
+hilal.visibility / hilal.forecast → List<HilalForecastDay>
+AltitudeConventions: pinned threshold table (blue [−6,−4), golden [−4,+6),
+  twilights −6/−12/−18, horizon −0.833) — documented conventions
+Dual sunset policy: prayer-convention time (prayer module) and astronomical
+  ephemeris time (astronomy module) are DISTINCT named facts (divergences D16)
 ```
 
 ### calendar

@@ -1,9 +1,10 @@
 package com.khushu.engine.astronomy
 
+import com.khushu.engine.astronomy.internal.CelestialTrackSolver
 import com.khushu.engine.astronomy.internal.Ephemeris
+import com.khushu.engine.astronomy.internal.MoonTrackSolver
 import com.khushu.engine.astronomy.internal.HilalEngine
 import com.khushu.engine.astronomy.internal.LunarOrientationMath
-import com.khushu.engine.astronomy.internal.MoonTrackSolver
 import com.khushu.engine.core.geo.Location
 import io.github.cosinekitty.astronomy.Body
 import java.time.Instant
@@ -49,6 +50,58 @@ object Astronomy {
             val set = rs.setEpochMs ?: return null
             if (set <= rise) return null
             return java.time.Duration.ofMillis(set - rise)
+        }
+
+        /** Tonight's length: tomorrow's sunrise − today's sunset; null-safe at poles. */
+        fun nightLength(location: Location, date: LocalDate, zoneId: ZoneId): java.time.Duration? {
+            val todaySet = riseSet(location, date, zoneId).setEpochMs ?: return null
+            val nextRise = Ephemeris.riseSetMs(Body.Sun, io.github.cosinekitty.astronomy.Direction.Rise, MoonTrackSolver.dayStartEpochMs(date.plusDays(1), zoneId), location)
+                ?.takeIf { it < MoonTrackSolver.dayStartEpochMs(date.plusDays(2), zoneId) }
+                ?: return null
+            if (nextRise <= todaySet) return null
+            return java.time.Duration.ofMillis(nextRise - todaySet)
+        }
+
+        /**
+         * The full semantic solar day: raw altitude crossings + named bands with
+         * explicit night-ownership (lateNight/earlyNight). See [SolarDayPhases].
+         */
+        fun phases(location: Location, date: LocalDate, zoneId: ZoneId): SolarDayPhases =
+            SolarDaySolver.solve(location, date, zoneId)
+
+        /**
+         * The pinned altitude-threshold table (blue/golden/twilight boundaries).
+         * Conventions — documented, not universal.
+         */
+        fun conventions(): AltitudeConventions = AltitudeConventions()
+
+        fun audit(): AstroAudit = AstroAudit()
+
+        /**
+         * One-pass monthly solar trajectory: per-day rise/set/transit plus
+         * optional hourly ENU path samples. Mirrors moon.track; composed from
+         * the same body-agnostic solver internals.
+         */
+        fun track(
+            location: Location,
+            yearMonth: YearMonth,
+            zoneId: ZoneId,
+            includePath: Boolean = false,
+        ): com.khushu.engine.astronomy.SunTrack {
+            val days = CelestialTrackSolver.solve(Body.Sun, location, yearMonth, zoneId).map {
+                com.khushu.engine.astronomy.SolarDayTrack(
+                    date = it.date,
+                    riseEpochMs = it.riseEpochMs,
+                    setEpochMs = it.setEpochMs,
+                    transitEpochMs = it.transitEpochMs,
+                )
+            }
+            val path = if (includePath) {
+                val start = MoonTrackSolver.dayStartEpochMs(yearMonth.atDay(1), zoneId)
+                val end = MoonTrackSolver.dayStartEpochMs(yearMonth.plusMonths(1).atDay(1), zoneId)
+                CelestialTrackSolver.pathSamples(Body.Sun, start, end, location)
+            } else emptyList()
+            return com.khushu.engine.astronomy.SunTrack(days = days, pathPoints = path)
         }
 
         /**
@@ -109,14 +162,15 @@ object Astronomy {
             val epochMs = instant.toEpochMilli()
             val phaseAngle = Ephemeris.moonPhaseAngleDeg(epochMs)
             val conjunctionMs = Ephemeris.nextMoonPhaseMs(0.0, epochMs - 30L * 86_400_000L, 31.0)
-                ?: (epochMs - 15L * 86_400_000L)
             return MoonState(
                 phaseAngleDeg = phaseAngle,
                 illuminationFraction = Ephemeris.moonIlluminationFraction(epochMs),
                 elongationDeg = Ephemeris.moonElongationDeg(epochMs),
                 phaseName = phaseName(phaseAngle),
                 brightLimbTiltDeg = LunarOrientationMath.brightLimbTiltDeg(epochMs, location),
-                moonAgeDays = ((epochMs - conjunctionMs).coerceAtLeast(0L)) / 86_400_000.0,
+                moonAgeDays = conjunctionMs?.let { c ->
+                    ((epochMs - c).coerceAtLeast(0L)) / 86_400_000.0
+                },
                 isWaxing = phaseAngle < 180.0,
             )
         }
@@ -159,7 +213,12 @@ object Astronomy {
             return MonthlyMoonTrack(days = days, pathPoints = path)
         }
 
-        /** Canonical phase-band table pinned by donor tests; shared by every consumer. */
+        /**
+         * Canonical phase-band table pinned by donor tests; shared by every consumer.
+         * Band edges: each named band is INCLUSIVE of its lower bound and EXCLUSIVE
+         * of its upper bound except where noted; angles outside 15°..<345° map to
+         * "New Moon" (i.e. New Moon owns [345,360)+[0,15)).
+         */
         fun phaseName(phaseAngleDeg: Double): String = when {
             phaseAngleDeg in 15.0..75.0 -> "Waxing Crescent"
             phaseAngleDeg in 75.0..105.0 -> "First Quarter"
@@ -271,6 +330,17 @@ object Astronomy {
         }
     }
 
+    /** Equinoxes and solstices for [year] — passthrough over cosinekitty Seasons. */
+    fun seasons(year: Int): com.khushu.engine.astronomy.Seasons {
+        val info = io.github.cosinekitty.astronomy.seasons(year)
+        return com.khushu.engine.astronomy.Seasons(
+            marchEquinox = info.marchEquinox.toMillisecondsSince1970().let(Instant::ofEpochMilli),
+            juneSolstice = info.juneSolstice.toMillisecondsSince1970().let(Instant::ofEpochMilli),
+            septemberEquinox = info.septemberEquinox.toMillisecondsSince1970().let(Instant::ofEpochMilli),
+            decemberSolstice = info.decemberSolstice.toMillisecondsSince1970().let(Instant::ofEpochMilli),
+        )
+    }
+
     object hilal {
         /**
          * Crescent-sighting report anchored to local sunset of [date]'s day.
@@ -289,11 +359,11 @@ object Astronomy {
             from: LocalDate,
             zoneId: ZoneId,
             nights: Int = 8,
-        ): List<Pair<LocalDate, HilalReport?>> {
+        ): List<com.khushu.engine.astronomy.HilalForecastDay> {
             require(nights in 1..60)
             return (0 until nights).map { i ->
                 val d = from.plusDays(i.toLong())
-                d to visibility(location, d, zoneId)
+                com.khushu.engine.astronomy.HilalForecastDay(d, visibility(location, d, zoneId))
             }
         }
     }

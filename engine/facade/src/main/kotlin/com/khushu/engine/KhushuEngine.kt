@@ -177,7 +177,8 @@ class KhushuEngine {
                 from: LocalDate,
                 zoneId: ZoneId,
                 nights: Int = 8,
-            ): List<Pair<LocalDate, HilalReport?>> = Astronomy.hilal.forecast(location, from, zoneId, nights)
+            ): List<com.khushu.engine.astronomy.HilalForecastDay> =
+                Astronomy.hilal.forecast(location, from, zoneId, nights)
         }
     }
 

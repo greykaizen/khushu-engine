@@ -108,9 +108,41 @@ fun main(args: Array<String>) {
         }
     }
 
+    // ── v1.2 reference section (NOT donor-derived; change-detectors only) ──
+    data class PhaseRow(
+        val siteKey: String, val date: String,
+        val sunriseMs: Long?, val sunsetMs: Long?, val noonMs: Long, val midnightMs: Long,
+        val astroDawnMs: Long?, val nautDawnMs: Long?, val civDawnMs: Long?,
+        val blueEndM: Long?, val dayBegin: Long?, val dayEnd: Long?,
+        val blueStartE: Long?, val civDuskMs: Long?, val nautDuskMs: Long?, val astroDuskMs: Long?,
+    )
+    val phaseRows = mutableListOf<PhaseRow>()
+    for (site in SITES) {
+        val obs = Observer(site.lat, site.lon, site.alt)
+        for ((y, m, d) in listOf(Triple(2026, 1, 15), Triple(2026, 3, 20), Triple(2026, 6, 21), Triple(2026, 9, 23), Triple(2026, 12, 21))) {
+            val dayStart = java.time.ZonedDateTime.of(y, m, d, 0, 0, 0, 0, java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+            val dayEnd = dayStart + 86_400_000L
+            fun x2(deg: Double, rise: Boolean): Long? = try {
+                io.github.cosinekitty.astronomy.searchAltitude(Body.Sun, obs, if (rise) Direction.Rise else Direction.Set, Time.fromMillisecondsSince1970(dayStart), 1.0, deg)?.toMillisecondsSince1970()?.takeIf { it < dayEnd }
+            } catch (e: Exception) { null }
+            val noon = io.github.cosinekitty.astronomy.searchHourAngle(Body.Sun, obs, 0.0, Time.fromMillisecondsSince1970(dayStart)).time.toMillisecondsSince1970().coerceIn(dayStart, dayEnd - 1)
+            val mid = try {
+                io.github.cosinekitty.astronomy.searchHourAngle(Body.Sun, obs, 180.0, Time.fromMillisecondsSince1970(noon)).time.toMillisecondsSince1970()
+            } catch (e: Exception) { noon + 43_200_000L }
+            phaseRows += PhaseRow(
+                site.key, "$y-%02d-%02d".format(m, d),
+                x2(-0.833, true), x2(-0.833, false), noon, mid,
+                x2(-18.0, true), x2(-12.0, true), x2(-6.0, true),
+                x2(-4.0, true), x2(6.0, true), x2(6.0, false),
+                x2(-4.0, false), x2(-6.0, false), x2(-12.0, false), x2(-18.0, false),
+            )
+        }
+    }
+
     val json = buildString {
         append("{\n")
         append("  \"meta\": {\"generator\": \"astro-golden-dumper\", \"cosinekitty\": \"2.1.19\",\n")
+        append("    \"note\": \"cases=donor-regression lock; solarDay=REFERENCE fixtures (self-generated change-detectors, not correctness evidence)\",\n")
         append("    \"donorPath\": \"Osprey app/src/main/java/com/kaizen/osprey/core/astronomy\"},\n")
         append("  \"sites\": {\n")
         append(SITES.joinToString(",\n") {
@@ -126,6 +158,16 @@ fun main(args: Array<String>) {
                 "\"moonDec\":${r.moonDecDeg},\"moonDistKm\":${r.moonDistKm}," +
                 "\"phaseDeg\":${r.phaseAngleDeg},\"illum\":${r.illumFraction}," +
                 "\"elongDeg\":${r.elongationDeg},\"tiltDeg\":${r.brightLimbTiltDeg}}"
+        })
+        append("\n  ],\n")
+        append("  \"solarDayReference\": [\n")
+        append(phaseRows.joinToString(",\n") { r ->
+            "    {\"site\":\"${r.siteKey}\",\"date\":\"${r.date}\"," +
+                "\"sunrise\":${r.sunriseMs ?: "null"},\"sunset\":${r.sunsetMs ?: "null"}," +
+                "\"noon\":${r.noonMs},\"midnight\":${r.midnightMs}," +
+                "\"astroDawn\":${r.astroDawnMs ?: "null"},\"nautDawn\":${r.nautDawnMs ?: "null"},\"civDawn\":${r.civDawnMs ?: "null"}," +
+                "\"blueEndM\":${r.blueEndM ?: "null"},\"dayBegin\":${r.dayBegin ?: "null"},\"dayEnd\":${r.dayEnd ?: "null"}," +
+                "\"blueStartE\":${r.blueStartE ?: "null"},\"civDusk\":${r.civDuskMs ?: "null"},\"nautDusk\":${r.nautDuskMs ?: "null"},\"astroDusk\":${r.astroDuskMs ?: "null"}}"
         })
         append("\n  ]\n}\n")
     }

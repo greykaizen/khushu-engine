@@ -1,5 +1,52 @@
+public final class com/khushu/engine/astronomy/AltitudeConventions {
+	public fun <init> ()V
+	public fun <init> (DDDDDDD)V
+	public synthetic fun <init> (DDDDDDDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun component6 ()D
+	public final fun component7 ()D
+	public final fun copy (DDDDDDD)Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/AltitudeConventions;DDDDDDDILjava/lang/Object;)Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAstronomicalTwilightDeg ()D
+	public final fun getBlueHourLowerDeg ()D
+	public final fun getBlueHourUpperDeg ()D
+	public final fun getCivilTwilightDeg ()D
+	public final fun getGoldenHourUpperDeg ()D
+	public final fun getNauticalTwilightDeg ()D
+	public final fun getSunriseSunsetDeg ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/AstroAudit {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/astronomy/AltitudeConventions;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/astronomy/AltitudeConventions;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/astronomy/AltitudeConventions;Ljava/util/List;)Lcom/khushu/engine/astronomy/AstroAudit;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/AstroAudit;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/astronomy/AltitudeConventions;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/AstroAudit;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAberrationModel ()Ljava/lang/String;
+	public final fun getConventions ()Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public final fun getEphemeris ()Ljava/lang/String;
+	public final fun getRefractionModel ()Ljava/lang/String;
+	public final fun getWarnings ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/khushu/engine/astronomy/Astronomy {
 	public static final field INSTANCE Lcom/khushu/engine/astronomy/Astronomy;
+	public final fun seasons (I)Lcom/khushu/engine/astronomy/Seasons;
 }
 
 public final class com/khushu/engine/astronomy/Astronomy$hilal {
@@ -27,10 +74,16 @@ public final class com/khushu/engine/astronomy/Astronomy$moon {
 
 public final class com/khushu/engine/astronomy/Astronomy$sun {
 	public static final field INSTANCE Lcom/khushu/engine/astronomy/Astronomy$sun;
+	public final fun audit ()Lcom/khushu/engine/astronomy/AstroAudit;
+	public final fun conventions ()Lcom/khushu/engine/astronomy/AltitudeConventions;
 	public final fun dayLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
 	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun nightLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
+	public final fun phases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarDayPhases;
 	public final fun position (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
 	public final fun riseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
+	public final fun track (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SunTrack;
+	public static synthetic fun track$default (Lcom/khushu/engine/astronomy/Astronomy$sun;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SunTrack;
 }
 
 public final class com/khushu/engine/astronomy/CelestialPathPoint {
@@ -98,6 +151,19 @@ public final class com/khushu/engine/astronomy/GlobalSolarEclipse {
 	public final fun getLongitudeDeg ()D
 	public final fun getObscuration ()Ljava/lang/Double;
 	public final fun getPeakEpochMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/HilalForecastDay {
+	public fun <init> (Ljava/time/LocalDate;Lcom/khushu/engine/astronomy/HilalReport;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Lcom/khushu/engine/astronomy/HilalReport;
+	public final fun copy (Ljava/time/LocalDate;Lcom/khushu/engine/astronomy/HilalReport;)Lcom/khushu/engine/astronomy/HilalForecastDay;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/HilalForecastDay;Ljava/time/LocalDate;Lcom/khushu/engine/astronomy/HilalReport;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/HilalForecastDay;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getReport ()Lcom/khushu/engine/astronomy/HilalReport;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -199,21 +265,21 @@ public final class com/khushu/engine/astronomy/MoonDistanceExtreme {
 }
 
 public final class com/khushu/engine/astronomy/MoonState {
-	public fun <init> (DDDLjava/lang/String;DDZ)V
+	public fun <init> (DDDLjava/lang/String;DLjava/lang/Double;Z)V
 	public final fun component1 ()D
 	public final fun component2 ()D
 	public final fun component3 ()D
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()D
-	public final fun component6 ()D
+	public final fun component6 ()Ljava/lang/Double;
 	public final fun component7 ()Z
-	public final fun copy (DDDLjava/lang/String;DDZ)Lcom/khushu/engine/astronomy/MoonState;
-	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/MoonState;DDDLjava/lang/String;DDZILjava/lang/Object;)Lcom/khushu/engine/astronomy/MoonState;
+	public final fun copy (DDDLjava/lang/String;DLjava/lang/Double;Z)Lcom/khushu/engine/astronomy/MoonState;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/MoonState;DDDLjava/lang/String;DLjava/lang/Double;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/MoonState;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBrightLimbTiltDeg ()D
 	public final fun getElongationDeg ()D
 	public final fun getIlluminationFraction ()D
-	public final fun getMoonAgeDays ()D
+	public final fun getMoonAgeDays ()Ljava/lang/Double;
 	public final fun getPhaseAngleDeg ()D
 	public final fun getPhaseName ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -246,6 +312,23 @@ public final class com/khushu/engine/astronomy/RiseSet {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/khushu/engine/astronomy/Seasons {
+	public fun <init> (Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/time/Instant;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun copy (Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/Seasons;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/Seasons;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/Seasons;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDecemberSolstice ()Ljava/time/Instant;
+	public final fun getJuneSolstice ()Ljava/time/Instant;
+	public final fun getMarchEquinox ()Ljava/time/Instant;
+	public final fun getSeptemberEquinox ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/khushu/engine/astronomy/SightingVerdict {
 	public fun <init> (Ljava/lang/String;ZII)V
 	public final fun component1 ()Ljava/lang/String;
@@ -259,6 +342,109 @@ public final class com/khushu/engine/astronomy/SightingVerdict {
 	public final fun getCriteriaMet ()I
 	public final fun getCriteriaTotal ()I
 	public final fun getPassed ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/SolarAltitudeCrossings {
+	public fun <init> (Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/time/Instant;
+	public final fun component10 ()Ljava/time/Instant;
+	public final fun component11 ()Ljava/time/Instant;
+	public final fun component12 ()Ljava/time/Instant;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun component5 ()Ljava/time/Instant;
+	public final fun component6 ()Ljava/time/Instant;
+	public final fun component7 ()Ljava/time/Instant;
+	public final fun component8 ()Ljava/time/Instant;
+	public final fun component9 ()Ljava/time/Instant;
+	public final fun copy (Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAstronomicalDawn ()Ljava/time/Instant;
+	public final fun getAstronomicalDusk ()Ljava/time/Instant;
+	public final fun getBlueHourEveningStart ()Ljava/time/Instant;
+	public final fun getBlueHourMorningEnd ()Ljava/time/Instant;
+	public final fun getCivilDawn ()Ljava/time/Instant;
+	public final fun getCivilDusk ()Ljava/time/Instant;
+	public final fun getDaylightBegin ()Ljava/time/Instant;
+	public final fun getDaylightEnd ()Ljava/time/Instant;
+	public final fun getNauticalDawn ()Ljava/time/Instant;
+	public final fun getNauticalDusk ()Ljava/time/Instant;
+	public final fun getSunrise ()Ljava/time/Instant;
+	public final fun getSunset ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/SolarDayPhases {
+	public fun <init> (Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Ljava/time/Duration;Ljava/time/Duration;Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;Lcom/khushu/engine/astronomy/AstroAudit;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component10 ()Lkotlin/ranges/ClosedRange;
+	public final fun component11 ()Lkotlin/ranges/ClosedRange;
+	public final fun component12 ()Lkotlin/ranges/ClosedRange;
+	public final fun component13 ()Lkotlin/ranges/ClosedRange;
+	public final fun component14 ()Lkotlin/ranges/ClosedRange;
+	public final fun component15 ()Lkotlin/ranges/ClosedRange;
+	public final fun component16 ()Lkotlin/ranges/ClosedRange;
+	public final fun component17 ()Lkotlin/ranges/ClosedRange;
+	public final fun component18 ()Lkotlin/ranges/ClosedRange;
+	public final fun component19 ()Ljava/time/Duration;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun component20 ()Ljava/time/Duration;
+	public final fun component21 ()Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;
+	public final fun component22 ()Lcom/khushu/engine/astronomy/AstroAudit;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun component5 ()Ljava/time/Instant;
+	public final fun component6 ()Lkotlin/ranges/ClosedRange;
+	public final fun component7 ()Lkotlin/ranges/ClosedRange;
+	public final fun component8 ()Lkotlin/ranges/ClosedRange;
+	public final fun component9 ()Lkotlin/ranges/ClosedRange;
+	public final fun copy (Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Ljava/time/Duration;Ljava/time/Duration;Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;Lcom/khushu/engine/astronomy/AstroAudit;)Lcom/khushu/engine/astronomy/SolarDayPhases;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SolarDayPhases;Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Ljava/time/Duration;Ljava/time/Duration;Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;Lcom/khushu/engine/astronomy/AstroAudit;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarDayPhases;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudit ()Lcom/khushu/engine/astronomy/AstroAudit;
+	public final fun getCrossings ()Lcom/khushu/engine/astronomy/SolarAltitudeCrossings;
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getDayLength ()Ljava/time/Duration;
+	public final fun getDaylight ()Lkotlin/ranges/ClosedRange;
+	public final fun getEarlyNight ()Lkotlin/ranges/ClosedRange;
+	public final fun getEveningAstronomicalTwilight ()Lkotlin/ranges/ClosedRange;
+	public final fun getEveningBlueHour ()Lkotlin/ranges/ClosedRange;
+	public final fun getEveningCivilTwilight ()Lkotlin/ranges/ClosedRange;
+	public final fun getEveningGoldenHour ()Lkotlin/ranges/ClosedRange;
+	public final fun getEveningNauticalTwilight ()Lkotlin/ranges/ClosedRange;
+	public final fun getFollowingNightLength ()Ljava/time/Duration;
+	public final fun getLateNight ()Lkotlin/ranges/ClosedRange;
+	public final fun getMorningAstronomicalTwilight ()Lkotlin/ranges/ClosedRange;
+	public final fun getMorningBlueHour ()Lkotlin/ranges/ClosedRange;
+	public final fun getMorningCivilTwilight ()Lkotlin/ranges/ClosedRange;
+	public final fun getMorningGoldenHour ()Lkotlin/ranges/ClosedRange;
+	public final fun getMorningNauticalTwilight ()Lkotlin/ranges/ClosedRange;
+	public final fun getSolarMidnight ()Ljava/time/Instant;
+	public final fun getSolarNoon ()Ljava/time/Instant;
+	public final fun getSunrise ()Ljava/time/Instant;
+	public final fun getSunset ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/SolarDayTrack {
+	public fun <init> (Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun copy (Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)Lcom/khushu/engine/astronomy/SolarDayTrack;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SolarDayTrack;Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarDayTrack;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getRiseEpochMs ()Ljava/lang/Long;
+	public final fun getSetEpochMs ()Ljava/lang/Long;
+	public final fun getTransitEpochMs ()Ljava/lang/Long;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -328,6 +514,20 @@ public final class com/khushu/engine/astronomy/SolarPosition {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/khushu/engine/astronomy/SunTrack {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;)Lcom/khushu/engine/astronomy/SunTrack;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SunTrack;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/SunTrack;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDays ()Ljava/util/List;
+	public final fun getPathPoints ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/khushu/engine/astronomy/UpcomingMoonPhase {
 	public fun <init> (DJ)V
 	public final fun component1 ()D
@@ -353,5 +553,22 @@ public final class com/khushu/engine/astronomy/YallopGrade : java/lang/Enum {
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/astronomy/YallopGrade;
 	public static fun values ()[Lcom/khushu/engine/astronomy/YallopGrade;
+}
+
+public final class com/khushu/engine/astronomy/internal/CelestialDayTrack {
+	public fun <init> (Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun copy (Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)Lcom/khushu/engine/astronomy/internal/CelestialDayTrack;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/internal/CelestialDayTrack;Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/internal/CelestialDayTrack;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getRiseEpochMs ()Ljava/lang/Long;
+	public final fun getSetEpochMs ()Ljava/lang/Long;
+	public final fun getTransitEpochMs ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

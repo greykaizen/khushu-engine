@@ -29,8 +29,11 @@ data class MoonState(
     val phaseName: String,
     /** Bright-limb tilt at the observer (χ − q), degrees in [0, 360). */
     val brightLimbTiltDeg: Double,
-    /** Days since the most recent new moon. */
-    val moonAgeDays: Double,
+    /**
+     * Days since the most recent new moon. Null when the conjunction search
+     * failed — the engine never fabricates an age.
+     */
+    val moonAgeDays: Double?,
     val isWaxing: Boolean,
 )
 
@@ -160,4 +163,34 @@ data class HilalReport(
     val yallop: YallopGrade,
     val odeh: OdehZone,
     val verdicts: List<SightingVerdict>,
+)
+
+/** Equinox/solstice instants for one calendar year. */
+data class Seasons(
+    val marchEquinox: java.time.Instant,
+    val juneSolstice: java.time.Instant,
+    val septemberEquinox: java.time.Instant,
+    val decemberSolstice: java.time.Instant,
+)
+
+/** Per-day solar trajectory facts. */
+data class SolarDayTrack(
+    val date: java.time.LocalDate,
+    val riseEpochMs: Long?,
+    val setEpochMs: Long?,
+    /** Culmination (solar noon) within this civil day. */
+    val transitEpochMs: Long?,
+)
+
+/** One-pass monthly solar track with optional render-path samples. */
+data class SunTrack(
+    val days: List<SolarDayTrack>,
+    val pathPoints: List<CelestialPathPoint> = emptyList(),
+)
+
+/** One evening of a hilal sighting outlook. */
+data class HilalForecastDay(
+    val date: java.time.LocalDate,
+    /** Null when the sun never sets that civil day. */
+    val report: HilalReport?,
 )
