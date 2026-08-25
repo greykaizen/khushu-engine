@@ -60,6 +60,32 @@ references, never gospel (AGENTS.md §2).
 - adhan2-jvm 0.0.6 ships Java 21 bytecode; the scaffold targeted 17. All engine
   modules now use `jvmToolchain(21)`.
 
+### D7. Calendar moon: invented fallbacks and default observers eliminated
+- **Donor**: `LunarEphemeris.getMoonTransit` substituted fake times when a search
+  failed (`rise = midnight + 8h`, `set = rise + 12h`), and
+  `SunMoonCalculator.calculateMoonPhase` defaulted the observer to hardcoded
+  `(30°, 70°)` — silently wrong bright-limb tilts for any real user.
+- **Engine**: uncomputable events stay `null` (polar/edge cases are explicit);
+  every lunar fact requires an explicit `Location`. The AR path's trusted math
+  (χ−q bright-limb tilt, ENU vectors) is ported behavior-identically
+  (`internal/LunarOrientationMath.kt`) and locked by `astro_golden.json`.
+
+### D8. Month-moon computed in one pass; events bounded to the civil day
+- **Donor**: calendar recomputed per-render — repeated rise/set searches plus a
+  96-sample path per draw, with no fact reuse.
+- **Engine**: `moon.track(location, yearMonth, zoneId)` walks the month once
+  (per day: rise, set, transit, phase@transit, optional render path).
+  Benchmarked ~1.5× the donor pattern wall-clock while returning strictly more
+  facts (`MoonTrackBenchmarkTest`). Solar/lunar events are additionally bounded
+  to their civil day — donor could return next-day dusk as today's event.
+
+### D9. Dependency currency (2026-08)
+- Kotlin 2.1.20 → **2.4.10**; kotlinx-serialization-json 1.8.0 → **1.11.0**;
+  adhan2 0.0.6 → **0.0.7** (includes upstream international-date-line fix;
+  prayer goldens regenerated on 0.0.7 with an added Apia/Samoa date-line site;
+  6184 cases). cosinekitty astronomy stays at 2.1.19 — the latest published
+  Maven/JitPack release.
+
 ### Pending reconciliations
 - adhan2's internal solar model vs cosinekitty (astronomy session): sunrise/sunset
   may differ ~1–2 min between `prayer.times()` anchors and future

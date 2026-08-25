@@ -274,7 +274,7 @@ The API is the product; internals are replaceable.
 | Module | Status | Donor source (Osprey path) |
 |---|---|---|
 | core | 🟨 started | typed geo units (`Latitude`/`Longitude`/`AltitudeMeters`/`Location`) done; time primitives pending |
-| astronomy | ⬜ planned (largest donor overlap) | `AstroMath.kt`, `AstroEphemerisEngine.kt`, `AstroEventEngine.kt`, `AstroSchedule.kt`, `LunarOrientation.kt`, `feature/calendar/SunMoonCalculator.kt`, `feature/astro/solar/SolarEphemeris.kt` |
+| astronomy | 🟨 ported, verifying | cosinekitty 2.1.19 (JitPack) behind capability API; sun/moon/hilal + one-pass `moon.track`; 576-case golden matrix green; divergences D7-D8 |
 | calendar | ⬜ planned | `core/common/CalendarHelper.kt` (hijri/formatting), `IslamicEventCalculator.kt`, `feature/calendar/CalendarModels.kt` (fast blocks) |
 | prayer | 🟨 ported, verifying | wraps `com.batoulapps.adhan:adhan2:0.0.6`; 5310-case golden matrix green; polar-safe; see docs/divergences.md D1–D4 |
 | qibla | 🟨 ported, verifying | bearing + distance owned by engine; cross-checked vs adhan2 (docs/divergences.md D5) |

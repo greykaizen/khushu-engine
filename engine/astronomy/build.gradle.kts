@@ -1,10 +1,15 @@
-plugins { kotlin("jvm") }
+plugins {
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+}
 
 kotlin { jvmToolchain(21) }
 
 dependencies {
-    implementation(project(":engine:core"))
+    api(project(":engine:core"))
+    implementation("io.github.cosinekitty:astronomy:2.1.19")
     testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 }
 
 tasks.test { useJUnitPlatform() }
