@@ -23,7 +23,7 @@ object HijriCalendar {
             year = cal.get(Calendar.YEAR),
             month = cal.get(Calendar.MONTH) + 1,
             day = cal.get(Calendar.DAY_OF_MONTH),
-            monthName = monthName(cal.get(Calendar.MONTH)),
+            monthName = monthName(cal.get(Calendar.MONTH) + 1),
             offsetApplied = offsetDays,
         )
     }
@@ -37,18 +37,10 @@ object HijriCalendar {
         val label = h.label
         val events = mutableListOf<IslamicEvent>()
 
-        when (h.month to h.day) {
-            1 to 1 -> events += IslamicEvent("Islamic New Year", label)
-            1 to 9 -> events += IslamicEvent("Tasu'a", label)
-            1 to 10 -> events += IslamicEvent("Day of Ashura", label)
-            3 to 12 -> events += IslamicEvent("Mawlid an-Nabi", label)
-            7 to 27 -> events += IslamicEvent("Isra and Mi'raj", label)
-            8 to 15 -> events += IslamicEvent("Mid-Sha'ban", label)
-            9 to 1 -> events += IslamicEvent("Ramadan Begins", label)
-            10 to 1 -> events += IslamicEvent("Eid al-Fitr", label)
-            12 to 8 -> events += IslamicEvent("Hajj Begins", label)
-            12 to 9 -> events += IslamicEvent("Day of Arafah", label)
-            12 to 10 -> events += IslamicEvent("Eid al-Adha", label)
+        for (def in builtInDefinitions()) {
+            if (def.hijriMonth == h.month && def.hijriDay == h.day) {
+                events += IslamicEvent(def.title, label)
+            }
         }
         // Convention pinned: a seek-night is marked on the civil day whose tabular
         // hijri date is the odd Ramadan night — i.e. the night BEGINS at the
@@ -182,9 +174,29 @@ object HijriCalendar {
     private fun epochOf(date: LocalDate): Long =
         date.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
 
-    private fun monthName(zeroBased: Int): String = when (zeroBased + 1) {
+    fun monthName(hijriMonth1Indexed: Int): String = when (hijriMonth1Indexed) {
         1 -> "Muharram"; 2 -> "Safar"; 3 -> "Rabi al-Awwal"; 4 -> "Rabi al-Thani"
         5 -> "Jumada al-Ula"; 6 -> "Jumada al-Akhirah"; 7 -> "Rajab"; 8 -> "Sha'ban"
         9 -> "Ramadan"; 10 -> "Shawwal"; 11 -> "Dhul-Qa'dah"; else -> "Dhul-Hijjah"
     }
+
+    private fun monthNameZeroBased(zeroBased: Int): String = monthName(zeroBased + 1)
+
+    /**
+     * The core fixed-hijri-date event pack — single source for [events] and the
+     * canonical JSON export. Scope trimmed per divergences D11.
+     */
+    fun builtInDefinitions(): List<EventDefinition> = listOf(
+        EventDefinition("new_year", "Islamic New Year", 1, 1, EventCategory.HISTORICAL, confidence = Confidence.ESTABLISHED),
+        EventDefinition("tasua", "Tasu'a", 1, 9, EventCategory.FASTING, confidence = Confidence.ESTABLISHED),
+        EventDefinition("ashura", "Day of Ashura", 1, 10, EventCategory.FASTING, confidence = Confidence.ESTABLISHED),
+        EventDefinition("mawlid", "Mawlid an-Nabi", 3, 12, EventCategory.HISTORICAL),
+        EventDefinition("isra_miraj", "Isra and Mi'raj", 7, 27, EventCategory.HISTORICAL),
+        EventDefinition("mid_shaban", "Mid-Sha'ban", 8, 15, EventCategory.HISTORICAL),
+        EventDefinition("ramadan_begins", "Ramadan Begins", 9, 1, EventCategory.MONTH_START, confidence = Confidence.ESTABLISHED),
+        EventDefinition("eid_al_fitr", "Eid al-Fitr", 10, 1, EventCategory.EID, confidence = Confidence.ESTABLISHED),
+        EventDefinition("hajj_begins", "Hajj Begins", 12, 8, EventCategory.HAJJ),
+        EventDefinition("arafah", "Day of Arafah", 12, 9, EventCategory.HAJJ, confidence = Confidence.ESTABLISHED),
+        EventDefinition("eid_al_adha", "Eid al-Adha", 12, 10, EventCategory.EID, confidence = Confidence.ESTABLISHED),
+    )
 }

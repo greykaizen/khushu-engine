@@ -8,6 +8,8 @@ import com.khushu.engine.astronomy.MonthlyMoonTrack
 import com.khushu.engine.astronomy.RiseSet
 import com.khushu.engine.astronomy.SolarEvents
 import com.khushu.engine.astronomy.SolarPosition
+import com.khushu.engine.calendar.CalendarConfiguration
+import com.khushu.engine.calendar.EventRegistry
 import com.khushu.engine.calendar.HijriCalendar
 import com.khushu.engine.calendar.CalendarParams
 import com.khushu.engine.calendar.FastDay
@@ -202,6 +204,45 @@ class KhushuEngine {
 
         fun fastDays(range: ClosedRange<LocalDate>, params: CalendarParams): List<FastDay> =
             HijriCalendar.fastDays(range, params)
+
+        // ── Namespaced capability tree ──────────────────────────────────────
+
+        /** Local Islamic-day calculation using SUNSET — distinct from tabular conversion. */
+        val date = DateApi()
+        val month = MonthApi()
+        val facts = FactsApi()
+
+        /**
+         * Event registry: built-in core pack + host-registered packs
+         * (engine schema or Aladhan shape) merged into per-date occurrences.
+         */
+        fun events(config: CalendarConfiguration): EventRegistry = EventRegistry(config.hijriOffsetDays)
+
+        val observance = ObservanceApi()
+        val lunar = LunarApi()
+
+        inner class ObservanceApi internal constructor() {
+            /** Occurrences with explicitly selected observed-date overrides applied. */
+            fun on(
+                date: LocalDate,
+                config: CalendarConfiguration,
+                context: com.khushu.engine.calendar.ObservanceContext,
+                registry: EventRegistry,
+            ): List<com.khushu.engine.calendar.EventOccurrence> = registry.occurrencesOn(date, context)
+        }
+
+        inner class LunarApi internal constructor() {
+            fun monthView(
+                hijriYear: Int,
+                hijriMonth: Int,
+                location: Location,
+                zoneId: ZoneId,
+                config: CalendarConfiguration = CalendarConfiguration(primary = CalendarConfiguration.Side.HIJRI),
+            ): List<com.khushu.engine.calendar.LunarCalendarView.LunarDayFact> =
+                com.khushu.engine.calendar.LunarCalendarView.monthView(
+                    hijriYear, hijriMonth, location, zoneId, config.hijriOffsetDays,
+                )
+        }
     }
 
     class QiblaApi internal constructor() {
