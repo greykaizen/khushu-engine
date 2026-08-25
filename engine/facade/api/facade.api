@@ -14,6 +14,16 @@ public final class com/khushu/engine/CachedEngine {
 	public final fun sunPosition (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
 }
 
+public final class com/khushu/engine/DateApi {
+	public final fun both (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/DualDate;
+	public final fun convert (IIILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
+	public final fun islamicDate (Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/HijriDate;
+	public static synthetic fun islamicDate$default (Lcom/khushu/engine/DateApi;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
+	public final fun islamicDateAt (Ljava/time/Instant;Lcom/khushu/engine/core/geo/Location;Ljava/time/ZoneId;Lcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/HijriDate;
+	public final fun primary (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/DateLine;
+	public final fun secondary (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/DateLine;
+}
+
 public final class com/khushu/engine/DayApi {
 	public final fun summary (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;)Lcom/khushu/engine/DaySummary;
 	public static synthetic fun summary$default (Lcom/khushu/engine/DayApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;ILjava/lang/Object;)Lcom/khushu/engine/DaySummary;
@@ -52,6 +62,26 @@ public final class com/khushu/engine/DaySummary {
 	public final fun getSunset ()Ljava/time/Instant;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/FactsApi {
+	public final fun arafah (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
+	public final fun ashura (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
+	public final fun eidAlAdha (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
+	public final fun eidAlFitr (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
+	public final fun firstTenDhulHijjah (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
+	public final fun hajjSeason (ILcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public final fun isLastTenNights (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)Z
+	public final fun isLeapHijriYear (ILcom/khushu/engine/calendar/CalendarConfiguration;)Z
+	public final fun isRamadan (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)Z
+	public final fun oddNightSeekCandidates (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
+	public final fun ramadan (ILcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/Facts$RamadanFacts;
+	public final fun ramadanProgress (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)Lkotlin/Pair;
+	public final fun sacredMonths (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
+	public final fun tashreeqDays (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
+	public final fun tasua (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
+	public final fun upcomingEvents (Ljava/time/LocalDate;ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
+	public final fun whiteDays (IILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
 }
 
 public final class com/khushu/engine/KhushuEngine {
@@ -99,11 +129,17 @@ public final class com/khushu/engine/KhushuEngine$AstronomyApi$SunApi {
 }
 
 public final class com/khushu/engine/KhushuEngine$CalendarApi {
+	public final fun events (Lcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/EventRegistry;
 	public final fun events (Ljava/time/LocalDate;I)Ljava/util/List;
 	public static synthetic fun events$default (Lcom/khushu/engine/KhushuEngine$CalendarApi;Ljava/time/LocalDate;IILjava/lang/Object;)Ljava/util/List;
 	public final fun eventsInRange (Lkotlin/ranges/ClosedRange;I)Ljava/util/List;
 	public static synthetic fun eventsInRange$default (Lcom/khushu/engine/KhushuEngine$CalendarApi;Lkotlin/ranges/ClosedRange;IILjava/lang/Object;)Ljava/util/List;
 	public final fun fastDays (Lkotlin/ranges/ClosedRange;Lcom/khushu/engine/calendar/CalendarParams;)Ljava/util/List;
+	public final fun getDate ()Lcom/khushu/engine/DateApi;
+	public final fun getFacts ()Lcom/khushu/engine/FactsApi;
+	public final fun getLunar ()Lcom/khushu/engine/KhushuEngine$CalendarApi$LunarApi;
+	public final fun getMonth ()Lcom/khushu/engine/MonthApi;
+	public final fun getObservance ()Lcom/khushu/engine/KhushuEngine$CalendarApi$ObservanceApi;
 	public final fun hijri (Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/HijriDate;
 	public static synthetic fun hijri$default (Lcom/khushu/engine/KhushuEngine$CalendarApi;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
 	public final fun hijriMonthLengths (II)Ljava/util/List;
@@ -113,6 +149,15 @@ public final class com/khushu/engine/KhushuEngine$CalendarApi {
 	public final fun isSacredMonth (I)Z
 	public final fun nextOccurrence (IILjava/time/LocalDate;I)Ljava/time/LocalDate;
 	public static synthetic fun nextOccurrence$default (Lcom/khushu/engine/KhushuEngine$CalendarApi;IILjava/time/LocalDate;IILjava/lang/Object;)Ljava/time/LocalDate;
+}
+
+public final class com/khushu/engine/KhushuEngine$CalendarApi$LunarApi {
+	public final fun monthView (IILcom/khushu/engine/core/geo/Location;Ljava/time/ZoneId;Lcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
+	public static synthetic fun monthView$default (Lcom/khushu/engine/KhushuEngine$CalendarApi$LunarApi;IILcom/khushu/engine/core/geo/Location;Ljava/time/ZoneId;Lcom/khushu/engine/calendar/CalendarConfiguration;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/KhushuEngine$CalendarApi$ObservanceApi {
+	public final fun on (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;Lcom/khushu/engine/calendar/ObservanceContext;Lcom/khushu/engine/calendar/EventRegistry;)Ljava/util/List;
 }
 
 public final class com/khushu/engine/KhushuEngine$PrayerApi {
@@ -161,5 +206,14 @@ public final class com/khushu/engine/KhushuEngine$ZakatApi {
 	public static synthetic fun mal$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Lcom/khushu/engine/zakat/ZakatAssets;Lcom/khushu/engine/zakat/ZakatParams;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatResult;
 	public final fun rikazDue (D)D
 	public final fun ushrDue (DLcom/khushu/engine/zakat/ZakatRules$Irrigation;)D
+}
+
+public final class com/khushu/engine/MonthApi {
+	public final fun addDays (Ljava/time/LocalDate;ILcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/HijriDate;
+	public final fun addMonths (Ljava/time/LocalDate;ILcom/khushu/engine/calendar/CalendarConfiguration;)Lkotlin/Pair;
+	public final fun boundaries (IILcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public final fun hijriYearMap (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/SortedMap;
+	public final fun monthMatrix (Ljava/time/YearMonth;Lcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/Map;
+	public final fun yearMatrix (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/Map;
 }
 

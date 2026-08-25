@@ -108,6 +108,14 @@ references, never gospel (AGENTS.md §2).
   the computational engine (AGENTS.md §10: the engine computes facts). Hosts
   may re-add these as presentation utilities over `MonthlyMoonTrack.pathPoints`.
 
+### D13. Shafaq/Rounding exposure is a documented pass-through, not a claim
+- adhan2 0.0.7 exposes `Shafaq{GENERAL,AHMER,ABYAD}` (twilight-color model used
+  by the Moon Sighting Committee method) and `Rounding{NEAREST,UP,NONE}`.
+- Engine exposes both as nullable configuration fields: `null` inherits the
+  method preset; explicit values pass through unchanged. Provenance of the MSC
+  twilight-color convention itself is not re-derived here — treated as
+  EXPERIMENTAL until independently documented.
+
 ## Maintenance log
 
 (Not divergences — environment and dependency decisions recorded for traceability.)

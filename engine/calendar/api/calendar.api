@@ -1,19 +1,32 @@
-public final class com/khushu/engine/calendar/Calendar {
-	public static final field INSTANCE Lcom/khushu/engine/calendar/Calendar;
-	public final fun events (Ljava/time/LocalDate;I)Ljava/util/List;
-	public static synthetic fun events$default (Lcom/khushu/engine/calendar/Calendar;Ljava/time/LocalDate;IILjava/lang/Object;)Ljava/util/List;
-	public final fun eventsInRange (Lkotlin/ranges/ClosedRange;I)Ljava/util/List;
-	public static synthetic fun eventsInRange$default (Lcom/khushu/engine/calendar/Calendar;Lkotlin/ranges/ClosedRange;IILjava/lang/Object;)Ljava/util/List;
-	public final fun fastDays (Lkotlin/ranges/ClosedRange;Lcom/khushu/engine/calendar/CalendarParams;)Ljava/util/List;
-	public final fun hijri (Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/HijriDate;
-	public static synthetic fun hijri$default (Lcom/khushu/engine/calendar/Calendar;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
-	public final fun hijriMonthLengths (II)Ljava/util/List;
-	public static synthetic fun hijriMonthLengths$default (Lcom/khushu/engine/calendar/Calendar;IIILjava/lang/Object;)Ljava/util/List;
-	public final fun hijriToGregorian (IIII)Ljava/time/LocalDate;
-	public static synthetic fun hijriToGregorian$default (Lcom/khushu/engine/calendar/Calendar;IIIIILjava/lang/Object;)Ljava/time/LocalDate;
-	public final fun isSacredMonth (I)Z
-	public final fun nextOccurrence (IILjava/time/LocalDate;I)Ljava/time/LocalDate;
-	public static synthetic fun nextOccurrence$default (Lcom/khushu/engine/calendar/Calendar;IILjava/time/LocalDate;IILjava/lang/Object;)Ljava/time/LocalDate;
+public final class com/khushu/engine/calendar/AladhanAdapter {
+	public static final field INSTANCE Lcom/khushu/engine/calendar/AladhanAdapter;
+	public final fun parse (Ljava/lang/String;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/calendar/CalendarConfiguration {
+	public fun <init> (Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarSystem;I)V
+	public synthetic fun <init> (Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarSystem;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public final fun component2 ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public final fun component3 ()Lcom/khushu/engine/calendar/CalendarSystem;
+	public final fun component4 ()I
+	public final fun copy (Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarSystem;I)Lcom/khushu/engine/calendar/CalendarConfiguration;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/CalendarConfiguration;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarSystem;IILjava/lang/Object;)Lcom/khushu/engine/calendar/CalendarConfiguration;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHijriOffsetDays ()I
+	public final fun getPrimary ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public final fun getSecondary ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public final fun getSystem ()Lcom/khushu/engine/calendar/CalendarSystem;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/CalendarConfiguration$Side : java/lang/Enum {
+	public static final field GREGORIAN Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public static final field HIJRI Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public static fun values ()[Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
 }
 
 public final class com/khushu/engine/calendar/CalendarParams {
@@ -41,6 +54,209 @@ public final class com/khushu/engine/calendar/CalendarParams {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/khushu/engine/calendar/CalendarSystem : java/lang/Enum {
+	public static final field UMM_AL_QURA Lcom/khushu/engine/calendar/CalendarSystem;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/calendar/CalendarSystem;
+	public static fun values ()[Lcom/khushu/engine/calendar/CalendarSystem;
+}
+
+public final class com/khushu/engine/calendar/CivilCalendarType : java/lang/Enum {
+	public static final field GREGORIAN Lcom/khushu/engine/calendar/CivilCalendarType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/calendar/CivilCalendarType;
+	public static fun values ()[Lcom/khushu/engine/calendar/CivilCalendarType;
+}
+
+public final class com/khushu/engine/calendar/Confidence : java/lang/Enum {
+	public static final field COMMUNITY Lcom/khushu/engine/calendar/Confidence;
+	public static final field COMPUTATIONAL Lcom/khushu/engine/calendar/Confidence;
+	public static final field ESTABLISHED Lcom/khushu/engine/calendar/Confidence;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/calendar/Confidence;
+	public static fun values ()[Lcom/khushu/engine/calendar/Confidence;
+}
+
+public abstract interface class com/khushu/engine/calendar/DateLine {
+}
+
+public final class com/khushu/engine/calendar/DateLine$Gregorian : com/khushu/engine/calendar/DateLine {
+	public fun <init> (Ljava/time/LocalDate;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun copy (Ljava/time/LocalDate;)Lcom/khushu/engine/calendar/DateLine$Gregorian;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/DateLine$Gregorian;Ljava/time/LocalDate;ILjava/lang/Object;)Lcom/khushu/engine/calendar/DateLine$Gregorian;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Ljava/time/LocalDate;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/DateLine$Hijri : com/khushu/engine/calendar/DateLine {
+	public fun <init> (Lcom/khushu/engine/calendar/HijriDate;)V
+	public final fun component1 ()Lcom/khushu/engine/calendar/HijriDate;
+	public final fun copy (Lcom/khushu/engine/calendar/HijriDate;)Lcom/khushu/engine/calendar/DateLine$Hijri;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/DateLine$Hijri;Lcom/khushu/engine/calendar/HijriDate;ILjava/lang/Object;)Lcom/khushu/engine/calendar/DateLine$Hijri;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Lcom/khushu/engine/calendar/HijriDate;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/DualDate {
+	public fun <init> (Lcom/khushu/engine/calendar/DateLine;Lcom/khushu/engine/calendar/DateLine;)V
+	public final fun component1 ()Lcom/khushu/engine/calendar/DateLine;
+	public final fun component2 ()Lcom/khushu/engine/calendar/DateLine;
+	public final fun copy (Lcom/khushu/engine/calendar/DateLine;Lcom/khushu/engine/calendar/DateLine;)Lcom/khushu/engine/calendar/DualDate;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/DualDate;Lcom/khushu/engine/calendar/DateLine;Lcom/khushu/engine/calendar/DateLine;ILjava/lang/Object;)Lcom/khushu/engine/calendar/DualDate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPrimary ()Lcom/khushu/engine/calendar/DateLine;
+	public final fun getSecondary ()Lcom/khushu/engine/calendar/DateLine;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/EventCategory : java/lang/Enum {
+	public static final field EID Lcom/khushu/engine/calendar/EventCategory;
+	public static final field FASTING Lcom/khushu/engine/calendar/EventCategory;
+	public static final field HAJJ Lcom/khushu/engine/calendar/EventCategory;
+	public static final field HISTORICAL Lcom/khushu/engine/calendar/EventCategory;
+	public static final field MONTH_START Lcom/khushu/engine/calendar/EventCategory;
+	public static final field OTHER Lcom/khushu/engine/calendar/EventCategory;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/calendar/EventCategory;
+	public static fun values ()[Lcom/khushu/engine/calendar/EventCategory;
+}
+
+public final class com/khushu/engine/calendar/EventDefinition {
+	public static final field Companion Lcom/khushu/engine/calendar/EventDefinition$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;IILcom/khushu/engine/calendar/EventCategory;Lcom/khushu/engine/calendar/Recurrence;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/calendar/Confidence;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;IILcom/khushu/engine/calendar/EventCategory;Lcom/khushu/engine/calendar/Recurrence;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/calendar/Confidence;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()Lcom/khushu/engine/calendar/EventCategory;
+	public final fun component6 ()Lcom/khushu/engine/calendar/Recurrence;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Lcom/khushu/engine/calendar/Confidence;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;IILcom/khushu/engine/calendar/EventCategory;Lcom/khushu/engine/calendar/Recurrence;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/calendar/Confidence;)Lcom/khushu/engine/calendar/EventDefinition;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/EventDefinition;Ljava/lang/String;Ljava/lang/String;IILcom/khushu/engine/calendar/EventCategory;Lcom/khushu/engine/calendar/Recurrence;Ljava/lang/String;Ljava/lang/String;Lcom/khushu/engine/calendar/Confidence;ILjava/lang/Object;)Lcom/khushu/engine/calendar/EventDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCategory ()Lcom/khushu/engine/calendar/EventCategory;
+	public final fun getConfidence ()Lcom/khushu/engine/calendar/Confidence;
+	public final fun getHijriDay ()I
+	public final fun getHijriMonth ()I
+	public final fun getId ()Ljava/lang/String;
+	public final fun getRecurrence ()Lcom/khushu/engine/calendar/Recurrence;
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getSourceVersion ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/khushu/engine/calendar/EventDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/khushu/engine/calendar/EventDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/khushu/engine/calendar/EventDefinition;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/khushu/engine/calendar/EventDefinition;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/engine/calendar/EventDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/engine/calendar/EventOccurrence {
+	public fun <init> (Lcom/khushu/engine/calendar/EventDefinition;Ljava/time/LocalDate;)V
+	public final fun component1 ()Lcom/khushu/engine/calendar/EventDefinition;
+	public final fun component2 ()Ljava/time/LocalDate;
+	public final fun copy (Lcom/khushu/engine/calendar/EventDefinition;Ljava/time/LocalDate;)Lcom/khushu/engine/calendar/EventOccurrence;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/EventOccurrence;Lcom/khushu/engine/calendar/EventDefinition;Ljava/time/LocalDate;ILjava/lang/Object;)Lcom/khushu/engine/calendar/EventOccurrence;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCivilDate ()Ljava/time/LocalDate;
+	public final fun getDefinition ()Lcom/khushu/engine/calendar/EventDefinition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/EventPackException : java/lang/IllegalArgumentException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/khushu/engine/calendar/EventRegistry {
+	public static final field Companion Lcom/khushu/engine/calendar/EventRegistry$Companion;
+	public fun <init> ()V
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAll ()Ljava/util/List;
+	public final fun occurrencesInRange (Lkotlin/ranges/ClosedRange;Lcom/khushu/engine/calendar/ObservanceContext;)Ljava/util/List;
+	public static synthetic fun occurrencesInRange$default (Lcom/khushu/engine/calendar/EventRegistry;Lkotlin/ranges/ClosedRange;Lcom/khushu/engine/calendar/ObservanceContext;ILjava/lang/Object;)Ljava/util/List;
+	public final fun occurrencesOn (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/ObservanceContext;)Ljava/util/List;
+	public static synthetic fun occurrencesOn$default (Lcom/khushu/engine/calendar/EventRegistry;Ljava/time/LocalDate;Lcom/khushu/engine/calendar/ObservanceContext;ILjava/lang/Object;)Ljava/util/List;
+	public final fun registerAladhan (Ljava/lang/String;)I
+	public final fun registerPack (Ljava/lang/String;)I
+	public final fun upcoming (Ljava/lang/String;Ljava/time/LocalDate;I)Ljava/util/List;
+	public static synthetic fun upcoming$default (Lcom/khushu/engine/calendar/EventRegistry;Ljava/lang/String;Ljava/time/LocalDate;IILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/calendar/EventRegistry$Companion {
+	public final fun builtInPackJson ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/Facts {
+	public static final field INSTANCE Lcom/khushu/engine/calendar/Facts;
+	public final fun arafah (II)Ljava/time/LocalDate;
+	public static synthetic fun arafah$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/time/LocalDate;
+	public final fun ashura (II)Ljava/time/LocalDate;
+	public static synthetic fun ashura$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/time/LocalDate;
+	public final fun eidAlAdha (II)Ljava/time/LocalDate;
+	public static synthetic fun eidAlAdha$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/time/LocalDate;
+	public final fun eidAlFitr (II)Ljava/time/LocalDate;
+	public static synthetic fun eidAlFitr$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/time/LocalDate;
+	public final fun firstTenDhulHijjah (II)Ljava/util/List;
+	public static synthetic fun firstTenDhulHijjah$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/util/List;
+	public final fun hajjSeason (II)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public static synthetic fun hajjSeason$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public final fun isLastTenNights (Ljava/time/LocalDate;I)Z
+	public static synthetic fun isLastTenNights$default (Lcom/khushu/engine/calendar/Facts;Ljava/time/LocalDate;IILjava/lang/Object;)Z
+	public final fun isRamadan (Ljava/time/LocalDate;I)Z
+	public static synthetic fun isRamadan$default (Lcom/khushu/engine/calendar/Facts;Ljava/time/LocalDate;IILjava/lang/Object;)Z
+	public final fun oddNightSeekCandidates (II)Ljava/util/List;
+	public static synthetic fun oddNightSeekCandidates$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/util/List;
+	public final fun ramadan (II)Lcom/khushu/engine/calendar/Facts$RamadanFacts;
+	public static synthetic fun ramadan$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Lcom/khushu/engine/calendar/Facts$RamadanFacts;
+	public final fun sacredMonths (II)Ljava/util/List;
+	public static synthetic fun sacredMonths$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/util/List;
+	public final fun tashreeqDays (II)Ljava/util/List;
+	public static synthetic fun tashreeqDays$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/util/List;
+	public final fun tasua (II)Ljava/time/LocalDate;
+	public static synthetic fun tasua$default (Lcom/khushu/engine/calendar/Facts;IIILjava/lang/Object;)Ljava/time/LocalDate;
+	public final fun whiteDays (III)Ljava/util/List;
+	public static synthetic fun whiteDays$default (Lcom/khushu/engine/calendar/Facts;IIIILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/calendar/Facts$RamadanFacts {
+	public fun <init> (ILjava/time/LocalDate;Ljava/time/LocalDate;I)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/time/LocalDate;
+	public final fun component3 ()Ljava/time/LocalDate;
+	public final fun component4 ()I
+	public final fun copy (ILjava/time/LocalDate;Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/Facts$RamadanFacts;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/Facts$RamadanFacts;ILjava/time/LocalDate;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/Facts$RamadanFacts;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFirstDay ()Ljava/time/LocalDate;
+	public final fun getHijriYear ()I
+	public final fun getLastDay ()Ljava/time/LocalDate;
+	public final fun getLengthDays ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/khushu/engine/calendar/FastDay {
 	public fun <init> (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/FastRule;)V
 	public final fun component1 ()Ljava/time/LocalDate;
@@ -62,8 +278,49 @@ public final class com/khushu/engine/calendar/FastRule : java/lang/Enum {
 	public static final field TASUA_ASHURA Lcom/khushu/engine/calendar/FastRule;
 	public static final field WHITE_DAYS Lcom/khushu/engine/calendar/FastRule;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getProvenance ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/calendar/FastRule;
 	public static fun values ()[Lcom/khushu/engine/calendar/FastRule;
+}
+
+public final class com/khushu/engine/calendar/HijriArithmetic {
+	public static final field INSTANCE Lcom/khushu/engine/calendar/HijriArithmetic;
+	public final fun addDays (Ljava/time/LocalDate;II)Lcom/khushu/engine/calendar/HijriDate;
+	public static synthetic fun addDays$default (Lcom/khushu/engine/calendar/HijriArithmetic;Ljava/time/LocalDate;IIILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
+	public final fun addMonths (Ljava/time/LocalDate;II)Lkotlin/Pair;
+	public static synthetic fun addMonths$default (Lcom/khushu/engine/calendar/HijriArithmetic;Ljava/time/LocalDate;IIILjava/lang/Object;)Lkotlin/Pair;
+	public final fun dayOfYear (Ljava/time/LocalDate;I)I
+	public static synthetic fun dayOfYear$default (Lcom/khushu/engine/calendar/HijriArithmetic;Ljava/time/LocalDate;IILjava/lang/Object;)I
+	public final fun daysInMonth (III)I
+	public static synthetic fun daysInMonth$default (Lcom/khushu/engine/calendar/HijriArithmetic;IIIILjava/lang/Object;)I
+	public final fun daysInYear (II)I
+	public static synthetic fun daysInYear$default (Lcom/khushu/engine/calendar/HijriArithmetic;IIILjava/lang/Object;)I
+	public final fun isLeapYear (II)Z
+	public static synthetic fun isLeapYear$default (Lcom/khushu/engine/calendar/HijriArithmetic;IIILjava/lang/Object;)Z
+	public final fun monthBoundaries (III)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public static synthetic fun monthBoundaries$default (Lcom/khushu/engine/calendar/HijriArithmetic;IIIILjava/lang/Object;)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public final fun remainingDaysInMonth (Ljava/time/LocalDate;I)I
+	public static synthetic fun remainingDaysInMonth$default (Lcom/khushu/engine/calendar/HijriArithmetic;Ljava/time/LocalDate;IILjava/lang/Object;)I
+}
+
+public final class com/khushu/engine/calendar/HijriCalendar {
+	public static final field INSTANCE Lcom/khushu/engine/calendar/HijriCalendar;
+	public final fun builtInDefinitions ()Ljava/util/List;
+	public final fun events (Ljava/time/LocalDate;I)Ljava/util/List;
+	public static synthetic fun events$default (Lcom/khushu/engine/calendar/HijriCalendar;Ljava/time/LocalDate;IILjava/lang/Object;)Ljava/util/List;
+	public final fun eventsInRange (Lkotlin/ranges/ClosedRange;I)Ljava/util/List;
+	public static synthetic fun eventsInRange$default (Lcom/khushu/engine/calendar/HijriCalendar;Lkotlin/ranges/ClosedRange;IILjava/lang/Object;)Ljava/util/List;
+	public final fun fastDays (Lkotlin/ranges/ClosedRange;Lcom/khushu/engine/calendar/CalendarParams;)Ljava/util/List;
+	public final fun hijri (Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/HijriDate;
+	public static synthetic fun hijri$default (Lcom/khushu/engine/calendar/HijriCalendar;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
+	public final fun hijriMonthLengths (II)Ljava/util/List;
+	public static synthetic fun hijriMonthLengths$default (Lcom/khushu/engine/calendar/HijriCalendar;IIILjava/lang/Object;)Ljava/util/List;
+	public final fun hijriToGregorian (IIII)Ljava/time/LocalDate;
+	public static synthetic fun hijriToGregorian$default (Lcom/khushu/engine/calendar/HijriCalendar;IIIIILjava/lang/Object;)Ljava/time/LocalDate;
+	public final fun isSacredMonth (I)Z
+	public final fun monthName (I)Ljava/lang/String;
+	public final fun nextOccurrence (IILjava/time/LocalDate;I)Ljava/time/LocalDate;
+	public static synthetic fun nextOccurrence$default (Lcom/khushu/engine/calendar/HijriCalendar;IILjava/time/LocalDate;IILjava/lang/Object;)Ljava/time/LocalDate;
 }
 
 public final class com/khushu/engine/calendar/HijriDate {
@@ -97,5 +354,87 @@ public final class com/khushu/engine/calendar/IslamicEvent {
 	public final fun getTitle ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/LunarCalendarView {
+	public static final field INSTANCE Lcom/khushu/engine/calendar/LunarCalendarView;
+	public final fun monthView (IILcom/khushu/engine/core/geo/Location;Ljava/time/ZoneId;I)Ljava/util/List;
+	public static synthetic fun monthView$default (Lcom/khushu/engine/calendar/LunarCalendarView;IILcom/khushu/engine/core/geo/Location;Ljava/time/ZoneId;IILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/calendar/LunarCalendarView$LunarDayFact {
+	public fun <init> (ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZ)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/time/LocalDate;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun component6 ()D
+	public final fun component7 ()D
+	public final fun component8 ()D
+	public final fun component9 ()Z
+	public final fun copy (ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZ)Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;ILjava/time/LocalDate;Ljava/time/Instant;DDDDDZILjava/lang/Object;)Lcom/khushu/engine/calendar/LunarCalendarView$LunarDayFact;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAboveHorizon ()Z
+	public final fun getAltitudeDeg ()D
+	public final fun getAzimuthDeg ()D
+	public final fun getBrightLimbAngleDeg ()D
+	public final fun getCivilDate ()Ljava/time/LocalDate;
+	public final fun getEveningInstant ()Ljava/time/Instant;
+	public final fun getHijriDay ()I
+	public final fun getIlluminationFraction ()D
+	public final fun getPhaseAngleDeg ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/MonthBoundaries {
+	public fun <init> (IILjava/lang/String;Ljava/time/LocalDate;Ljava/time/LocalDate;I)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/time/LocalDate;
+	public final fun component5 ()Ljava/time/LocalDate;
+	public final fun component6 ()I
+	public final fun copy (IILjava/lang/String;Ljava/time/LocalDate;Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/MonthBoundaries;IILjava/lang/String;Ljava/time/LocalDate;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/MonthBoundaries;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFirstCivilDate ()Ljava/time/LocalDate;
+	public final fun getHijriMonth ()I
+	public final fun getHijriYear ()I
+	public final fun getLastCivilDate ()Ljava/time/LocalDate;
+	public final fun getLengthDays ()I
+	public final fun getMonthName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/ObservanceContext {
+	public fun <init> ([Lcom/khushu/engine/calendar/ObservedDateOverride;)V
+	public final fun getByKey ()Ljava/util/Map;
+	public final fun observedDate (Ljava/lang/String;I)Ljava/time/LocalDate;
+}
+
+public final class com/khushu/engine/calendar/ObservedDateOverride {
+	public fun <init> (Ljava/lang/String;ILjava/time/LocalDate;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/time/LocalDate;
+	public final fun copy (Ljava/lang/String;ILjava/time/LocalDate;)Lcom/khushu/engine/calendar/ObservedDateOverride;
+	public static synthetic fun copy$default (Lcom/khushu/engine/calendar/ObservedDateOverride;Ljava/lang/String;ILjava/time/LocalDate;ILjava/lang/Object;)Lcom/khushu/engine/calendar/ObservedDateOverride;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDefinitionId ()Ljava/lang/String;
+	public final fun getHijriYear ()I
+	public final fun getObservedCivilDate ()Ljava/time/LocalDate;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/calendar/Recurrence : java/lang/Enum {
+	public static final field ANNUAL Lcom/khushu/engine/calendar/Recurrence;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/calendar/Recurrence;
+	public static fun values ()[Lcom/khushu/engine/calendar/Recurrence;
 }
 

@@ -92,12 +92,20 @@ hilal.forecast(location, from, zoneId, nights = 8): List<Pair<LocalDate, HilalRe
 
 ### calendar
 ```
-calendar.hijriToGregorian(y, m, d, offsetDays = 0): LocalDate      // reverse conversion
-calendar.hijriMonthLengths(hijriYear, offsetDays = 0): List<Int>   // twelve 29/30 lengths
-calendar.eventsInRange(range, offsetDays = 0): List<Pair<LocalDate, IslamicEvent>>
-calendar.nextOccurrence(month, day, after, offsetDays = 0): LocalDate
-calendar.isSacredMonth(hijriMonth): Boolean
-```
+HijriCalendar (was `Calendar`): hijri · hijriToGregorian · hijriMonthLengths ·
+  events · eventsInRange · nextOccurrence · isSacredMonth · fastDays · builtInDefinitions
+calendar.date.islamicDate(civil) / islamicDateAt(instant, location, zone, config)
+  // islamicDateAt = local Islamic-day calculation using SUNSET boundary
+calendar.date.primary/secondary/both/convert(civil, config): DateLine/DualDate
+calendar.month.monthMatrix/yearMatrix/hijriYearMap/boundaries/addDays/addMonths
+HijriArithmetic: daysInMonth/daysInYear/isLeapYear/dayOfYear/remainingDaysInMonth
+Facts: ramadan/isRamadan/isLastTenNights/oddNightSeekCandidates/sacredMonths/
+  hajjSeason/firstTenDhulHijjah/arafah/ashura/tasua/eidAlFitr/eidAlAdha/
+  tashreeqDays/whiteDays
+EventRegistry: registerPack(json)/registerAladhan(json)/occurrencesOn(date,
+  observance?)/occurrencesInRange/upcoming(id, after, count) + builtInPackJson()
+ObservanceContext(ObservedDateOverride...)   // applies only when explicitly passed
+LunarCalendarView.monthView(y, m, location, zoneId): LunarDayFact*
 
 ### prayer
 ```
