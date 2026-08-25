@@ -1,10 +1,12 @@
-plugins { kotlin("jvm") }
+plugins {
+    kotlin("jvm")
+}
 
 kotlin { jvmToolchain(21) }
 
 dependencies {
     implementation(project(":engine:core"))
-    api(project(":engine:astronomy"))
+    implementation("com.github.msarhan:ummalqura-calendar:2.0.2")
     testImplementation(kotlin("test"))
 }
 
