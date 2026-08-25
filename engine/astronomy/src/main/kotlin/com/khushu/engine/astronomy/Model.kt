@@ -28,6 +28,46 @@ data class MoonState(
     val phaseName: String,
     /** Bright-limb tilt at the observer (χ − q), degrees in [0, 360). */
     val brightLimbTiltDeg: Double,
+    /** Days since the most recent new moon. */
+    val moonAgeDays: Double,
+    val isWaxing: Boolean,
+)
+
+/** Next lunar quarter-phase event. */
+data class UpcomingMoonPhase(
+    val targetPhaseDeg: Double,
+    val epochMs: Long,
+) {
+    val phaseName: String
+        get() = when (targetPhaseDeg) {
+            0.0 -> "New Moon"; 90.0 -> "First Quarter"
+            180.0 -> "Full Moon"; else -> "Third Quarter"
+        }
+}
+
+enum class EclipseKind { NONE, PARTIAL, ANNULAR, TOTAL }
+
+/** Geocentric global solar eclipse. Peak instant + ground coordinates of greatest eclipse. */
+data class GlobalSolarEclipse(
+    val kind: EclipseKind,
+    val peakEpochMs: Long,
+    val obscuration: Double?,
+    val latitudeDeg: Double,
+    val longitudeDeg: Double,
+)
+
+/** Lunar (Earth-shadow) eclipse. */
+data class LunarEclipse(
+    val kind: EclipseKind,
+    val peakEpochMs: Long,
+    val obscuration: Double?,
+)
+
+/** Extreme geocentric lunar distance within a scanned window (supermoon aid). */
+data class MoonDistanceExtreme(
+    val epochMs: Long,
+    val distanceKm: Double,
+    val isPerigee: Boolean,
 )
 
 /** Rise/set instants; null means no event that civil day (polar conditions). */

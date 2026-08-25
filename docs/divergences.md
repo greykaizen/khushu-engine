@@ -98,6 +98,16 @@ references, never gospel (AGENTS.md §2).
   with announced moon-sighting dates (e.g. tabular Eid al-Adha 1445 = Jun 16 vs
   official Jun 17). The `hijriOffsetDays` parameter exists precisely for this.
 
+### D12. AR rendering helpers deferred to the host/AR layer
+- **Donor**: `EarthCoordinates.findClosestPointOnSphericalPath`,
+  `interpolatePathPoint` (nlerp), `angularSeparationDegrees`, and
+  `AstroEphemerisEngine.generateHorizonRing` serve AR boresight→path matching
+  and scene scaffolding.
+- **Engine**: `CelestialPathPoint` exposes the raw ENU facts; projection,
+  closest-point search and ring meshes are rendering concerns and stay out of
+  the computational engine (AGENTS.md §10: the engine computes facts). Hosts
+  may re-add these as presentation utilities over `MonthlyMoonTrack.pathPoints`.
+
 ## Maintenance log
 
 (Not divergences — environment and dependency decisions recorded for traceability.)

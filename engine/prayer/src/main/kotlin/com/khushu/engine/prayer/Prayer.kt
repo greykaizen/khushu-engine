@@ -124,6 +124,16 @@ data class PrayerStatus(
     }
 }
 
+/** Tahajjud night-prayer window for the night following [date]'s maghrib. Null when uncomputable. */
+data class TahajjudWindow(
+    /** Islamic midnight — midpoint of (maghrib today, fajr tomorrow). */
+    val windowOpens: Instant,
+    /** Last third of the night begins — the preferred Tahajjud time. */
+    val lastThirdBegins: Instant,
+    /** Fajr of the following day ends the window. */
+    val windowCloses: Instant,
+)
+
 /** Capability entry point: request prayer facts, never calculator classes. */
 object Prayer {
 
@@ -144,4 +154,21 @@ object Prayer {
         zoneId: java.time.ZoneId,
         params: PrayerParams = PrayerParams(),
     ): PrayerStatus = PrayerCalculator.status(location, now, zoneId, params)
+
+    /**
+     * Tahajjud window for the night beginning at [date]'s maghrib.
+     * Null when any boundary is uncomputable (polar).
+     */
+    fun tahajjudWindow(
+        location: Location,
+        date: LocalDate,
+        params: PrayerParams = PrayerParams(),
+    ): TahajjudWindow? {
+        val today = times(location, date, params)
+        val tomorrow = times(location, date.plusDays(1), params)
+        val midnight = today.midnight ?: return null
+        val lastThird = today.lastThirdOfNight ?: return null
+        val fajrTomorrow = tomorrow.fajr ?: return null
+        return TahajjudWindow(midnight, lastThird, fajrTomorrow)
+    }
 }

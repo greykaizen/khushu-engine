@@ -18,6 +18,7 @@ import com.khushu.engine.prayer.Prayer
 import com.khushu.engine.prayer.PrayerParams
 import com.khushu.engine.prayer.PrayerStatus
 import com.khushu.engine.prayer.PrayerTimesResult
+import com.khushu.engine.prayer.TahajjudWindow
 import com.khushu.engine.qibla.Qibla
 import com.khushu.engine.qibla.QiblaBearing
 import com.khushu.engine.zakat.FitranaResult
@@ -30,6 +31,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 /**
  * Single entry point for host applications. No Clock, no cache, no state —
@@ -52,6 +54,9 @@ class KhushuEngine {
     val qibla = QiblaApi()
     val zakat = ZakatApi()
 
+    /** Whole-day composite: every fact of one civil date in a single pass. */
+    val day = com.khushu.engine.DayApi()
+
     // ── Namespaces: pure delegation, zero logic ─────────────────────────────
 
     class PrayerApi internal constructor() {
@@ -60,6 +65,9 @@ class KhushuEngine {
 
         fun status(location: Location, now: Instant, zoneId: ZoneId, params: PrayerParams = PrayerParams()): PrayerStatus =
             Prayer.status(location, now, zoneId, params)
+
+        fun tahajjudWindow(location: Location, date: LocalDate, params: PrayerParams = PrayerParams()): TahajjudWindow? =
+            Prayer.tahajjudWindow(location, date, params)
     }
 
     class AstronomyApi internal constructor() {
@@ -73,6 +81,9 @@ class KhushuEngine {
 
             fun riseSet(location: Location, date: LocalDate, zoneId: ZoneId): RiseSet =
                 Astronomy.sun.riseSet(location, date, zoneId)
+
+            fun dayLength(location: Location, date: LocalDate, zoneId: ZoneId): java.time.Duration? =
+                Astronomy.sun.dayLength(location, date, zoneId)
 
             fun events(location: Location, date: LocalDate, zoneId: ZoneId): SolarEvents =
                 Astronomy.sun.events(location, date, zoneId)
@@ -97,11 +108,26 @@ class KhushuEngine {
             ): MonthlyMoonTrack = Astronomy.moon.track(location, yearMonth, zoneId, includePath, pathSamplesPerDay)
 
             fun phaseName(phaseAngleDeg: Double): String = Astronomy.moon.phaseName(phaseAngleDeg)
+
+            fun nextNewMoon(after: Instant) = Astronomy.moon.nextNewMoon(after)
+            fun nextFullMoon(after: Instant) = Astronomy.moon.nextFullMoon(after)
+            fun nextPhase(targetPhaseDeg: Double, after: Instant) = Astronomy.moon.nextPhase(targetPhaseDeg, after)
+
+            fun distanceExtremes(from: Instant, to: Instant) = Astronomy.moon.distanceExtremes(from, to)
+            fun nextGlobalSolarEclipse(after: Instant) = Astronomy.moon.nextGlobalSolarEclipse(after)
+            fun nextLunarEclipse(after: Instant) = Astronomy.moon.nextLunarEclipse(after)
         }
 
         class HilalApi internal constructor() {
             fun visibility(location: Location, date: LocalDate, zoneId: ZoneId): HilalReport? =
                 Astronomy.hilal.visibility(location, date, zoneId)
+
+            fun forecast(
+                location: Location,
+                from: LocalDate,
+                zoneId: ZoneId,
+                nights: Int = 8,
+            ): List<Pair<LocalDate, HilalReport?>> = Astronomy.hilal.forecast(location, from, zoneId, nights)
         }
     }
 
@@ -109,8 +135,22 @@ class KhushuEngine {
         fun hijri(localDate: LocalDate, offsetDays: Int = 0): HijriDate =
             CalendarCapability.hijri(localDate, offsetDays)
 
+        fun hijriToGregorian(hijriYear: Int, hijriMonth: Int, hijriDay: Int, offsetDays: Int = 0): LocalDate =
+            CalendarCapability.hijriToGregorian(hijriYear, hijriMonth, hijriDay, offsetDays)
+
+        fun hijriMonthLengths(hijriYear: Int, offsetDays: Int = 0): List<Int> =
+            CalendarCapability.hijriMonthLengths(hijriYear, offsetDays)
+
         fun events(localDate: LocalDate, offsetDays: Int = 0): List<IslamicEvent> =
             CalendarCapability.events(localDate, offsetDays)
+
+        fun eventsInRange(range: ClosedRange<LocalDate>, offsetDays: Int = 0): List<Pair<LocalDate, IslamicEvent>> =
+            CalendarCapability.eventsInRange(range, offsetDays)
+
+        fun nextOccurrence(month: Int, day: Int, after: LocalDate, offsetDays: Int = 0): LocalDate =
+            CalendarCapability.nextOccurrence(month, day, after, offsetDays)
+
+        fun isSacredMonth(hijriMonth: Int): Boolean = CalendarCapability.isSacredMonth(hijriMonth)
 
         fun fastDays(range: ClosedRange<LocalDate>, params: CalendarParams): List<FastDay> =
             CalendarCapability.fastDays(range, params)
@@ -118,6 +158,88 @@ class KhushuEngine {
 
     class QiblaApi internal constructor() {
         fun bearing(location: Location): QiblaBearing = Qibla.bearing(location)
+
+        /**
+         * Instants within [year] when the subsolar point stands directly over
+         * the Kaaba — anywhere on Earth, facing the sun then means facing the
+         * qibla. Occurs twice a year (late May and mid July).
+         *
+         * Composed from astronomy sun facts (RA/dec) + Kaaba constants;
+         * one shared computation, no duplicated solar math.
+         */
+        fun solarAlignmentInstants(year: Int): List<Instant> {
+            val kLatRad = Math.toRadians(Qibla.KAABA_LATITUDE_DEG)
+            val kLonRad = Math.toRadians(Qibla.KAABA_LONGITUDE_DEG)
+            val kx = kotlin.math.cos(kLatRad) * kotlin.math.cos(kLonRad)
+            val ky = kotlin.math.cos(kLatRad) * kotlin.math.sin(kLonRad)
+            val kz = kotlin.math.sin(kLatRad)
+
+            fun separationCosine(instant: Instant): Double {
+                val pos = Astronomy.sun.position(Location.of(0.0, 0.0), instant)
+                val decRad = Math.toRadians(pos.declinationDeg)
+                val gmstDeg = greenwichMeanSiderealDegrees(instant.toEpochMilli() / 86_400_000.0 + 2440587.5)
+                var lonRad = Math.toRadians(pos.rightAscensionHours * 15.0) - Math.toRadians(gmstDeg)
+                lonRad = Math.IEEEremainder(lonRad, 2 * Math.PI)
+                return kotlin.math.cos(decRad) * kotlin.math.cos(lonRad) * kx +
+                    kotlin.math.cos(decRad) * kotlin.math.sin(lonRad) * ky +
+                    kotlin.math.sin(decRad) * kz
+            }
+
+            val startMs = LocalDate.of(year, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+            val endMs = LocalDate.of(year + 1, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+            val stepMs = 3_600_000L
+
+            // Find ALL daily near-passes below tolerance, group consecutive
+            // days into single events, and return each event's exact peak.
+            data class Candidate(val t: Long, val cosSep: Double)
+            val candidates = mutableListOf<Candidate>()
+            var prevVal = separationCosine(Instant.ofEpochMilli(startMs))
+            var prevT = startMs
+            var t = startMs + stepMs
+            while (t <= endMs) {
+                val curVal = separationCosine(Instant.ofEpochMilli(t))
+                if (curVal < prevVal) {
+                    // local maximum between prevT..t — refine by golden section.
+                    var lo = prevT; var hi = t
+                    while (hi - lo > 1000L) {
+                        val m1 = lo + (hi - lo) / 3
+                        val m2 = hi - (hi - lo) / 3
+                        if (separationCosine(Instant.ofEpochMilli(m1)) < separationCosine(Instant.ofEpochMilli(m2))) lo = m1 else hi = m2
+                    }
+                    val peak = (lo + hi) / 2
+                    val cosSep = separationCosine(Instant.ofEpochMilli(peak))
+                    val sepDeg = Math.toDegrees(kotlin.math.acos(cosSep.coerceIn(-1.0, 1.0)))
+                    if (sepDeg <= 1.0) candidates += Candidate(peak, cosSep)
+                }
+                prevVal = curVal; prevT = t; t += stepMs
+            }
+
+            // Group candidates closer than 3 days into one event; keep the peak.
+            val out = mutableListOf<Instant>()
+            var group = mutableListOf<Candidate>()
+            fun flush() {
+                if (group.isEmpty()) return
+                out += Instant.ofEpochMilli(group.maxBy { it.cosSep }.t)
+                group = mutableListOf()
+            }
+            for (c in candidates) {
+                if (group.isNotEmpty() && c.t - group.last().t > 3L * 86_400_000) flush()
+                group += c
+            }
+            flush()
+            return out
+        }
+
+        /** GMST in degrees from Julian date (IAU 1982 polynomial). */
+        private fun greenwichMeanSiderealDegrees(jd: Double): Double {
+            val d = jd - 2451545.0
+            val tu = d / 36_525.0
+            val gmstDeg = Math.IEEEremainder(
+                280.46061837 + 360.98564736629 * d + 0.000387933 * tu * tu - tu * tu * tu / 38_710_000.0,
+                360.0,
+            )
+            return if (gmstDeg < 0) gmstDeg + 360.0 else gmstDeg
+        }
     }
 
     class ZakatApi internal constructor() {
@@ -126,5 +248,27 @@ class KhushuEngine {
 
         fun fitrana(dependents: Int, pricePerKg: Double, madhab: ZakatMadhab): FitranaResult =
             Zakat.fitrana(dependents, pricePerKg, madhab)
+
+        /**
+         * Hijri anniversary completing the hawl for wealth owned since
+         * [ownershipStart]. Composed with the calendar capability — the zakat
+         * module itself stays independent of calendar (module rules).
+         */
+        fun hawlAnniversary(ownershipStart: LocalDate, offsetDays: Int = 0): LocalDate =
+            com.khushu.engine.zakat.ZakatRules.hawlAnniversary(ownershipStart, offsetDays) { d, off ->
+                CalendarCapability.hijri(d, off).let { Triple(it.year, it.month, it.day) }
+            }
+
+        fun livestockNisab(kind: com.khushu.engine.zakat.ZakatRules.LivestockKind): Int =
+            com.khushu.engine.zakat.ZakatRules.livestockNisab(kind)
+
+        fun livestockDue(kind: com.khushu.engine.zakat.ZakatRules.LivestockKind, count: Int): String? =
+            com.khushu.engine.zakat.ZakatRules.livestockDue(kind, count)
+
+        fun ushrDue(harvestValue: Double, irrigation: com.khushu.engine.zakat.ZakatRules.Irrigation): Double =
+            com.khushu.engine.zakat.ZakatRules.ushrDue(harvestValue, irrigation)
+
+        fun rikazDue(treasureValue: Double): Double =
+            com.khushu.engine.zakat.ZakatRules.rikazDue(treasureValue)
     }
 }

@@ -31,3 +31,13 @@ AR call path — `AstroEphemerisEngine` + `LunarOrientation` on cosinekitty 2.1.
   review the diff carefully, and record why in `docs/divergences.md`.
 - Both projects pin their library versions in `build.gradle.kts` — bump them only
   together with the corresponding engine module and a divergences entry.
+
+## Regenerate hijri goldens
+
+Writes `engine/calendar/src/test/resources/fixtures/hijri_golden.json`
+(3655 cases: 2024–2025 daily × offsets −2..+2, replicating the donor's
+UmmalquraCalendar call path).
+
+```
+./gradlew -p tools/golden-dumper/calendar run --args="<repo-root>/engine/calendar/src/test/resources/fixtures/hijri_golden.json"
+```

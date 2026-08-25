@@ -59,6 +59,79 @@ object Calendar {
         return events.sortedBy { it.title }
     }
 
+    /** All events within the civil-date range (inclusive). */
+    fun eventsInRange(range: ClosedRange<LocalDate>, offsetDays: Int = 0): List<Pair<LocalDate, IslamicEvent>> {
+        val out = mutableListOf<Pair<LocalDate, IslamicEvent>>()
+        var d = range.start
+        while (d <= range.endInclusive) {
+            for (e in events(d, offsetDays)) out += d to e
+            d = d.plusDays(1)
+        }
+        return out
+    }
+
+    /**
+     * Reverse conversion: the civil date whose hijri date equals [hijriYear]/[hijriMonth]/[hijriDay]
+     * (with [offsetDays] applied on read-back). Hijri→civil mapping is monotonic,
+     * so a bounded binary search around a tabular estimate finds it exactly.
+     * Throws when no such date exists (e.g. day 30 in a 29-day month).
+     */
+    fun hijriToGregorian(hijriYear: Int, hijriMonth: Int, hijriDay: Int, offsetDays: Int = 0): LocalDate {
+        require(hijriMonth in 1..12 && hijriDay in 1..30 && hijriYear > 0) { "invalid hijri date" }
+        val estimate = LocalDate.of(2018, 9, 11)
+            .plusDays(Math.round((hijriYear - 1440) * 354.36673))
+            .plusDays(((hijriMonth - 1) * 29.530589).toLong())
+            .plusDays((hijriDay - 1).toLong() - offsetDays.toLong())
+
+        fun rank(date: LocalDate): Long {
+            val h = hijri(date, offsetDays)
+            return h.year.toLong() * 10000 + h.month * 100 + h.day
+        }
+        val targetRank = hijriYear.toLong() * 10000 + hijriMonth * 100 + hijriDay
+
+        var lo = estimate.minusDays(50)
+        var hi = estimate.plusDays(50)
+        while (lo < hi) {
+            val mid = lo.plusDays((java.time.temporal.ChronoUnit.DAYS.between(lo, hi)) / 2)
+            if (rank(mid) < targetRank) lo = mid.plusDays(1) else hi = mid
+        }
+        val result = lo
+        val h = hijri(result, offsetDays)
+        require(h.year == hijriYear && h.month == hijriMonth && h.day == hijriDay) {
+            "no civil date maps to $hijriDay-$hijriMonth-$hijriYear AH with offset $offsetDays (day may not exist)"
+        }
+        return result
+    }
+
+    /** Lengths (always 29 or 30) of all twelve months of a hijri year. */
+    fun hijriMonthLengths(hijriYear: Int, offsetDays: Int = 0): List<Int> {
+        fun start(year: Int, month: Int): LocalDate = hijriToGregorian(year, month, 1, offsetDays)
+        return (1..12).map { m ->
+            val thisStart = start(hijriYear, m)
+            val nextStart = if (m < 12) start(hijriYear, m + 1) else start(hijriYear + 1, 1)
+            java.time.temporal.ChronoUnit.DAYS.between(thisStart, nextStart).toInt()
+        }
+    }
+
+    /** Next civil date on which the given fixed hijri [month]/[day] falls, at or after [after]. */
+    fun nextOccurrence(month: Int, day: Int, after: LocalDate, offsetDays: Int = 0): LocalDate {
+        require(month in 1..12 && day in 1..30) { "invalid hijri month/day" }
+        var probe = after
+        // Hijri year of `probe`, then walk forward at most two years.
+        val hStart = hijri(probe, offsetDays)
+        for (yearOffset in 0..1) {
+            val target = runCatching {
+                hijriToGregorian(hStart.year + yearOffset, month, day, offsetDays)
+            }.getOrNull()
+            if (target != null && !target.isBefore(after)) return target
+        }
+        throw IllegalStateException("unreachable")
+    }
+
+    /** True when this hijri month is one of the four sacred months. */
+    fun isSacredMonth(hijriMonth: Int): Boolean =
+        hijriMonth == 1 || hijriMonth == 7 || hijriMonth == 11 || hijriMonth == 12
+
     /**
      * Optional fast days within [range] per [params]. Prohibited days are always
      * excluded: Eid al-Fitr, Eid al-Adha, Days of Tashreeq (11–13 Dhul-Hijjah).

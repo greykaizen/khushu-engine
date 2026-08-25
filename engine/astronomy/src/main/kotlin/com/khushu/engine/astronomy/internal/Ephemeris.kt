@@ -13,6 +13,7 @@ import io.github.cosinekitty.astronomy.illumination
 import io.github.cosinekitty.astronomy.moonPhase
 import io.github.cosinekitty.astronomy.searchAltitude
 import io.github.cosinekitty.astronomy.searchHourAngle
+import io.github.cosinekitty.astronomy.searchMoonPhase
 import io.github.cosinekitty.astronomy.searchRiseSet
 
 /**
@@ -89,4 +90,11 @@ internal object Ephemeris {
 
     fun moonElongationDeg(epochMs: Long): Double =
         illumination(Body.Moon, time(epochMs)).phaseAngle
+
+    /**
+     * First occurrence of the target lunar phase angle at or after [epochMs].
+     * 0.0 = new moon, 90 = first quarter, 180 = full, 270 = third quarter.
+     */
+    fun nextMoonPhaseMs(targetPhaseDeg: Double, epochMs: Long, limitDays: Double = 35.0): Long? =
+        searchMoonPhase(targetPhaseDeg, time(epochMs), limitDays)?.toMillisecondsSince1970()
 }

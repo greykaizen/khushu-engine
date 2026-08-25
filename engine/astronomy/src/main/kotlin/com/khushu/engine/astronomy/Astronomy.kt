@@ -42,6 +42,15 @@ object Astronomy {
             return RiseSet(riseEpochMs = rise, setEpochMs = set)
         }
 
+        /** Day length between rise and set; null on polar days. */
+        fun dayLength(location: Location, date: LocalDate, zoneId: ZoneId): java.time.Duration? {
+            val rs = riseSet(location, date, zoneId)
+            val rise = rs.riseEpochMs ?: return null
+            val set = rs.setEpochMs ?: return null
+            if (set <= rise) return null
+            return java.time.Duration.ofMillis(set - rise)
+        }
+
         /**
          * Canonical solar day schedule: twilight tiers (astronomical/nautical/civil),
          * blue/golden hour anchors, sunrise, solar noon, sunset — chronological.
@@ -99,14 +108,30 @@ object Astronomy {
         fun state(location: Location, instant: Instant): MoonState {
             val epochMs = instant.toEpochMilli()
             val phaseAngle = Ephemeris.moonPhaseAngleDeg(epochMs)
+            val conjunctionMs = Ephemeris.nextMoonPhaseMs(0.0, epochMs - 30L * 86_400_000L, 31.0)
+                ?: (epochMs - 15L * 86_400_000L)
             return MoonState(
                 phaseAngleDeg = phaseAngle,
                 illuminationFraction = Ephemeris.moonIlluminationFraction(epochMs),
                 elongationDeg = Ephemeris.moonElongationDeg(epochMs),
                 phaseName = phaseName(phaseAngle),
                 brightLimbTiltDeg = LunarOrientationMath.brightLimbTiltDeg(epochMs, location),
+                moonAgeDays = ((epochMs - conjunctionMs).coerceAtLeast(0L)) / 86_400_000.0,
+                isWaxing = phaseAngle < 180.0,
             )
         }
+
+        /** First occurrence of [targetPhaseDeg] (0/90/180/270) at or after [after]. */
+        fun nextPhase(targetPhaseDeg: Double, after: Instant): UpcomingMoonPhase? {
+            require(targetPhaseDeg in listOf(0.0, 90.0, 180.0, 270.0)) {
+                "targetPhaseDeg must be one of 0/90/180/270"
+            }
+            return Ephemeris.nextMoonPhaseMs(targetPhaseDeg, after.toEpochMilli())
+                ?.let { UpcomingMoonPhase(targetPhaseDeg, it) }
+        }
+
+        fun nextNewMoon(after: Instant): UpcomingMoonPhase? = nextPhase(0.0, after)
+        fun nextFullMoon(after: Instant): UpcomingMoonPhase? = nextPhase(180.0, after)
 
         fun riseSet(location: Location, date: LocalDate, zoneId: ZoneId): RiseSet {
             val startMs = MoonTrackSolver.dayStartEpochMs(date, zoneId)
@@ -145,6 +170,105 @@ object Astronomy {
             phaseAngleDeg in 285.0..345.0 -> "Waning Crescent"
             else -> "New Moon"
         }
+
+        /**
+         * Geocentric lunar distance extremes (perigee/apogee) within the scanned
+         * window [from, to]. Coarse daily sampling + parabolic refinement.
+         */
+        fun distanceExtremes(from: Instant, to: Instant): List<MoonDistanceExtreme> {
+            val fromMs = from.toEpochMilli()
+            val toMs = to.toEpochMilli()
+            require(toMs > fromMs) { "empty scan window" }
+            val auKm = Ephemeris.AU_KM
+            fun dist(tMs: Long): Double =
+                io.github.cosinekitty.astronomy.geoVector(
+                    Body.Moon,
+                    Ephemeris.time(tMs),
+                    io.github.cosinekitty.astronomy.Aberration.Corrected,
+                ).length() * auKm
+
+            data class Sample(val t: Long, val d: Double)
+            val stepMs = 6L * 3_600_000
+            val samples = ArrayList<Sample>()
+            var t = fromMs
+            while (t <= toMs) {
+                samples += Sample(t, dist(t))
+                t += stepMs
+            }
+            // Extremum must dominate every sample within ±24 h — short-period
+            // lunar perturbations create shallow false extrema otherwise.
+            val dominanceRadius = 4
+            val out = mutableListOf<MoonDistanceExtreme>()
+            // Require the full dominance window inside the scan range to avoid
+            // boundary artefacts.
+            for (i in dominanceRadius until samples.size - dominanceRadius) {
+                val c = samples[i]
+                var lo = true; var hi = true
+                for (j in maxOf(0, i - dominanceRadius)..minOf(samples.size - 1, i + dominanceRadius)) {
+                    if (j == i) continue
+                    if (samples[j].d <= c.d) lo = false
+                    if (samples[j].d >= c.d) hi = false
+                }
+                if (!lo && !hi) continue
+
+                val tStar: Long =
+                    if (i in 1 until samples.size - 1) {
+                        val p = samples[i - 1]; val n = samples[i + 1]
+                        val denom = p.d - 2.0 * c.d + n.d
+                        if (kotlin.math.abs(denom) < 1e-12) c.t else c.t + (0.5 * stepMs * (p.d - n.d) / denom).toLong()
+                    } else {
+                        c.t
+                    }
+                out += MoonDistanceExtreme(epochMs = tStar, distanceKm = dist(tStar), isPerigee = lo)
+            }
+
+            // Merge same-type survivors closer than half an anomalistic month,
+            // keeping the dominant one.
+            val merged = mutableListOf<MoonDistanceExtreme>()
+            for (cand in out.sortedBy { it.epochMs }) {
+                val last = merged.lastOrNull()
+                if (last != null && last.isPerigee == cand.isPerigee &&
+                    cand.epochMs - last.epochMs < 13L * 86_400_000
+                ) {
+                    val better = if (cand.isPerigee) cand.distanceKm < last.distanceKm else cand.distanceKm > last.distanceKm
+                    if (better) merged[merged.size - 1] = cand
+                } else {
+                    merged += cand
+                }
+            }
+            return merged
+        }
+
+        /** Next global solar eclipse at or after [after] (geocentric facts). */
+        fun nextGlobalSolarEclipse(after: Instant): GlobalSolarEclipse? {
+            val info = io.github.cosinekitty.astronomy.searchGlobalSolarEclipse(Ephemeris.time(after.toEpochMilli()))
+                ?: return null
+            return GlobalSolarEclipse(
+                kind = eclipseKind(info.kind),
+                peakEpochMs = info.peak.toMillisecondsSince1970(),
+                obscuration = info.obscuration.takeIf { it > 0.0 },
+                latitudeDeg = info.latitude,
+                longitudeDeg = info.longitude,
+            )
+        }
+
+        /** Next lunar eclipse visible somewhere on Earth at or after [after]. */
+        fun nextLunarEclipse(after: Instant): LunarEclipse? {
+            val info = io.github.cosinekitty.astronomy.searchLunarEclipse(Ephemeris.time(after.toEpochMilli()))
+                ?: return null
+            return LunarEclipse(
+                kind = eclipseKind(info.kind),
+                peakEpochMs = info.peak.toMillisecondsSince1970(),
+                obscuration = info.obscuration.takeIf { it > 0.0 },
+            )
+        }
+
+        private fun eclipseKind(k: io.github.cosinekitty.astronomy.EclipseKind): EclipseKind = when (k) {
+            io.github.cosinekitty.astronomy.EclipseKind.Partial -> EclipseKind.PARTIAL
+            io.github.cosinekitty.astronomy.EclipseKind.Annular -> EclipseKind.ANNULAR
+            io.github.cosinekitty.astronomy.EclipseKind.Total -> EclipseKind.TOTAL
+            else -> EclipseKind.NONE
+        }
     }
 
     object hilal {
@@ -154,5 +278,23 @@ object Astronomy {
          */
         fun visibility(location: Location, date: LocalDate, zoneId: ZoneId): HilalReport? =
             HilalEngine.visibility(MoonTrackSolver.dayStartEpochMs(date, zoneId), location)
+
+        /**
+         * Evening-by-evening sighting outlook for [nights] consecutive civil
+         * days starting [from]: each entry is the report anchored at that
+         * day's sunset. Null entries mark days without sunset (polar).
+         */
+        fun forecast(
+            location: Location,
+            from: LocalDate,
+            zoneId: ZoneId,
+            nights: Int = 8,
+        ): List<Pair<LocalDate, HilalReport?>> {
+            require(nights in 1..60)
+            return (0 until nights).map { i ->
+                val d = from.plusDays(i.toLong())
+                d to visibility(location, d, zoneId)
+            }
+        }
     }
 }

@@ -33,16 +33,35 @@ private val engine = KhushuEngine()
 )
 @Serializable private data class AGolden(val sites: Map<String, ASite>, val cases: List<ACase>)
 
+private val KNOWN_FLAGS = setOf(
+    "lat", "lon", "alt", "tz", "date", "madhab", "ym", "offset", "month", "year",
+    "prayer", "astro", "help",
+)
+
 private class Args(args: Array<String>) {
     private val map = HashMap<String, String>()
     init {
         var i = 0
-        while (i < args.size - 1) {
-            if (args[i].startsWith("--")) {
-                map[args[i].substring(2)] = args[i + 1]
+        while (i < args.size) {
+            if (!args[i].startsWith("--")) {
+                i++
+                continue
+            }
+            val flag = args[i].substring(2)
+            if (flag !in KNOWN_FLAGS) die("unknown flag --$flag (known: ${KNOWN_FLAGS.joinToString(", ")})")
+            if (flag in booleanFlags) {
+                map[flag] = "true"
+                i += 1
+            } else {
+                if (i + 1 >= args.size) die("flag --$flag expects a value")
+                map[flag] = args[i + 1]
                 i += 2
-            } else i++
+            }
         }
+    }
+
+    companion object {
+        private val booleanFlags = setOf("prayer", "astro")
     }
     operator fun get(k: String): String? = map[k]
 }
@@ -56,7 +75,7 @@ private fun location(a: Args): Location {
 private fun date(a: Args, key: String = "date"): LocalDate =
     a[key]?.let(LocalDate::parse) ?: LocalDate.now()
 
-private fun zone(a: Args): ZoneId = ZoneId.of(a["tz"] ?: "UTC")
+private fun zone(a: Args): ZoneId = ZoneId.of(a["tz"] ?: ZoneId.systemDefault().id)
 
 private fun die(msg: String): Nothing {
     System.err.println(msg)

@@ -75,3 +75,48 @@ KhushuEngine()
 ## tools (NOT public API)
 - `tools/cli`: prayer | sun | moon [--ym] | hijri | events | qibla | verify
 - `tools/golden-dumper/{prayer,astro}`: fixture regeneration (donor replicas)
+
+## v1.1 breadth additions (2026-08)
+
+### astronomy
+```
+moon.state(...) → MoonState now includes moonAgeDays, isWaxing
+sun.dayLength(location, date, zoneId): Duration?
+moon.nextPhase(0|90|180|270, after): UpcomingMoonPhase?
+moon.nextNewMoon(after) / moon.nextFullMoon(after): UpcomingMoonPhase?
+moon.distanceExtremes(from, to): List<MoonDistanceExtreme>   // geocentric perigee/apogee
+moon.nextGlobalSolarEclipse(after): GlobalSolarEclipse?
+moon.nextLunarEclipse(after): LunarEclipse?
+hilal.forecast(location, from, zoneId, nights = 8): List<Pair<LocalDate, HilalReport?>>
+```
+
+### calendar
+```
+calendar.hijriToGregorian(y, m, d, offsetDays = 0): LocalDate      // reverse conversion
+calendar.hijriMonthLengths(hijriYear, offsetDays = 0): List<Int>   // twelve 29/30 lengths
+calendar.eventsInRange(range, offsetDays = 0): List<Pair<LocalDate, IslamicEvent>>
+calendar.nextOccurrence(month, day, after, offsetDays = 0): LocalDate
+calendar.isSacredMonth(hijriMonth): Boolean
+```
+
+### prayer
+```
+prayer.tahajjudWindow(location, date, params): TahajjudWindow?     // midnight → lastThird → fajr
+```
+
+### qibla / zakat / day composite (facade)
+```
+engine.qibla.solarAlignmentInstants(year): List<Instant>           // sun over the Kaaba, 2×/year
+engine.zakat.hawlAnniversary(ownershipStart, offsetDays = 0): LocalDate
+engine.zakat.livestockNisab(kind) / livestockDue(kind, count)
+engine.zakat.ushrDue(harvestValue, irrigation) · rikazDue(value)
+engine.day.summary(location, date, zoneId, prayerParams, calendarParams): DaySummary
+    // one-pass whole-day composite — shared facts computed once internally
+
+CachedEngine(delegate)  // opt-in memoization; semantic keys per AGENTS §6:
+                        // prayer→(Location,date,params) sun→(Location,instant)
+                        // moonState→(Location,instant) hijri→(date,offset)
+```
+
+### fixtures
+- calendar: `hijri_golden.json` (3655 cases, donor ummalqura call path), regenerable via tools/golden-dumper/calendar.
