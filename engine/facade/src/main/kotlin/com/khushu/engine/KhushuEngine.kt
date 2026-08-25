@@ -8,7 +8,7 @@ import com.khushu.engine.astronomy.MonthlyMoonTrack
 import com.khushu.engine.astronomy.RiseSet
 import com.khushu.engine.astronomy.SolarEvents
 import com.khushu.engine.astronomy.SolarPosition
-import com.khushu.engine.calendar.Calendar as CalendarCapability
+import com.khushu.engine.calendar.HijriCalendar
 import com.khushu.engine.calendar.CalendarParams
 import com.khushu.engine.calendar.FastDay
 import com.khushu.engine.calendar.HijriDate
@@ -181,27 +181,27 @@ class KhushuEngine {
 
     class CalendarApi internal constructor() {
         fun hijri(localDate: LocalDate, offsetDays: Int = 0): HijriDate =
-            CalendarCapability.hijri(localDate, offsetDays)
+            HijriCalendar.hijri(localDate, offsetDays)
 
         fun hijriToGregorian(hijriYear: Int, hijriMonth: Int, hijriDay: Int, offsetDays: Int = 0): LocalDate =
-            CalendarCapability.hijriToGregorian(hijriYear, hijriMonth, hijriDay, offsetDays)
+            HijriCalendar.hijriToGregorian(hijriYear, hijriMonth, hijriDay, offsetDays)
 
         fun hijriMonthLengths(hijriYear: Int, offsetDays: Int = 0): List<Int> =
-            CalendarCapability.hijriMonthLengths(hijriYear, offsetDays)
+            HijriCalendar.hijriMonthLengths(hijriYear, offsetDays)
 
         fun events(localDate: LocalDate, offsetDays: Int = 0): List<IslamicEvent> =
-            CalendarCapability.events(localDate, offsetDays)
+            HijriCalendar.events(localDate, offsetDays)
 
         fun eventsInRange(range: ClosedRange<LocalDate>, offsetDays: Int = 0): List<Pair<LocalDate, IslamicEvent>> =
-            CalendarCapability.eventsInRange(range, offsetDays)
+            HijriCalendar.eventsInRange(range, offsetDays)
 
         fun nextOccurrence(month: Int, day: Int, after: LocalDate, offsetDays: Int = 0): LocalDate =
-            CalendarCapability.nextOccurrence(month, day, after, offsetDays)
+            HijriCalendar.nextOccurrence(month, day, after, offsetDays)
 
-        fun isSacredMonth(hijriMonth: Int): Boolean = CalendarCapability.isSacredMonth(hijriMonth)
+        fun isSacredMonth(hijriMonth: Int): Boolean = HijriCalendar.isSacredMonth(hijriMonth)
 
         fun fastDays(range: ClosedRange<LocalDate>, params: CalendarParams): List<FastDay> =
-            CalendarCapability.fastDays(range, params)
+            HijriCalendar.fastDays(range, params)
     }
 
     class QiblaApi internal constructor() {
@@ -304,7 +304,7 @@ class KhushuEngine {
          */
         fun hawlAnniversary(ownershipStart: LocalDate, offsetDays: Int = 0): LocalDate =
             com.khushu.engine.zakat.ZakatRules.hawlAnniversary(ownershipStart, offsetDays) { d, off ->
-                CalendarCapability.hijri(d, off).let { Triple(it.year, it.month, it.day) }
+                HijriCalendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
             }
 
         fun livestockNisab(kind: com.khushu.engine.zakat.ZakatRules.LivestockKind): Int =

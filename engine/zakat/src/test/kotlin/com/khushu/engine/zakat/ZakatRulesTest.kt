@@ -11,9 +11,9 @@ class ZakatRulesTest {
     fun hawlAnniversaryIsOneHijriYearLater() {
         // Owned since 2025-03-01 = 1 Ramadan 1446 → anniversary ≈ 1 Ramadan 1447.
         val anniversary = ZakatRules.hawlAnniversary(LocalDate.of(2025, 3, 1), 0) { d, off ->
-            com.khushu.engine.calendar.Calendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
+            com.khushu.engine.calendar.HijriCalendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
         }
-        val h = com.khushu.engine.calendar.Calendar.hijri(anniversary)
+        val h = com.khushu.engine.calendar.HijriCalendar.hijri(anniversary)
         assertEquals(1447, h.year)
         assertEquals(9, h.month)
         assertEquals(1, h.day)

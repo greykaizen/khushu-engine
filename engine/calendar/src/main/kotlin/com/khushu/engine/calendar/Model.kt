@@ -32,13 +32,13 @@ data class HijriDate(
     val label: String get() = "$day $monthName $year AH"
 }
 
-enum class FastRule {
-    MONDAY_THURSDAY,
-    WHITE_DAYS,
-    SHABAN,
-    SHAWWAL_SIX,
-    DHUL_HIJJAH_FIRST_NINE,
-    TASUA_ASHURA,
+enum class FastRule(val provenance: String) {
+    MONDAY_THURSDAY("Prophet's regular practice — Sunan Abi Dawud, Sahih Muslim"),
+    WHITE_DAYS("13th–15th of each lunar month — classical practice"),
+    SHABAN("Voluntary fasting through Sha'ban, excluding its last days — Sahih Bukhari/Nasa'i"),
+    SHAWWAL_SIX("Six days of Shawwal after Eid — Sahih Muslim; days are distributable, engine marks 2–7 as candidates"),
+    DHUL_HIJJAH_FIRST_NINE("First nine days of Dhul-Hijjah — Sahih Bukhari"),
+    TASUA_ASHURA("9th with the 10th of Muharram — Sahih Muslim"),
 }
 
 /** A civil date on which one optional fast is observed, with the governing rule. */

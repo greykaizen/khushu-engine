@@ -13,7 +13,7 @@ import java.util.Calendar
  * donor used. Fiqh rules follow donor behavior with one documented correction
  * (Shawwal six days; see docs/divergences.md D10).
  */
-object Calendar {
+object HijriCalendar {
 
     fun hijri(localDate: LocalDate, offsetDays: Int = 0): HijriDate {
         require(offsetDays in -2..2) { "offsetDays must be within −2..+2" }
@@ -50,6 +50,9 @@ object Calendar {
             12 to 9 -> events += IslamicEvent("Day of Arafah", label)
             12 to 10 -> events += IslamicEvent("Eid al-Adha", label)
         }
+        // Convention pinned: a seek-night is marked on the civil day whose tabular
+        // hijri date is the odd Ramadan night — i.e. the night BEGINS at the
+        // maghrib preceding that civil date.
         if (h.month == 9 && h.day in 21..29 && h.day % 2 == 1) {
             events += IslamicEvent("Laylat al-Qadr Seek-Night (Ramadan ${h.day})", label)
         }
@@ -125,7 +128,10 @@ object Calendar {
             }.getOrNull()
             if (target != null && !target.isBefore(after)) return target
         }
-        throw IllegalStateException("unreachable")
+        throw IllegalArgumentException(
+            "$day-$month does not occur in hijri years ${hStart.year} or ${hStart.year + 1} " +
+                "(the day may not exist in either year)",
+        )
     }
 
     /** True when this hijri month is one of the four sacred months. */

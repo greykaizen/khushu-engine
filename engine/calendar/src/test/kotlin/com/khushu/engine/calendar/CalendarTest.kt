@@ -10,7 +10,7 @@ class CalendarTest {
     @Test
     fun hijriConversionMatchesKnownAnchorDates() {
         // 1 Ramadan 1446 AH began on 2025-03-01 (Umm al-Qura tabular).
-        val ramadan = Calendar.hijri(LocalDate.of(2025, 3, 1))
+        val ramadan = HijriCalendar.hijri(LocalDate.of(2025, 3, 1))
         assertEquals(9, ramadan.month)
         assertEquals(1, ramadan.day)
         assertEquals(1446, ramadan.year)
@@ -18,7 +18,7 @@ class CalendarTest {
         // 10 Dhul-Hijjah 1445 per the Umm al-Qura *tabular* calendar = 2024-06-16
         // (official Saudi sighting announced June 17 — tabular vs observed is a
         // known, expected divergence; the offset parameter exists for exactly this).
-        val eid = Calendar.hijri(LocalDate.of(2024, 6, 16))
+        val eid = HijriCalendar.hijri(LocalDate.of(2024, 6, 16))
         assertEquals(12, eid.month)
         assertEquals(10, eid.day)
         assertEquals(1445, eid.year)
@@ -26,12 +26,12 @@ class CalendarTest {
 
     @Test
     fun offsetShiftsHijriDateByExactDays() {
-        val base = Calendar.hijri(LocalDate.of(2025, 3, 3))
-        val shiftedBack = Calendar.hijri(LocalDate.of(2025, 3, 3), -2)
-        val shiftedForward = Calendar.hijri(LocalDate.of(2025, 3, 3), 2)
+        val base = HijriCalendar.hijri(LocalDate.of(2025, 3, 3))
+        val shiftedBack = HijriCalendar.hijri(LocalDate.of(2025, 3, 3), -2)
+        val shiftedForward = HijriCalendar.hijri(LocalDate.of(2025, 3, 3), 2)
 
         // Shifting the civil date ±2 days must equal shifting the hijri result ±2 days.
-        val backViaDate = Calendar.hijri(LocalDate.of(2025, 3, 1))
+        val backViaDate = HijriCalendar.hijri(LocalDate.of(2025, 3, 1))
         assertEquals(backViaDate.day + 0, shiftedBack.day + 0)
         assertTrue(shiftedBack.offsetApplied == -2 && shiftedForward.offsetApplied == 2)
     }
@@ -49,7 +49,7 @@ class CalendarTest {
                 d = d.plusDays(1)
             }
         }) {
-            val h = Calendar.hijri(date)
+            val h = HijriCalendar.hijri(date)
             assertTrue(h.month in 1..12)
             assertTrue(h.day in 1..30)
             if (lastMonthKey != null && Pair(h.year, h.month) != lastMonthKey) {
@@ -65,9 +65,9 @@ class CalendarTest {
 
     @Test
     fun eventsLandOnKnownDates() {
-        val label = Calendar.hijri(LocalDate.of(2025, 3, 30)).label
+        val label = HijriCalendar.hijri(LocalDate.of(2025, 3, 30)).label
         // Eid al-Fitr 1446 = 2025-03-30 (Umm al-Qura).
-        val events = Calendar.events(LocalDate.of(2025, 3, 30))
+        val events = HijriCalendar.events(LocalDate.of(2025, 3, 30))
         assertTrue(events.any { it.title == "Eid al-Fitr" }, "expected Eid al-Fitr, got $events; today=$label")
     }
 
@@ -77,7 +77,7 @@ class CalendarTest {
             mondaysThursdays = true, whiteDays = true, shawwalSix = true,
             dhulHijjahFirstNine = true, tasuaAshura = true, shaban = true,
         )
-        val days = Calendar.fastDays(LocalDate.of(2025, 3, 25)..LocalDate.of(2025, 4, 15), allOn)
+        val days = HijriCalendar.fastDays(LocalDate.of(2025, 3, 25)..LocalDate.of(2025, 4, 15), allOn)
         // Eid al-Fitr (Shawwal 1) is never a fast day.
         assertTrue(days.none { it.date == LocalDate.of(2025, 3, 30) })
         // Shawwal six starts the day after Eid and runs six days.
@@ -87,7 +87,7 @@ class CalendarTest {
 
         // Arafah (9 Dhul-Hijjah 1446 = 2025-06-05 tabular) fasts; Eid (Jun 6) does not;
         // Tashreeq (Jun 7-9) are excluded from every rule including Mon/Thu.
-        val june = Calendar.fastDays(LocalDate.of(2025, 6, 1)..LocalDate.of(2025, 6, 12), allOn)
+        val june = HijriCalendar.fastDays(LocalDate.of(2025, 6, 1)..LocalDate.of(2025, 6, 12), allOn)
         assertTrue(june.any { it.date == LocalDate.of(2025, 6, 5) && it.rule == FastRule.DHUL_HIJJAH_FIRST_NINE })
         assertTrue(june.none { it.date == LocalDate.of(2025, 6, 6) })
         assertTrue(june.none { it.date in LocalDate.of(2025, 6, 7)..LocalDate.of(2025, 6, 9) })
@@ -95,7 +95,7 @@ class CalendarTest {
 
     @Test
     fun tasuaAndAshuraAreConsecutive() {
-        val days = Calendar.fastDays(
+        val days = HijriCalendar.fastDays(
             LocalDate.of(2025, 7, 1)..LocalDate.of(2025, 7, 20),
             CalendarParams(tasuaAshura = true),
         ).filter { it.rule == FastRule.TASUA_ASHURA }

@@ -26,7 +26,7 @@ class GoldenRegressionTest {
     @Test
     fun everyHijriGoldenCaseReproducesExactly() {
         for (case in golden.cases) {
-            val h = Calendar.hijri(LocalDate.parse(case.date), case.offset)
+            val h = HijriCalendar.hijri(LocalDate.parse(case.date), case.offset)
             assertEquals(case.hy, h.year, "${case.date} offset=${case.offset} year")
             assertEquals(case.hm, h.month, "${case.date} offset=${case.offset} month")
             assertEquals(case.hd, h.day, "${case.date} offset=${case.offset} day")

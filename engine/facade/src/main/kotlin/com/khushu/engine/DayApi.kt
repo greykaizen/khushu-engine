@@ -4,7 +4,7 @@ import com.khushu.engine.astronomy.Astronomy
 import com.khushu.engine.astronomy.MoonState
 import com.khushu.engine.astronomy.RiseSet
 import com.khushu.engine.astronomy.SolarEvents
-import com.khushu.engine.calendar.Calendar as CalendarCapability
+import com.khushu.engine.calendar.HijriCalendar
 import com.khushu.engine.calendar.CalendarParams
 import com.khushu.engine.calendar.FastRule
 import com.khushu.engine.calendar.HijriDate
@@ -53,9 +53,9 @@ class DayApi internal constructor() {
         calendarParams: CalendarParams = CalendarParams(),
     ): DaySummary {
         // Each fact below is computed exactly once; nothing delegates twice.
-        val hijri = CalendarCapability.hijri(date, calendarParams.hijriOffsetDays)
-        val events = CalendarCapability.events(date, calendarParams.hijriOffsetDays)
-        val fastRules = CalendarCapability
+        val hijri = HijriCalendar.hijri(date, calendarParams.hijriOffsetDays)
+        val events = HijriCalendar.events(date, calendarParams.hijriOffsetDays)
+        val fastRules = HijriCalendar
             .fastDays(date..date, calendarParams)
             .map { it.rule }
         val prayerTimes = Prayer.times(location, date, prayerParams)
@@ -77,7 +77,7 @@ class DayApi internal constructor() {
         return DaySummary(
             date = date,
             hijri = hijri,
-            sacredMonth = CalendarCapability.isSacredMonth(hijri.month),
+            sacredMonth = HijriCalendar.isSacredMonth(hijri.month),
             events = events,
             fastRules = fastRules,
             prayerTimes = prayerTimes,
@@ -92,7 +92,7 @@ class DayApi internal constructor() {
             solarEvents = solarEvents,
             moonAtNoon = moonState,
             moonRiseSet = moonRiseSet,
-            hijriMonthLength = CalendarCapability.hijriMonthLengths(hijri.year, calendarParams.hijriOffsetDays)[hijri.month - 1],
+            hijriMonthLength = HijriCalendar.hijriMonthLengths(hijri.year, calendarParams.hijriOffsetDays)[hijri.month - 1],
         )
     }
 }
