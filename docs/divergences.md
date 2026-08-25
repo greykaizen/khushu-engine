@@ -80,6 +80,24 @@ references, never gospel (AGENTS.md §2).
   facts (`MoonTrackBenchmarkTest`). Solar/lunar events are additionally bounded
   to their civil day — donor could return next-day dusk as today's event.
 
+### D10. Shawwal six-day fast bounded to six days
+- **Donor**: `IslamicEventCalculator.kt` marks Shawwal days **2..30** as voluntary
+  fasting opportunities under the `showShawwal` flag.
+- **Engine**: `FastRule.SHAWWAL_SIX` returns days **2..7** only — the hadith
+  specifies *six* days of Shawwal (Sahih Muslim), conventionally taken right
+  after Eid. Donor's month-long block overstated the rule.
+
+### D11. Islamic events trimmed to computational core
+- **Donor**: ~85% of the 1019-line event list is saint commemorations (urs /
+  birthdays of Sufi-chain figures) with long descriptions — content, not computation.
+- **Engine**: fixed-hijri-date standard events only (New Year, Tasua/Ashura,
+  Mawlid, Isra & Mi'raj, Mid-Sha'ban, Ramadan start, Laylat al-Qadr seek-nights,
+  Eid al-Fitr, Hajj begins, Arafah, Eid al-Adha, Tashreeq). The dropped tail
+  belongs in a future data project if ever needed.
+- Also noted: Umm al-Qura is a **tabular** calendar; it can disagree by one day
+  with announced moon-sighting dates (e.g. tabular Eid al-Adha 1445 = Jun 16 vs
+  official Jun 17). The `hijriOffsetDays` parameter exists precisely for this.
+
 ## Maintenance log
 
 (Not divergences — environment and dependency decisions recorded for traceability.)

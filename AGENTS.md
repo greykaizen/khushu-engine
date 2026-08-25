@@ -273,14 +273,15 @@ The API is the product; internals are replaceable.
 
 | Module | Status | Donor source (Osprey path) |
 |---|---|---|
-| core | 🟨 started | typed geo units (`Latitude`/`Longitude`/`AltitudeMeters`/`Location`) done; time primitives pending |
-| astronomy | 🟨 ported, verifying | cosinekitty 2.1.19 (JitPack) behind capability API; sun/moon/hilal + one-pass `moon.track`; 576-case golden matrix green; divergences D7-D8 |
-| calendar | ⬜ planned | `core/common/CalendarHelper.kt` (hijri/formatting), `IslamicEventCalculator.kt`, `feature/calendar/CalendarModels.kt` (fast blocks) |
-| prayer | 🟨 ported, verifying | wraps `com.batoulapps.adhan:adhan2:0.0.6`; 5310-case golden matrix green; polar-safe; see docs/divergences.md D1–D4 |
-| qibla | 🟨 ported, verifying | bearing + distance owned by engine; cross-checked vs adhan2 (docs/divergences.md D5) |
-| zakat | ⬜ planned | logic embedded in `feature/zakat/ZakatAlMalCalculator.kt`, `FitranaCalculator.kt` — extract, don't copy UI |
-| cli | ⬜ planned | — |
-| goldens | 🟨 prayer done (6 sites × 365 days × madhab × conventions × high-lat rules) | regenerate via dumper (see docs/divergences.md); astronomy dump still pending |
+| core | ✅ locked | typed geo units (`Latitude`/`Longitude`/`AltitudeMeters`/`Location`) |
+| astronomy | ✅ locked | cosinekitty 2.1.19 (JitPack) behind capability API; sun/moon/hilal + one-pass `moon.track`; 576-case golden matrix green; divergences D7-D8 |
+| calendar | ✅ locked | ummalqura-calendar 2.0.2 behind capability API; hijri/events/fastDays; authoritative anchor dates + round-trip properties; D10-D11 |
+| prayer | ✅ locked | wraps `com.batoulapps.adhan:adhan2-jvm:0.0.7`; 6184-case golden matrix green; polar-safe; see docs/divergences.md D1–D4 |
+| qibla | ✅ locked | bearing + distance owned by engine; cross-checked vs adhan2 (docs/divergences.md D5) |
+| zakat | ✅ locked | pure extraction from donor UI; fiqh spot cases + property tests; rate 0.025, madhab rules, saʿ conventions documented |
+| facade | ✅ locked | thin delegation namespaces (`engine.astronomy.sun.*` etc.), zero logic |
+| cli | 🟨 usable | all spec §7 commands incl. `verify` (both golden suites PASS); not part of public API |
+| goldens | ✅ dumped | prayer 6184 cases (adhan2 0.0.7, incl. date-line site); astronomy 576 cases (donor AR path); regenerable in-repo via tools/golden-dumper |
 
 Legend: ⬜ planned · 🟨 in progress · ✅ locked (all verification green)
 
