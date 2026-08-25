@@ -75,18 +75,29 @@ references, never gospel (AGENTS.md §2).
   96-sample path per draw, with no fact reuse.
 - **Engine**: `moon.track(location, yearMonth, zoneId)` walks the month once
   (per day: rise, set, transit, phase@transit, optional render path).
-  Benchmarked ~1.5× the donor pattern wall-clock while returning strictly more
+  Benchmarked ≈1.5× **faster** than the donor call pattern (65 ms vs 95 ms per
+  month, including a 48-sample/day render path) while returning strictly more
   facts (`MoonTrackBenchmarkTest`). Solar/lunar events are additionally bounded
   to their civil day — donor could return next-day dusk as today's event.
 
-### D9. Dependency currency (2026-08)
+## Maintenance log
+
+(Not divergences — environment and dependency decisions recorded for traceability.)
+
+### M1. Dependency currency (2026-08)
 - Kotlin 2.1.20 → **2.4.10**; kotlinx-serialization-json 1.8.0 → **1.11.0**;
   adhan2 0.0.6 → **0.0.7** (includes upstream international-date-line fix;
   prayer goldens regenerated on 0.0.7 with an added Apia/Samoa date-line site;
   6184 cases). cosinekitty astronomy stays at 2.1.19 — the latest published
   Maven/JitPack release.
 
-### Pending reconciliations
+### M2. Golden dumpers live in-repo
+- `tools/golden-dumper/{prayer,astro}` are committed standalone Gradle projects
+  (donor replicas — see tools/golden-dumper/README.md). They were previously
+  ephemeral under /tmp; fixture regeneration must never depend on machine state
+  outside this repository.
+
+## Pending reconciliations
 - adhan2's internal solar model vs cosinekitty (astronomy session): sunrise/sunset
   may differ ~1–2 min between `prayer.times()` anchors and future
   `astronomy.sun.riseSet`. Unification decision deferred until astronomy is
@@ -96,12 +107,13 @@ references, never gospel (AGENTS.md §2).
   `AstroEphemerisEngine`/cosinekitty presumed authoritative.
 
 ## Regenerating goldens
-The dumper is a standalone Gradle project reproducing the donor's exact call
-path (same library version, typed params). Location: `/tmp/opencode/prayer-golden-dumper`.
-Regenerate with:
+Both dumpers are committed under `tools/golden-dumper/` as standalone Gradle
+projects that replicate the donor's exact call path and dependency set
+(see `tools/golden-dumper/README.md`). Regenerate with:
 
 ```
-gradlew -p <dumper> run --args="<repo>/engine/prayer/src/test/resources/fixtures/prayer_golden.json"
+./gradlew -p tools/golden-dumper/prayer run --args="<repo-root>/engine/prayer/src/test/resources/fixtures/prayer_golden.json"
+./gradlew -p tools/golden-dumper/astro   run --args="<repo-root>/engine/astronomy/src/test/resources/fixtures/astro_golden.json"
 ```
 
 Fixtures are inputs only — tests treat them as immutable expectations.
