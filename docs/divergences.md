@@ -148,6 +148,28 @@ references, never gospel (AGENTS.md §2).
   the former proves donor-parity; correctness of the latter rests on almanac
   spot-checks (seasons ±5 min vs NASA/TimeAndDate 2026 values).
 
+### D17. Fitr saʿ weight conventions — cited, not canonical
+- Engine stores VOLUME (1 ṣāʿ/person) as the primary fact; kg conversions are
+  labeled conventions: 2.175 kg (widely-published general estimate), 3.0 kg
+  (common Hanafi practice), ~2.1 kg rice (approximation associated with Ibn
+  ʿUthaymeen, via IslamQA #49793). No single figure is treated as universal.
+- Monetary payment representation: Hanafi methodology permits cash value;
+  Shafiʿi/Maliki/Hanbali positions commonly require food (IslamQA #109734).
+  `PaymentMode` is representation only — the engine does not recommend.
+
+### D18. Ushr nisab threshold — majority rule recorded
+- Engine applies ushr to all harvests without a minimum (majority practice);
+  the ≥5 wasq minimum position is NOT implemented. Recorded per IslamQA and
+  SeekersGuidance ushr material. Mixed-irrigation methodology deferred to
+  v1.3 design.
+
+### D19. Camel schedule beyond 120 — classical decomposition implemented
+- Explicit bands end at 120 (two hiqqah). Beyond: "for every forty a bint
+  labun, for every fifty a hiqqah" (IslamQA #71267); combination minimizing
+  total headcount preferred; non-decomposable excess flags
+  `requiresScholarReview` instead of guessing. Grazing/trade-purpose
+  distinctions remain caller policy (v1.3).
+
 ## Maintenance log
 
 (Not divergences — environment and dependency decisions recorded for traceability.)

@@ -3,6 +3,27 @@ public final class com/khushu/engine/qibla/Qibla {
 	public static final field KAABA_LATITUDE_DEG D
 	public static final field KAABA_LONGITUDE_DEG D
 	public final fun bearing (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
+	public final fun bearingBetween (Lcom/khushu/engine/core/geo/Location;Lcom/khushu/engine/core/geo/Location;)Lkotlin/Pair;
+	public final fun shadowVerification (ILcom/khushu/engine/core/geo/Location;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/qibla/QiblaAudit {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/khushu/engine/qibla/QiblaAudit;
+	public static synthetic fun copy$default (Lcom/khushu/engine/qibla/QiblaAudit;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/qibla/QiblaAudit;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBearingFormula ()Ljava/lang/String;
+	public final fun getDistanceModel ()Ljava/lang/String;
+	public final fun getKaabaConstantsOrigin ()Ljava/lang/String;
+	public final fun getWarnings ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/khushu/engine/qibla/QiblaBearing {
@@ -14,6 +35,52 @@ public final class com/khushu/engine/qibla/QiblaBearing {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBearingDegFromNorth-Uf8F044 ()D
 	public final fun getGreatCircleDistanceKm-1xieZJw ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/qibla/QiblaShadowEvent {
+	public synthetic fun <init> (Ljava/time/Instant;Lcom/khushu/engine/qibla/ShadowMethod;Ljava/lang/Double;Ljava/lang/Double;ZDLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/time/Instant;
+	public final fun component2 ()Lcom/khushu/engine/qibla/ShadowMethod;
+	public final fun component3 ()Ljava/lang/Double;
+	public final fun component4 ()Ljava/lang/Double;
+	public final fun component5 ()Z
+	public final fun component6-Uf8F044 ()D
+	public final fun copy-NvYQSFo (Ljava/time/Instant;Lcom/khushu/engine/qibla/ShadowMethod;Ljava/lang/Double;Ljava/lang/Double;ZD)Lcom/khushu/engine/qibla/QiblaShadowEvent;
+	public static synthetic fun copy-NvYQSFo$default (Lcom/khushu/engine/qibla/QiblaShadowEvent;Ljava/time/Instant;Lcom/khushu/engine/qibla/ShadowMethod;Ljava/lang/Double;Ljava/lang/Double;ZDILjava/lang/Object;)Lcom/khushu/engine/qibla/QiblaShadowEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInstant ()Ljava/time/Instant;
+	public final fun getMethod ()Lcom/khushu/engine/qibla/ShadowMethod;
+	public final fun getShadowBearingDeg-Uf8F044 ()D
+	public final fun getSunAltitudeDegAtLocation ()Ljava/lang/Double;
+	public final fun getSunAzimuthDegAtLocation ()Ljava/lang/Double;
+	public final fun getVisibleAtLocation ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/qibla/ShadowMethod : java/lang/Enum {
+	public static final field FACE_AWAY_FROM_SUN Lcom/khushu/engine/qibla/ShadowMethod;
+	public static final field FACE_TOWARD_SUN Lcom/khushu/engine/qibla/ShadowMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/qibla/ShadowMethod;
+	public static fun values ()[Lcom/khushu/engine/qibla/ShadowMethod;
+}
+
+public final class com/khushu/engine/qibla/SunQiblaRelation {
+	public fun <init> (DDDZ)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()Z
+	public final fun copy (DDDZ)Lcom/khushu/engine/qibla/SunQiblaRelation;
+	public static synthetic fun copy$default (Lcom/khushu/engine/qibla/SunQiblaRelation;DDDZILjava/lang/Object;)Lcom/khushu/engine/qibla/SunQiblaRelation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlignedWithinTolerance ()Z
+	public final fun getSignedAngleToQiblaDeg ()D
+	public final fun getSunAltitudeDeg ()D
+	public final fun getSunAzimuthDeg ()D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

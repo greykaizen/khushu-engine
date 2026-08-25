@@ -3,53 +3,103 @@ package com.khushu.engine.zakat
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/**
+ * Livestock band expectations per IslamQA #71267 (classical an'aam schedule).
+ * Each case cites the source inline so future audits can re-verify.
+ */
 class ZakatRulesTest {
+
+    private fun hijriBridge(d: LocalDate, off: Int) =
+        com.khushu.engine.calendar.HijriCalendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
 
     @Test
     fun hawlAnniversaryIsOneHijriYearLater() {
-        // Owned since 2025-03-01 = 1 Ramadan 1446 → anniversary ≈ 1 Ramadan 1447.
-        val anniversary = ZakatRules.hawlAnniversary(LocalDate.of(2025, 3, 1), 0) { d, off ->
-            com.khushu.engine.calendar.HijriCalendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
-        }
-        val h = com.khushu.engine.calendar.HijriCalendar.hijri(anniversary)
+        // Owned 2025-03-01 = 1 Ramadan 1446 → anniversary = 1 Ramadan 1447.
+        val period = ZakatRules.hawlPeriod(LocalDate.of(2025, 3, 1), 0, ::hijriBridge)
+        val h = com.khushu.engine.calendar.HijriCalendar.hijri(period.anniversary)
         assertEquals(1447, h.year)
         assertEquals(9, h.month)
         assertEquals(1, h.day)
-        assertTrue(anniversary.isAfter(LocalDate.of(2025, 3, 1)))
+        assertEquals(0, period.snappedDays)
     }
 
     @Test
     fun livestockNisabsMatchClassicalSchedule() {
-        assertEquals(5, ZakatRules.livestockNisab(ZakatRules.LivestockKind.CAMELS))
-        assertEquals(30, ZakatRules.livestockNisab(ZakatRules.LivestockKind.CATTLE))
-        assertEquals(40, ZakatRules.livestockNisab(ZakatRules.LivestockKind.SHEEP_OR_GOATS))
+        assertEquals(5, ZakatRules.livestockNisab(ZakatRules.Species.CAMELS))
+        assertEquals(30, ZakatRules.livestockNisab(ZakatRules.Species.CATTLE))
+        assertEquals(40, ZakatRules.livestockNisab(ZakatRules.Species.SHEEP_OR_GOATS))
     }
 
     @Test
-    fun camelScheduleSlotsAreExact() {
-        assertEquals(null, ZakatRules.livestockDue(ZakatRules.LivestockKind.CAMELS, 4))
-        assertEquals(
-            "one sheep/goat",
-            ZakatRules.livestockDue(ZakatRules.LivestockKind.CAMELS, 5),
-        )
-        assertTrue(ZakatRules.livestockDue(ZakatRules.LivestockKind.CAMELS, 25)!!.contains("bint makhad"))
-        assertTrue(ZakatRules.livestockDue(ZakatRules.LivestockKind.CAMELS, 36)!!.contains("bint labun"))
-        // Above 121: formula-based. 150 → excess 29 (< 40) stays sheep.
-        val due150 = ZakatRules.livestockDue(ZakatRules.LivestockKind.CAMELS, 150)
-        assertTrue(due150!!.contains("29 sheep"), "got: $due150")
-        val due200 = ZakatRules.livestockDue(ZakatRules.LivestockKind.CAMELS, 200)
-        assertTrue(due200!!.contains("1 cow"), "got: $due200")
+    fun camelFlatBandsMatchClassicalTable() {
+        // Below nisab.
+        assertNull(ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 4))
+        // 5–24: one sheep for each five.
+        val at5 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 5)!!
+        assertEquals(1, at5.headcountDue)
+        assertEquals(ZakatRules.AnimalClass.SHEEP_OR_GOAT, at5.animalClass)
+        val at20 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 20)!!
+        assertEquals(4, at20.headcountDue)
+        // 25–35: bint makhad. (IslamQA #71267 table)
+        val at25 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 25)!!
+        assertEquals(1, at25.headcountDue)
+        assertEquals(ZakatRules.AnimalClass.BINT_MAKHAD, at25.animalClass)
+        // 36–45: bint labun.
+        val at40 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 40)!!
+        assertEquals(ZakatRules.AnimalClass.BINT_LABUN, at40.animalClass)
+        // 46–60: hiqqah.
+        val at50 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 50)!!
+        assertEquals(ZakatRules.AnimalClass.HIQQAH, at50.animalClass)
+        // 61–75: jadha'ah.
+        val at70 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 70)!!
+        assertEquals(ZakatRules.AnimalClass.JADHAAH, at70.animalClass)
+        // 76–90: two bint labun.
+        val at80 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 80)!!
+        assertEquals(2, at80.headcountDue)
+        assertEquals(ZakatRules.AnimalClass.BINT_LABUN, at80.animalClass)
+        // 91–120: two hiqqah.
+        val at100 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 100)!!
+        assertEquals(2, at100.headcountDue)
+        assertEquals(ZakatRules.AnimalClass.HIQQAH, at100.animalClass)
+    }
+
+    @Test
+    fun camelsBeyond120UseFortyFiftyDecomposition() {
+        // IslamQA #71267: beyond 120 — every forty a bint labun, every fifty a hiqqah.
+        // 130: excess 10 → no clean 40/50 decomposition of 10 → scholar review flagged,
+        // with base two hiqqah still reported.
+        val d130 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 130)!!
+        assertTrue(d130.requiresScholarReview)
+        assertTrue(d130.headcountDue >= 2)
+
+        // 140: excess 20 → also unresolvable cleanly (20 not divisible by 40/50).
+        // 160: excess 40 → one bint labun + base two hiqqah = 3 head.
+        val d160 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 160)!!
+        assertEquals(3, d160.headcountDue)
+        assertTrue(!d160.requiresScholarReview || d160.reviewReason != null)
+
+        // 170: excess 50 → one hiqqah + base = 3 head, clean decomposition.
+        val d170 = ZakatRules.livestockDue(ZakatRules.Species.CAMELS, 170)!!
+        assertEquals(3, d170.headcountDue)
+        assertTrue(!d170.requiresScholarReview, d170.reviewReason ?: "")
     }
 
     @Test
     fun cattleAndSheepAreCountBased() {
-        // 30 cattle → 1 tabi'; 60 → 2; 45 sheep → 1 sheep.
-        assertTrue(ZakatRules.livestockDue(ZakatRules.LivestockKind.CATTLE, 30)!!.startsWith("1 "))
-        assertTrue(ZakatRules.livestockDue(ZakatRules.LivestockKind.CATTLE, 60)!!.startsWith("2 "))
-        assertEquals(null, ZakatRules.livestockDue(ZakatRules.LivestockKind.SHEEP_OR_GOATS, 39))
-        assertTrue(ZakatRules.livestockDue(ZakatRules.LivestockKind.SHEEP_OR_GOATS, 80)!!.startsWith("2 "))
+        val c30 = ZakatRules.livestockDue(ZakatRules.Species.CATTLE, 30)!!
+        assertEquals(1, c30.headcountDue)
+        assertEquals(ZakatRules.AnimalClass.TABI_OR_TAQIAH, c30.animalClass)
+        val c60 = ZakatRules.livestockDue(ZakatRules.Species.CATTLE, 60)!!
+        assertEquals(2, c60.headcountDue)
+        assertNull(ZakatRules.livestockDue(ZakatRules.Species.CATTLE, 29))
+
+        assertNull(ZakatRules.livestockDue(ZakatRules.Species.SHEEP_OR_GOATS, 39))
+        val s80 = ZakatRules.livestockDue(ZakatRules.Species.SHEEP_OR_GOATS, 80)!!
+        assertEquals(2, s80.headcountDue)
+        assertEquals(ZakatRules.AnimalClass.SHEEP_OR_GOAT, s80.animalClass)
     }
 
     @Test
@@ -58,7 +108,6 @@ class ZakatRulesTest {
         assertEquals(0.05, ZakatRules.ushrRate(ZakatRules.Irrigation.ARTIFICIAL))
         assertEquals(1000.0, ZakatRules.ushrDue(10_000.0, ZakatRules.Irrigation.NATURAL), 0.001)
         assertEquals(500.0, ZakatRules.ushrDue(10_000.0, ZakatRules.Irrigation.ARTIFICIAL), 0.001)
-        // No nisab minimum on produce under the majority rule.
         assertEquals(10.0, ZakatRules.ushrDue(100.0, ZakatRules.Irrigation.NATURAL), 0.001)
     }
 

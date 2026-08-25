@@ -193,15 +193,19 @@ public final class com/khushu/engine/KhushuEngine$PrayerApi$WindowsApi {
 
 public final class com/khushu/engine/KhushuEngine$QiblaApi {
 	public final fun bearing (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
-	public final fun solarAlignmentInstants (I)Ljava/util/List;
+	public final fun bearingBetween (Lcom/khushu/engine/core/geo/Location;Lcom/khushu/engine/core/geo/Location;)Lkotlin/Pair;
+	public final fun relativeSunAngle (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;D)Lcom/khushu/engine/qibla/SunQiblaRelation;
+	public static synthetic fun relativeSunAngle$default (Lcom/khushu/engine/KhushuEngine$QiblaApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;DILjava/lang/Object;)Lcom/khushu/engine/qibla/SunQiblaRelation;
+	public final fun shadowVerification (ILcom/khushu/engine/core/geo/Location;)Ljava/util/List;
 }
 
 public final class com/khushu/engine/KhushuEngine$ZakatApi {
 	public final fun fitrana (IDLcom/khushu/engine/zakat/ZakatMadhab;)Lcom/khushu/engine/zakat/FitranaResult;
-	public final fun hawlAnniversary (Ljava/time/LocalDate;I)Ljava/time/LocalDate;
-	public static synthetic fun hawlAnniversary$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Ljava/time/LocalDate;IILjava/lang/Object;)Ljava/time/LocalDate;
-	public final fun livestockDue (Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;I)Ljava/lang/String;
-	public final fun livestockNisab (Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;)I
+	public final fun hawlPeriod (Ljava/time/LocalDate;I)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public static synthetic fun hawlPeriod$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public final fun livestockDue (Lcom/khushu/engine/zakat/ZakatRules$Species;I)Lcom/khushu/engine/zakat/ZakatRules$LivestockDue;
+	public final fun livestockNisab (Lcom/khushu/engine/zakat/ZakatRules$Species;)I
+	public final fun livestockSchedule (Lcom/khushu/engine/zakat/ZakatRules$Species;)Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
 	public final fun mal (Lcom/khushu/engine/zakat/ZakatAssets;Lcom/khushu/engine/zakat/ZakatParams;)Lcom/khushu/engine/zakat/ZakatResult;
 	public static synthetic fun mal$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Lcom/khushu/engine/zakat/ZakatAssets;Lcom/khushu/engine/zakat/ZakatParams;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatResult;
 	public final fun rikazDue (D)D

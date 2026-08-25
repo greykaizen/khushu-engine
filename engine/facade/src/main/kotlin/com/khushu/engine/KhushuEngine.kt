@@ -22,6 +22,8 @@ import com.khushu.engine.prayer.PrayerStatus
 import com.khushu.engine.prayer.PrayerTimesResult
 import com.khushu.engine.prayer.TahajjudWindow
 import com.khushu.engine.qibla.Qibla
+import com.khushu.engine.qibla.QiblaShadowEvent
+import com.khushu.engine.qibla.SunQiblaRelation
 import com.khushu.engine.qibla.QiblaBearing
 import com.khushu.engine.zakat.FitranaResult
 import com.khushu.engine.zakat.Zakat
@@ -249,86 +251,40 @@ class KhushuEngine {
     class QiblaApi internal constructor() {
         fun bearing(location: Location): QiblaBearing = Qibla.bearing(location)
 
+        /** Generic great-circle initial bearing + distance between two locations. */
+        fun bearingBetween(from: Location, to: Location): Pair<Double, Double> =
+            Qibla.bearingBetween(from, to)
+
         /**
-         * Instants within [year] when the subsolar point stands directly over
-         * the Kaaba — anywhere on Earth, facing the sun then means facing the
-         * qibla. Occurs twice a year (late May and mid July).
-         *
-         * Composed from astronomy sun facts (RA/dec) + Kaaba constants;
-         * one shared computation, no duplicated solar math.
+         * Shadow-qibla verification windows for [year]: the sun stands over the
+         * Kaaba (face toward it) and over its antipode (face away from it).
+         * Purely geometric facts + mainstream method hints; no fiqh ruling.
          */
-        fun solarAlignmentInstants(year: Int): List<Instant> {
-            val kLatRad = Math.toRadians(Qibla.KAABA_LATITUDE_DEG)
-            val kLonRad = Math.toRadians(Qibla.KAABA_LONGITUDE_DEG)
-            val kx = kotlin.math.cos(kLatRad) * kotlin.math.cos(kLonRad)
-            val ky = kotlin.math.cos(kLatRad) * kotlin.math.sin(kLonRad)
-            val kz = kotlin.math.sin(kLatRad)
+        fun shadowVerification(
+            year: Int,
+            location: Location,
+        ): List<QiblaShadowEvent> = Qibla.shadowVerification(year, location)
 
-            fun separationCosine(instant: Instant): Double {
-                val pos = Astronomy.sun.position(Location.of(0.0, 0.0), instant)
-                val decRad = Math.toRadians(pos.declinationDeg)
-                val gmstDeg = greenwichMeanSiderealDegrees(instant.toEpochMilli() / 86_400_000.0 + 2440587.5)
-                var lonRad = Math.toRadians(pos.rightAscensionHours * 15.0) - Math.toRadians(gmstDeg)
-                lonRad = Math.IEEEremainder(lonRad, 2 * Math.PI)
-                return kotlin.math.cos(decRad) * kotlin.math.cos(lonRad) * kx +
-                    kotlin.math.cos(decRad) * kotlin.math.sin(lonRad) * ky +
-                    kotlin.math.sin(decRad) * kz
-            }
-
-            val startMs = LocalDate.of(year, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-            val endMs = LocalDate.of(year + 1, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-            val stepMs = 3_600_000L
-
-            // Find ALL daily near-passes below tolerance, group consecutive
-            // days into single events, and return each event's exact peak.
-            data class Candidate(val t: Long, val cosSep: Double)
-            val candidates = mutableListOf<Candidate>()
-            var prevVal = separationCosine(Instant.ofEpochMilli(startMs))
-            var prevT = startMs
-            var t = startMs + stepMs
-            while (t <= endMs) {
-                val curVal = separationCosine(Instant.ofEpochMilli(t))
-                if (curVal < prevVal) {
-                    // local maximum between prevT..t — refine by golden section.
-                    var lo = prevT; var hi = t
-                    while (hi - lo > 1000L) {
-                        val m1 = lo + (hi - lo) / 3
-                        val m2 = hi - (hi - lo) / 3
-                        if (separationCosine(Instant.ofEpochMilli(m1)) < separationCosine(Instant.ofEpochMilli(m2))) lo = m1 else hi = m2
-                    }
-                    val peak = (lo + hi) / 2
-                    val cosSep = separationCosine(Instant.ofEpochMilli(peak))
-                    val sepDeg = Math.toDegrees(kotlin.math.acos(cosSep.coerceIn(-1.0, 1.0)))
-                    if (sepDeg <= 1.0) candidates += Candidate(peak, cosSep)
-                }
-                prevVal = curVal; prevT = t; t += stepMs
-            }
-
-            // Group candidates closer than 3 days into one event; keep the peak.
-            val out = mutableListOf<Instant>()
-            var group = mutableListOf<Candidate>()
-            fun flush() {
-                if (group.isEmpty()) return
-                out += Instant.ofEpochMilli(group.maxBy { it.cosSep }.t)
-                group = mutableListOf()
-            }
-            for (c in candidates) {
-                if (group.isNotEmpty() && c.t - group.last().t > 3L * 86_400_000) flush()
-                group += c
-            }
-            flush()
-            return out
-        }
-
-        /** GMST in degrees from Julian date (IAU 1982 polynomial). */
-        private fun greenwichMeanSiderealDegrees(jd: Double): Double {
-            val d = jd - 2451545.0
-            val tu = d / 36_525.0
-            val gmstDeg = Math.IEEEremainder(
-                280.46061837 + 360.98564736629 * d + 0.000387933 * tu * tu - tu * tu * tu / 38_710_000.0,
-                360.0,
+        /**
+         * Signed angle between the sun's azimuth and the local qibla bearing at
+         * [instant] ([−180, 180]); plus whether they align within [toleranceDeg].
+         */
+        fun relativeSunAngle(
+            location: Location,
+            instant: Instant,
+            toleranceDeg: Double = 2.0,
+        ): SunQiblaRelation {
+            val bearing = Qibla.bearing(location).bearingDegFromNorth.value
+            val pos = Astronomy.sun.position(location, instant)
+            var diff = (pos.azimuthDeg - bearing) % 360.0
+            if (diff > 180.0) diff -= 360.0
+            if (diff < -180.0) diff += 360.0
+            return SunQiblaRelation(
+                sunAzimuthDeg = pos.azimuthDeg,
+                sunAltitudeDeg = pos.altitudeDeg,
+                signedAngleToQiblaDeg = diff,
+                alignedWithinTolerance = kotlin.math.abs(diff) <= toleranceDeg,
             )
-            return if (gmstDeg < 0) gmstDeg + 360.0 else gmstDeg
         }
     }
 
@@ -340,20 +296,23 @@ class KhushuEngine {
             Zakat.fitrana(dependents, pricePerKg, madhab)
 
         /**
-         * Hijri anniversary completing the hawl for wealth owned since
-         * [ownershipStart]. Composed with the calendar capability — the zakat
-         * module itself stays independent of calendar (module rules).
+         * Full hawl period for wealth owned since [ownershipStart]: hijri
+         * anniversary with explicit snap provenance. Composed with the calendar
+         * capability — the zakat module stays independent of calendar.
          */
-        fun hawlAnniversary(ownershipStart: LocalDate, offsetDays: Int = 0): LocalDate =
-            com.khushu.engine.zakat.ZakatRules.hawlAnniversary(ownershipStart, offsetDays) { d, off ->
+        fun hawlPeriod(ownershipStart: LocalDate, offsetDays: Int = 0): com.khushu.engine.zakat.ZakatRules.HawlPeriod =
+            com.khushu.engine.zakat.ZakatRules.hawlPeriod(ownershipStart, offsetDays) { d, off ->
                 HijriCalendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
             }
 
-        fun livestockNisab(kind: com.khushu.engine.zakat.ZakatRules.LivestockKind): Int =
-            com.khushu.engine.zakat.ZakatRules.livestockNisab(kind)
+        fun livestockSchedule(kind: com.khushu.engine.zakat.ZakatRules.Species) =
+            com.khushu.engine.zakat.ZakatRules.scheduleFor(kind)
 
-        fun livestockDue(kind: com.khushu.engine.zakat.ZakatRules.LivestockKind, count: Int): String? =
+        fun livestockDue(kind: com.khushu.engine.zakat.ZakatRules.Species, count: Int) =
             com.khushu.engine.zakat.ZakatRules.livestockDue(kind, count)
+
+        fun livestockNisab(kind: com.khushu.engine.zakat.ZakatRules.Species) =
+            com.khushu.engine.zakat.ZakatRules.livestockNisab(kind)
 
         fun ushrDue(harvestValue: Double, irrigation: com.khushu.engine.zakat.ZakatRules.Irrigation): Double =
             com.khushu.engine.zakat.ZakatRules.ushrDue(harvestValue, irrigation)

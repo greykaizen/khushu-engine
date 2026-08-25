@@ -5,6 +5,7 @@ kotlin { jvmToolchain(21) }
 dependencies {
     implementation("com.batoulapps.adhan:adhan2-jvm:0.0.7")
     api(project(":engine:core"))
+    api(project(":engine:astronomy")) // shadow-verification composes subsolar facts
     testImplementation(kotlin("test"))
 }
 

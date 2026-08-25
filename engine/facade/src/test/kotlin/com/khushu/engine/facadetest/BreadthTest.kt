@@ -58,7 +58,15 @@ class BreadthTest {
     @Test
     fun solarAlignmentInstantsOccurTwiceAYearAndAreSelfConsistent() {
         // Zenith passage over the Kaaba: late May and mid July.
-        val instants = engine.qibla.solarAlignmentInstants(2026)
+        @Suppress("UNRESOLVED_REFERENCE_WRONG_NAME")
+        val instants = run {
+            // solarAlignmentInstants moved to the qibla shadow-verification API.
+            com.khushu.engine.astronomy.SubsolarAlignment.passagesOver(
+                com.khushu.engine.qibla.Qibla.KAABA_LATITUDE_DEG,
+                com.khushu.engine.qibla.Qibla.KAABA_LONGITUDE_DEG,
+                2026,
+            ).map { it.instant }
+        }
         assertEquals(2, instants.size, "got ${instants.map { Instant.ofEpochMilli(it.toEpochMilli()) }}")
 
         val first = instants[0].atZone(ZoneId.of("Asia/Riyadh"))

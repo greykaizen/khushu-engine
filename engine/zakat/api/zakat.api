@@ -147,14 +147,57 @@ public final class com/khushu/engine/zakat/ZakatResult {
 public final class com/khushu/engine/zakat/ZakatRules {
 	public static final field INSTANCE Lcom/khushu/engine/zakat/ZakatRules;
 	public static final field RIKAZ_RATE D
-	public final fun hawlAnniversary (Ljava/time/LocalDate;ILkotlin/jvm/functions/Function2;)Ljava/time/LocalDate;
-	public static synthetic fun hawlAnniversary$default (Lcom/khushu/engine/zakat/ZakatRules;Ljava/time/LocalDate;ILkotlin/jvm/functions/Function2;ILjava/lang/Object;)Ljava/time/LocalDate;
-	public final fun livestockDue (Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;I)Ljava/lang/String;
-	public final fun livestockNisab (Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;)I
-	public final fun livestockSlots (Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;)Ljava/util/List;
+	public final fun getCAMEL_SCHEDULE ()Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
+	public final fun getCATTLE_SCHEDULE ()Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
+	public final fun getSHEEP_SCHEDULE ()Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
+	public final fun hawlPeriod (Ljava/time/LocalDate;ILkotlin/jvm/functions/Function2;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public static synthetic fun hawlPeriod$default (Lcom/khushu/engine/zakat/ZakatRules;Ljava/time/LocalDate;ILkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public final fun livestockDue (Lcom/khushu/engine/zakat/ZakatRules$Species;I)Lcom/khushu/engine/zakat/ZakatRules$LivestockDue;
+	public final fun livestockNisab (Lcom/khushu/engine/zakat/ZakatRules$Species;)I
 	public final fun rikazDue (D)D
+	public final fun scheduleFor (Lcom/khushu/engine/zakat/ZakatRules$Species;)Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
 	public final fun ushrDue (DLcom/khushu/engine/zakat/ZakatRules$Irrigation;)D
 	public final fun ushrRate (Lcom/khushu/engine/zakat/ZakatRules$Irrigation;)D
+}
+
+public final class com/khushu/engine/zakat/ZakatRules$AnimalClass : java/lang/Enum {
+	public static final field BINT_LABUN Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public static final field BINT_MAKHAD Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public static final field HIQQAH Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public static final field JADHAAH Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public static final field SHEEP_OR_GOAT Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public static final field TABI_OR_TAQIAH Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getKey ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public static fun values ()[Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+}
+
+public final class com/khushu/engine/zakat/ZakatRules$BandKind : java/lang/Enum {
+	public static final field FLAT Lcom/khushu/engine/zakat/ZakatRules$BandKind;
+	public static final field PER_GROUP Lcom/khushu/engine/zakat/ZakatRules$BandKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$BandKind;
+	public static fun values ()[Lcom/khushu/engine/zakat/ZakatRules$BandKind;
+}
+
+public final class com/khushu/engine/zakat/ZakatRules$HawlPeriod {
+	public fun <init> (Ljava/time/LocalDate;Ljava/time/LocalDate;Ljava/time/LocalDate;II)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/time/LocalDate;
+	public final fun component3 ()Ljava/time/LocalDate;
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun copy (Ljava/time/LocalDate;Ljava/time/LocalDate;Ljava/time/LocalDate;II)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public static synthetic fun copy$default (Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;Ljava/time/LocalDate;Ljava/time/LocalDate;Ljava/time/LocalDate;IIILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnniversary ()Ljava/time/LocalDate;
+	public final fun getEnds ()Ljava/time/LocalDate;
+	public final fun getHijriYearCompleted ()I
+	public final fun getSnappedDays ()I
+	public final fun getStarts ()Ljava/time/LocalDate;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/khushu/engine/zakat/ZakatRules$Irrigation : java/lang/Enum {
@@ -165,25 +208,78 @@ public final class com/khushu/engine/zakat/ZakatRules$Irrigation : java/lang/Enu
 	public static fun values ()[Lcom/khushu/engine/zakat/ZakatRules$Irrigation;
 }
 
-public final class com/khushu/engine/zakat/ZakatRules$LivestockKind : java/lang/Enum {
-	public static final field CAMELS Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;
-	public static final field CATTLE Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;
-	public static final field SHEEP_OR_GOATS Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;
-	public static fun values ()[Lcom/khushu/engine/zakat/ZakatRules$LivestockKind;
-}
-
-public final class com/khushu/engine/zakat/ZakatRules$LivestockSlot {
-	public fun <init> (ILjava/lang/String;)V
+public final class com/khushu/engine/zakat/ZakatRules$LivestockBand {
+	public fun <init> (ILjava/lang/Integer;Lcom/khushu/engine/zakat/ZakatRules$BandKind;Ljava/lang/Integer;Ljava/lang/Integer;Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;Ljava/lang/String;)V
 	public final fun component1 ()I
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$LivestockSlot;
-	public static synthetic fun copy$default (Lcom/khushu/engine/zakat/ZakatRules$LivestockSlot;ILjava/lang/String;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$LivestockSlot;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun component3 ()Lcom/khushu/engine/zakat/ZakatRules$BandKind;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun component6 ()Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/Integer;Lcom/khushu/engine/zakat/ZakatRules$BandKind;Ljava/lang/Integer;Ljava/lang/Integer;Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;Ljava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$LivestockBand;
+	public static synthetic fun copy$default (Lcom/khushu/engine/zakat/ZakatRules$LivestockBand;ILjava/lang/Integer;Lcom/khushu/engine/zakat/ZakatRules$BandKind;Ljava/lang/Integer;Ljava/lang/Integer;Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;Ljava/lang/String;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$LivestockBand;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDescription ()Ljava/lang/String;
-	public final fun getThreshold ()I
+	public final fun getAnimalClass ()Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public final fun getFromCount ()I
+	public final fun getGroupSize ()Ljava/lang/Integer;
+	public final fun getHeadcountDue ()Ljava/lang/Integer;
+	public final fun getKind ()Lcom/khushu/engine/zakat/ZakatRules$BandKind;
+	public final fun getProvenance ()Ljava/lang/String;
+	public final fun getToCount ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/zakat/ZakatRules$LivestockDue {
+	public fun <init> (Lcom/khushu/engine/zakat/ZakatRules$Species;IIILcom/khushu/engine/zakat/ZakatRules$AnimalClass;Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Lcom/khushu/engine/zakat/ZakatRules$Species;IIILcom/khushu/engine/zakat/ZakatRules$AnimalClass;Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Z
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Lcom/khushu/engine/zakat/ZakatRules$Species;IIILcom/khushu/engine/zakat/ZakatRules$AnimalClass;Ljava/lang/String;ZLjava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$LivestockDue;
+	public static synthetic fun copy$default (Lcom/khushu/engine/zakat/ZakatRules$LivestockDue;Lcom/khushu/engine/zakat/ZakatRules$Species;IIILcom/khushu/engine/zakat/ZakatRules$AnimalClass;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$LivestockDue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnimalClass ()Lcom/khushu/engine/zakat/ZakatRules$AnimalClass;
+	public final fun getCountAssessed ()I
+	public final fun getHeadcountDue ()I
+	public final fun getNisabThreshold ()I
+	public final fun getProvenance ()Ljava/lang/String;
+	public final fun getRequiresScholarReview ()Z
+	public final fun getReviewReason ()Ljava/lang/String;
+	public final fun getSpecies ()Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/zakat/ZakatRules$LivestockSchedule {
+	public fun <init> (Lcom/khushu/engine/zakat/ZakatRules$Species;ILjava/util/List;Ljava/lang/String;)V
+	public final fun component1 ()Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lcom/khushu/engine/zakat/ZakatRules$Species;ILjava/util/List;Ljava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
+	public static synthetic fun copy$default (Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;Lcom/khushu/engine/zakat/ZakatRules$Species;ILjava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBands ()Ljava/util/List;
+	public final fun getBeyondTableProvenance ()Ljava/lang/String;
+	public final fun getNisabThreshold ()I
+	public final fun getSpecies ()Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/zakat/ZakatRules$Species : java/lang/Enum {
+	public static final field CAMELS Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public static final field CATTLE Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public static final field SHEEP_OR_GOATS Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/zakat/ZakatRules$Species;
+	public static fun values ()[Lcom/khushu/engine/zakat/ZakatRules$Species;
 }
 

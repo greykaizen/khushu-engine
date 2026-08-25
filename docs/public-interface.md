@@ -118,12 +118,29 @@ LunarCalendarView.monthView(y, m, location, zoneId): LunarDayFact*
 prayer.tahajjudWindow(location, date, params): TahajjudWindow?     // midnight → lastThird → fajr
 ```
 
-### qibla / zakat / day composite (facade)
+### qibla (module + facade)
 ```
-engine.qibla.solarAlignmentInstants(year): List<Instant>           // sun over the Kaaba, 2×/year
-engine.zakat.hawlAnniversary(ownershipStart, offsetDays = 0): LocalDate
-engine.zakat.livestockNisab(kind) / livestockDue(kind, count)
-engine.zakat.ushrDue(harvestValue, irrigation) · rikazDue(value)
+qibla.bearing(location): QiblaBearing(bearingDegFromNorth: Degrees, greatCircleDistanceKm: Kilometers)
+qibla.bearingBetween(from, to): Pair<Double, Double>       // generic great-circle
+qibla.shadowVerification(year, location): List<QiblaShadowEvent>
+  // Kaaba-zenith + antipodal passages; FACE_TOWARD/FACE_AWAY; visibility + shadow bearing
+engine.qibla.relativeSunAngle(location, instant, toleranceDeg = 2.0): SunQiblaRelation
+engine.qibla.solarAlignmentInstants(year): List<Instant>   // convenience passthrough
+QiblaAudit: Kaaba constants origin, spherical model, formula — provenance
+
+### zakat rules (ZakatRules)
+```
+hawlPeriod(ownershipStart, offsetDays, hijriBridge): HawlPeriod(starts, anniversary,
+  ends, hijriYearCompleted, snappedDays)   // facade wires the calendar bridge
+LivestockSchedule tables per Species — declarative bands with provenance
+livestockDue(species, count): LivestockDue?(species, countAssessed, nisabThreshold,
+  headcountDue, animalClass, provenance, requiresScholarReview?, reviewReason?)
+livestockNisab(species) · ushrRate/ushrDue(Irrigation) · rikazDue(value)
+Camel >120: classical forty/fifty decomposition (IslamQA #71267); unresolved
+  excess → requiresScholarReview instead of a guess (D19)
+
+### day composite (facade)
+```
 engine.day.summary(location, date, zoneId, prayerParams, calendarParams): DaySummary
     // one-pass whole-day composite — shared facts computed once internally
 

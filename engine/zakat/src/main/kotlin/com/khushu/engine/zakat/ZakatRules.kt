@@ -4,8 +4,13 @@ import java.time.LocalDate
 import kotlin.math.floor
 
 /**
- * Fiqh rule engines beyond zakat al-mal: hawl anniversaries, livestock nisab
- * tables, agricultural ushr and rikaz. All tabular/pure computation.
+ * Livestock zakat rule engine. The classical schedules are DECLARATIVE DATA —
+ * auditable, citable, never a clever hidden formula.
+ *
+ * Sources: band structure per IslamQA #71267 (classical anʿām schedule);
+ * beyond-120 rule per the same source: "for every forty a bint labun and for
+ * every fifty a hiqqah". Grazing/trade-purpose distinctions are caller policy
+ * (see docs/v1.3-zakat-design.md).
  */
 object ZakatRules {
 
@@ -13,25 +18,43 @@ object ZakatRules {
 
     /**
      * The hijri-anniversary date on which the hawl completes: same hijri
-     * (month/day) one year later, snapped to an existing date when the target
-     * year's month is shorter. Uses [com.khushu.engine.calendar.Calendar] via a
-     * forward-conversion probe so no reverse table is needed.
+     * (month/day) one year later, snapping back up to 2 days when the target
+     * month is shorter. Snap is EXPLICIT in the returned [HawlPeriod].
+     *
+     * Hijri conversion is injected by the CALLER (facade wires it to the
+     * calendar capability) — this module stays independent of calendar.
      */
-    fun hawlAnniversary(
+    fun hawlPeriod(
         ownershipStart: LocalDate,
         offsetDays: Int = 0,
         hijri: (LocalDate, Int) -> Triple<Int, Int, Int>,
-    ): LocalDate {
+    ): HawlPeriod {
         val (y, m, d) = hijri(ownershipStart, offsetDays)
         val targetYear = y + 1
-        // Same hijri day one year later; if that day doesn't exist in the
-        // target year's month (29-day month), snap back up to 2 days.
         for (day in d downTo maxOf(1, d - 2)) {
             val candidate = findCivilDate(targetYear, m, day, offsetDays, hijri)
-            if (candidate != null && !candidate.isBefore(ownershipStart)) return candidate
+            if (candidate != null && !candidate.isBefore(ownershipStart)) {
+                return HawlPeriod(
+                    starts = ownershipStart,
+                    anniversary = candidate,
+                    ends = candidate,
+                    hijriYearCompleted = targetYear,
+                    snappedDays = d - day,
+                )
+            }
         }
         throw IllegalStateException("hawl anniversary not resolvable for $ownershipStart")
     }
+
+    data class HawlPeriod(
+        val starts: LocalDate,
+        /** The hijri anniversary civil date (may be snapped back ≤2 days). */
+        val anniversary: LocalDate,
+        val ends: LocalDate,
+        val hijriYearCompleted: Int,
+        /** How many days the anniversary was snapped back (0 = exact). */
+        val snappedDays: Int,
+    )
 
     private fun findCivilDate(
         year: Int, month: Int, day: Int, offsetDays: Int,
@@ -60,76 +83,158 @@ object ZakatRules {
 
     // ── Livestock ────────────────────────────────────────────────────────────
 
-    enum class LivestockKind { CAMELS, CATTLE, SHEEP_OR_GOATS }
+    enum class Species { CAMELS, CATTLE, SHEEP_OR_GOATS }
 
-    /**
-     * One slot of the species' nisab schedule: count threshold, what is due at
-     * or beyond it, and whether the due animal is taken per [count] head.
-     */
-    data class LivestockSlot(val threshold: Int, val description: String)
-
-    private val CAMEL_SLOTS = listOf( // classical fiqh schedule (Sahih Bukhari, Mu'adh hadith)
-        LivestockSlot(5, "one sheep/goat"),
-        LivestockSlot(10, "two sheep/goats"),
-        LivestockSlot(15, "three sheep/goats"),
-        LivestockSlot(20, "four sheep/goats"),
-        LivestockSlot(25, "one bint makhad (she-camel aged ~1 year)"),
-        LivestockSlot(36, "one bint labun (she-camel aged ~2 years)"),
-        LivestockSlot(46, "one hiqqah (she-camel aged ~3 years)"),
-        LivestockSlot(61, "one jadha'ah (she-camel aged ~4 years)"),
-        LivestockSlot(76, "two bint labun"),
-        LivestockSlot(91, "two hiqqah"),
-        LivestockSlot(121, "two bint makhad; then one cow per 40 or one sheep per head beyond"),
-    )
-
-    private val CATTLE_SLOTS = listOf(
-        LivestockSlot(30, "one tabi' (bull/buffalo calf ~1 year) or taqi'ah (~2 years)"),
-    )
-
-    private val SHEEP_SLOTS = listOf(
-        LivestockSlot(40, "one sheep/goat"),
-    )
-
-    fun livestockSlots(kind: LivestockKind): List<LivestockSlot> = when (kind) {
-        LivestockKind.CAMELS -> CAMEL_SLOTS
-        LivestockKind.CATTLE -> CATTLE_SLOTS
-        LivestockKind.SHEEP_OR_GOATS -> SHEEP_SLOTS
+    /** Age/species class of the animal actually owed. Labels are the UI's job. */
+    enum class AnimalClass(val key: String) {
+        SHEEP_OR_GOAT("sheep_or_goat"),
+        BINT_MAKHAD("bint_makhad"),   // she-camel ~1 year
+        BINT_LABUN("bint_labun"),     // she-camel ~2 years
+        HIQQAH("hiqqah"),             // she-camel ~3 years
+        JADHAAH("jadhaah"),           // she-camel ~4 years
+        TABI_OR_TAQIAH("tabi_or_taqiah"), // cattle bull/cow ~1–2 years (owner's choice)
     }
 
-    /** What is due for [count] animals of [kind]; null below the first nisab. */
-    fun livestockDue(kind: LivestockKind, count: Int): String? {
+    enum class BandKind { PER_GROUP, FLAT }
+
+    data class LivestockBand(
+        val fromCount: Int,
+        val toCount: Int?, // null = open-ended
+        val kind: BandKind,
+        val groupSize: Int?,
+        val headcountDue: Int?,
+        val animalClass: AnimalClass,
+        val provenance: String,
+    )
+
+    data class LivestockSchedule(
+        val species: Species,
+        val nisabThreshold: Int,
+        val bands: List<LivestockBand>,
+        /** Citation for the beyond-table continuation rule (open-ended band). */
+        val beyondTableProvenance: String?,
+    )
+
+    private const val P_ISLAMQA = "IslamQA #71267 — classical an'aam schedule"
+
+    val CAMEL_SCHEDULE = LivestockSchedule(
+        species = Species.CAMELS,
+        nisabThreshold = 5,
+        bands = listOf(
+            LivestockBand(5, 24, BandKind.PER_GROUP, 5, 1, AnimalClass.SHEEP_OR_GOAT, P_ISLAMQA),
+            LivestockBand(25, 35, BandKind.FLAT, null, 1, AnimalClass.BINT_MAKHAD, P_ISLAMQA),
+            LivestockBand(36, 45, BandKind.FLAT, null, 1, AnimalClass.BINT_LABUN, P_ISLAMQA),
+            LivestockBand(46, 60, BandKind.FLAT, null, 1, AnimalClass.HIQQAH, P_ISLAMQA),
+            LivestockBand(61, 75, BandKind.FLAT, null, 1, AnimalClass.JADHAAH, P_ISLAMQA),
+            LivestockBand(76, 90, BandKind.FLAT, null, 2, AnimalClass.BINT_LABUN, P_ISLAMQA),
+            LivestockBand(91, 120, BandKind.FLAT, null, 2, AnimalClass.HIQQAH, P_ISLAMQA),
+            LivestockBand(121, null, BandKind.PER_GROUP, null, 1, AnimalClass.BINT_LABUN,
+                "Beyond 120: for every forty a bint labun, for every fifty a hiqqah ($P_ISLAMQA); combination minimizing total headcount preferred"),
+        ),
+        beyondTableProvenance = P_ISLAMQA,
+    )
+
+    val CATTLE_SCHEDULE = LivestockSchedule(
+        species = Species.CATTLE,
+        nisabThreshold = 30,
+        bands = listOf(
+            LivestockBand(30, null, BandKind.PER_GROUP, 30, 1, AnimalClass.TABI_OR_TAQIAH, P_ISLAMQA),
+        ),
+        beyondTableProvenance = P_ISLAMQA,
+    )
+
+    val SHEEP_SCHEDULE = LivestockSchedule(
+        species = Species.SHEEP_OR_GOATS,
+        nisabThreshold = 40,
+        bands = listOf(
+            LivestockBand(40, null, BandKind.PER_GROUP, 40, 1, AnimalClass.SHEEP_OR_GOAT, P_ISLAMQA),
+        ),
+        beyondTableProvenance = P_ISLAMQA,
+    )
+
+    fun scheduleFor(kind: Species): LivestockSchedule = when (kind) {
+        Species.CAMELS -> CAMEL_SCHEDULE
+        Species.CATTLE -> CATTLE_SCHEDULE
+        Species.SHEEP_OR_GOATS -> SHEEP_SCHEDULE
+    }
+
+    data class LivestockDue(
+        val species: Species,
+        val countAssessed: Int,
+        val nisabThreshold: Int,
+        val headcountDue: Int,
+        val animalClass: AnimalClass,
+        val provenance: String,
+        /** True when the selected methodology cannot fully resolve the case. */
+        val requiresScholarReview: Boolean = false,
+        val reviewReason: String? = null,
+    )
+
+    /** Structured obligation for [count] animals of [kind]; null below nisab. */
+    fun livestockDue(kind: Species, count: Int): LivestockDue? {
         require(count >= 0)
-        var slot: LivestockSlot? = null
-        for (s in livestockSlots(kind)) if (count >= s.threshold) slot = s else break
-        return slot?.description?.let { desc ->
-            when {
-                kind == LivestockKind.CAMELS && count >= 121 ->
-                    "per the 121+ schedule: two bint makhad base, plus ${extraCamelDue(count)} for the excess"
-                kind == LivestockKind.CATTLE && count >= 30 ->
-                    "${floor(count / 30.0).toInt()} tabi'/taqi'ah (1 per 30)"
-                kind == LivestockKind.SHEEP_OR_GOATS && count >= 40 ->
-                    "${floor(count / 40.0).toInt()} sheep (1 per 40)"
-                else -> desc
-            }
+        val schedule = scheduleFor(kind)
+        if (count < schedule.nisabThreshold) return null
+
+        val band = schedule.bands.last { count >= it.fromCount }
+
+        return when {
+            // Camels beyond the explicit table: classical 40/50 decomposition.
+            band.kind == BandKind.PER_GROUP && band.groupSize == null ->
+                decomposeCamels(count, band)
+            band.kind == BandKind.PER_GROUP ->
+                LivestockDue(
+                    kind, count, schedule.nisabThreshold,
+                    floor(count / band.groupSize!!.toDouble()).toInt(),
+                    band.animalClass, band.provenance,
+                )
+            else -> LivestockDue(
+                kind, count, schedule.nisabThreshold,
+                band.headcountDue!!, band.animalClass, band.provenance,
+            )
         }
     }
 
-    private fun extraCamelDue(count: Int): String {
-        val excess = count - 121
-        val cows = floor(excess / 40.0).toInt()
-        val remainderAfterCows = excess - cows * 40
-        return "$cows cow(s) plus $remainderAfterCows sheep/goats"
+    /**
+     * Beyond 120: base obligation (two hiqqah) plus, over the excess, every
+     * complete fifty → one hiqqah and every complete forty → one bint labun;
+     * among valid decompositions the one minimizing total headcount is
+     * preferred (documented practice). When the excess leaves a remainder that
+     * neither division resolves cleanly, the result flags scholar review
+     * rather than guessing.
+     */
+    private fun decomposeCamels(count: Int, band: LivestockBand): LivestockDue {
+        val excess = count - 120
+        val roundedExcess = (excess / 10) * 10
+        var best: Pair<Int, Int>? = null // k50 to k40
+        for (k50 in 0..roundedExcess / 50) {
+            val remainder = roundedExcess - k50 * 50
+            if (remainder % 40 == 0) {
+                val k40 = remainder / 40
+                if (best == null || (k50 + k40) < (best.first + best.second)) best = Pair(k50, k40)
+            }
+        }
+        val (k50, k40) = best ?: Pair(floor(excess / 50.0).toInt(), 0)
+        val unresolved = best == null || excess % 10 != 0
+        val headcount = 2 /*base*/ + k50 /*hiqqah*/ + k40 /*bint labun*/
+        val primaryClass = if (k50 > 0 || headcount == 2) AnimalClass.HIQQAH else AnimalClass.BINT_LABUN
+        return LivestockDue(
+            species = Species.CAMELS,
+            countAssessed = count,
+            nisabThreshold = scheduleFor(Species.CAMELS).nisabThreshold,
+            headcountDue = headcount,
+            animalClass = primaryClass,
+            provenance = band.provenance,
+            requiresScholarReview = unresolved,
+            reviewReason = if (unresolved) "excess $excess does not decompose cleanly into 40/50 groups" else null,
+        )
     }
 
-    /** Nisab threshold for the species (first slot). */
-    fun livestockNisab(kind: LivestockKind): Int = livestockSlots(kind).first().threshold
+    /** Nisab threshold for the species. */
+    fun livestockNisab(kind: Species): Int = scheduleFor(kind).nisabThreshold
 
     // ── Ushr (agricultural) ──────────────────────────────────────────────────
 
-    /**
-     * Ushr rate on produce: 10% for rain/land naturally irrigated, 5% for
-     * artificially irrigated land (cost of irrigation borne by farmer).
-     */
     enum class Irrigation { NATURAL, ARTIFICIAL }
 
     fun ushrRate(irrigation: Irrigation): Double = when (irrigation) {
@@ -139,15 +244,13 @@ object ZakatRules {
 
     fun ushrDue(harvestValue: Double, irrigation: Irrigation): Double {
         require(harvestValue >= 0.0)
-        // Classical fiqh: no nisab minimum on produce (some schools require ≥ 5 wasq);
-        // engine applies the simple majority rule — due on all harvests.
         return harvestValue * ushrRate(irrigation)
     }
 
     // ── Rikaz ────────────────────────────────────────────────────────────────
 
-    /** Buried treasure (rikaz): flat 20% (khums), no nisab, no hawl. */
     const val RIKAZ_RATE = 0.20
+
     fun rikazDue(treasureValue: Double): Double {
         require(treasureValue >= 0.0)
         return treasureValue * RIKAZ_RATE
