@@ -5,6 +5,7 @@ import com.khushu.engine.astronomy.OdehZone
 import com.khushu.engine.astronomy.SightingVerdict
 import com.khushu.engine.astronomy.YallopGrade
 import com.khushu.engine.core.geo.Location
+import com.khushu.engine.core.units.ArcMinutes
 import io.github.cosinekitty.astronomy.Body
 import io.github.cosinekitty.astronomy.Direction
 import kotlin.math.acos
@@ -75,7 +76,7 @@ internal object HilalEngine {
             moonAgeHours = moonAgeHours,
             arcvDeg = arcv,
             elongationDeg = elongation,
-            crescentWidthArcmin = widthArcmin,
+            crescentWidthArcmin = ArcMinutes(widthArcmin),
             illuminationFraction = illumination,
             yallop = yallopGrade(arcv, widthArcmin),
             odeh = odehZone(arcv, widthArcmin),

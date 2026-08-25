@@ -141,7 +141,7 @@ class AstronomyPropertyTest {
         assertNotNull(report)
         assertTrue(report.arcvDeg > -30.0)
         assertTrue(report.elongationDeg > 0.0)
-        assertTrue(report.crescentWidthArcmin >= 0.0)
+        assertTrue(report.crescentWidthArcmin.value >= 0.0)
         assertTrue(report.lagMinutes >= 0)
         assertEquals(4, report.verdicts.size)
         assertTrue(report.moonAgeHours > 24) // ~2 days after conjunction

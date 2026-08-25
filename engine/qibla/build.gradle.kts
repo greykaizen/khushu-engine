@@ -4,7 +4,7 @@ kotlin { jvmToolchain(21) }
 
 dependencies {
     implementation("com.batoulapps.adhan:adhan2-jvm:0.0.7")
-    implementation(project(":engine:core"))
+    api(project(":engine:core"))
     testImplementation(kotlin("test"))
 }
 

@@ -25,7 +25,7 @@ class QiblaTest {
     @Test
     fun bearingMatchesAdhan2ReferenceEverywhere() {
         for (loc in sweep) {
-            val ours = Qibla.bearing(loc).bearingDegFromNorth
+            val ours = Qibla.bearing(loc).bearingDegFromNorth.value
             val adhan = AdhanQibla(Coordinates(loc.latitude.degrees, loc.longitude.degrees)).direction.let {
                 if (it < 0) it + 360.0 else it % 360.0
             }
@@ -39,24 +39,24 @@ class QiblaTest {
     fun bearingAlwaysWithinCompassRange() {
         for (loc in sweep) {
             val b = Qibla.bearing(loc)
-            assertTrue(b.bearingDegFromNorth in 0.0..360.0)
-            assertTrue(b.greatCircleDistanceKm > 0.0)
+            assertTrue(b.bearingDegFromNorth.value in 0.0..360.0)
+            assertTrue(b.greatCircleDistanceKm.value > 0.0)
         }
     }
 
     @Test
     fun authoritativeSpotValues() {
         // Published qibla values (rounded to the nearest degree):
-        assertEquals(119.0, Qibla.bearing(Location.of(51.5072, -0.1276)).bearingDegFromNorth, 0.5, "London")
-        assertEquals(58.0, Qibla.bearing(Location.of(40.7128, -74.0060)).bearingDegFromNorth, 0.5, "New York")
+        assertEquals(119.0, Qibla.bearing(Location.of(51.5072, -0.1276)).bearingDegFromNorth.value, 0.5, "London")
+        assertEquals(58.0, Qibla.bearing(Location.of(40.7128, -74.0060)).bearingDegFromNorth.value, 0.5, "New York")
         // New York to Makkah is roughly 10 200 km across the Atlantic.
-        assertTrue(abs(Qibla.bearing(Location.of(40.7128, -74.0060)).greatCircleDistanceKm - 10_200.0) < 150.0)
+        assertTrue(abs(Qibla.bearing(Location.of(40.7128, -74.0060)).greatCircleDistanceKm.value - 10_200.0) < 150.0)
     }
 
     @Test
     fun distanceShrinksAsYouApproachTheKaaba() {
-        val far = Qibla.bearing(Location.of(51.5072, -0.1276)).greatCircleDistanceKm
-        val near = Qibla.bearing(Location.of(21.0, 39.8)).greatCircleDistanceKm
+        val far = Qibla.bearing(Location.of(51.5072, -0.1276)).greatCircleDistanceKm.value
+        val near = Qibla.bearing(Location.of(21.0, 39.8)).greatCircleDistanceKm.value
         assertTrue(near < far / 100.0)
     }
 }

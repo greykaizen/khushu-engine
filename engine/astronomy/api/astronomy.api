@@ -1,0 +1,357 @@
+public final class com/khushu/engine/astronomy/Astronomy {
+	public static final field INSTANCE Lcom/khushu/engine/astronomy/Astronomy;
+}
+
+public final class com/khushu/engine/astronomy/Astronomy$hilal {
+	public static final field INSTANCE Lcom/khushu/engine/astronomy/Astronomy$hilal;
+	public final fun forecast (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;I)Ljava/util/List;
+	public static synthetic fun forecast$default (Lcom/khushu/engine/astronomy/Astronomy$hilal;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;IILjava/lang/Object;)Ljava/util/List;
+	public final fun visibility (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/HilalReport;
+}
+
+public final class com/khushu/engine/astronomy/Astronomy$moon {
+	public static final field INSTANCE Lcom/khushu/engine/astronomy/Astronomy$moon;
+	public final fun distanceExtremes (Ljava/time/Instant;Ljava/time/Instant;)Ljava/util/List;
+	public final fun nextFullMoon (Ljava/time/Instant;)Lcom/khushu/engine/astronomy/UpcomingMoonPhase;
+	public final fun nextGlobalSolarEclipse (Ljava/time/Instant;)Lcom/khushu/engine/astronomy/GlobalSolarEclipse;
+	public final fun nextLunarEclipse (Ljava/time/Instant;)Lcom/khushu/engine/astronomy/LunarEclipse;
+	public final fun nextNewMoon (Ljava/time/Instant;)Lcom/khushu/engine/astronomy/UpcomingMoonPhase;
+	public final fun nextPhase (DLjava/time/Instant;)Lcom/khushu/engine/astronomy/UpcomingMoonPhase;
+	public final fun phaseName (D)Ljava/lang/String;
+	public final fun position (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/LunarPosition;
+	public final fun riseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
+	public final fun state (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/MoonState;
+	public final fun track (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;ZI)Lcom/khushu/engine/astronomy/MonthlyMoonTrack;
+	public static synthetic fun track$default (Lcom/khushu/engine/astronomy/Astronomy$moon;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;ZIILjava/lang/Object;)Lcom/khushu/engine/astronomy/MonthlyMoonTrack;
+}
+
+public final class com/khushu/engine/astronomy/Astronomy$sun {
+	public static final field INSTANCE Lcom/khushu/engine/astronomy/Astronomy$sun;
+	public final fun dayLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
+	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun position (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
+	public final fun riseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
+}
+
+public final class com/khushu/engine/astronomy/CelestialPathPoint {
+	public fun <init> (JDD[FZ)V
+	public final fun component1 ()J
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()[F
+	public final fun component5 ()Z
+	public final fun copy (JDD[FZ)Lcom/khushu/engine/astronomy/CelestialPathPoint;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/CelestialPathPoint;JDD[FZILjava/lang/Object;)Lcom/khushu/engine/astronomy/CelestialPathPoint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAboveHorizon ()Z
+	public final fun getAltitudeDeg ()D
+	public final fun getAzimuthDeg ()D
+	public final fun getEnu ()[F
+	public final fun getEpochMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/DayMoon {
+	public fun <init> (Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Double;Ljava/lang/Double;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun component6 ()Ljava/lang/Double;
+	public final fun copy (Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Double;Ljava/lang/Double;)Lcom/khushu/engine/astronomy/DayMoon;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/DayMoon;Ljava/time/LocalDate;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/DayMoon;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getIlluminationAtTransit ()Ljava/lang/Double;
+	public final fun getPhaseAngleDegAtTransit ()Ljava/lang/Double;
+	public final fun getRiseEpochMs ()Ljava/lang/Long;
+	public final fun getSetEpochMs ()Ljava/lang/Long;
+	public final fun getTransitEpochMs ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/EclipseKind : java/lang/Enum {
+	public static final field ANNULAR Lcom/khushu/engine/astronomy/EclipseKind;
+	public static final field NONE Lcom/khushu/engine/astronomy/EclipseKind;
+	public static final field PARTIAL Lcom/khushu/engine/astronomy/EclipseKind;
+	public static final field TOTAL Lcom/khushu/engine/astronomy/EclipseKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/astronomy/EclipseKind;
+	public static fun values ()[Lcom/khushu/engine/astronomy/EclipseKind;
+}
+
+public final class com/khushu/engine/astronomy/GlobalSolarEclipse {
+	public fun <init> (Lcom/khushu/engine/astronomy/EclipseKind;JLjava/lang/Double;DD)V
+	public final fun component1 ()Lcom/khushu/engine/astronomy/EclipseKind;
+	public final fun component2 ()J
+	public final fun component3 ()Ljava/lang/Double;
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun copy (Lcom/khushu/engine/astronomy/EclipseKind;JLjava/lang/Double;DD)Lcom/khushu/engine/astronomy/GlobalSolarEclipse;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/GlobalSolarEclipse;Lcom/khushu/engine/astronomy/EclipseKind;JLjava/lang/Double;DDILjava/lang/Object;)Lcom/khushu/engine/astronomy/GlobalSolarEclipse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKind ()Lcom/khushu/engine/astronomy/EclipseKind;
+	public final fun getLatitudeDeg ()D
+	public final fun getLongitudeDeg ()D
+	public final fun getObscuration ()Ljava/lang/Double;
+	public final fun getPeakEpochMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/HilalReport {
+	public synthetic fun <init> (JLjava/lang/Long;JIIDDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component10 ()Lcom/khushu/engine/astronomy/YallopGrade;
+	public final fun component11 ()Lcom/khushu/engine/astronomy/OdehZone;
+	public final fun component12 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun component3 ()J
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()D
+	public final fun component7 ()D
+	public final fun component8-Kxo4Pdc ()D
+	public final fun component9 ()D
+	public final fun copy-NRnVkRQ (JLjava/lang/Long;JIIDDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;)Lcom/khushu/engine/astronomy/HilalReport;
+	public static synthetic fun copy-NRnVkRQ$default (Lcom/khushu/engine/astronomy/HilalReport;JLjava/lang/Long;JIIDDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/HilalReport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArcvDeg ()D
+	public final fun getBestTimeEpochMs ()J
+	public final fun getCrescentWidthArcmin-Kxo4Pdc ()D
+	public final fun getElongationDeg ()D
+	public final fun getIlluminationFraction ()D
+	public final fun getLagMinutes ()I
+	public final fun getMoonAgeHours ()I
+	public final fun getMoonsetEpochMs ()Ljava/lang/Long;
+	public final fun getOdeh ()Lcom/khushu/engine/astronomy/OdehZone;
+	public final fun getSunsetEpochMs ()J
+	public final fun getVerdicts ()Ljava/util/List;
+	public final fun getYallop ()Lcom/khushu/engine/astronomy/YallopGrade;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/LunarEclipse {
+	public fun <init> (Lcom/khushu/engine/astronomy/EclipseKind;JLjava/lang/Double;)V
+	public final fun component1 ()Lcom/khushu/engine/astronomy/EclipseKind;
+	public final fun component2 ()J
+	public final fun component3 ()Ljava/lang/Double;
+	public final fun copy (Lcom/khushu/engine/astronomy/EclipseKind;JLjava/lang/Double;)Lcom/khushu/engine/astronomy/LunarEclipse;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/LunarEclipse;Lcom/khushu/engine/astronomy/EclipseKind;JLjava/lang/Double;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/LunarEclipse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKind ()Lcom/khushu/engine/astronomy/EclipseKind;
+	public final fun getObscuration ()Ljava/lang/Double;
+	public final fun getPeakEpochMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/LunarPosition {
+	public fun <init> (DDDDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun copy (DDDDD)Lcom/khushu/engine/astronomy/LunarPosition;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/LunarPosition;DDDDDILjava/lang/Object;)Lcom/khushu/engine/astronomy/LunarPosition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAltitudeDeg ()D
+	public final fun getAzimuthDeg ()D
+	public final fun getDeclinationDeg ()D
+	public final fun getDistanceKm ()D
+	public final fun getRightAscensionHours ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/MonthlyMoonTrack {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;)Lcom/khushu/engine/astronomy/MonthlyMoonTrack;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/MonthlyMoonTrack;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/MonthlyMoonTrack;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDays ()Ljava/util/List;
+	public final fun getPathPoints ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/MoonDistanceExtreme {
+	public fun <init> (JDZ)V
+	public final fun component1 ()J
+	public final fun component2 ()D
+	public final fun component3 ()Z
+	public final fun copy (JDZ)Lcom/khushu/engine/astronomy/MoonDistanceExtreme;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/MoonDistanceExtreme;JDZILjava/lang/Object;)Lcom/khushu/engine/astronomy/MoonDistanceExtreme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDistanceKm ()D
+	public final fun getEpochMs ()J
+	public fun hashCode ()I
+	public final fun isPerigee ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/MoonState {
+	public fun <init> (DDDLjava/lang/String;DDZ)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()D
+	public final fun component6 ()D
+	public final fun component7 ()Z
+	public final fun copy (DDDLjava/lang/String;DDZ)Lcom/khushu/engine/astronomy/MoonState;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/MoonState;DDDLjava/lang/String;DDZILjava/lang/Object;)Lcom/khushu/engine/astronomy/MoonState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBrightLimbTiltDeg ()D
+	public final fun getElongationDeg ()D
+	public final fun getIlluminationFraction ()D
+	public final fun getMoonAgeDays ()D
+	public final fun getPhaseAngleDeg ()D
+	public final fun getPhaseName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isWaxing ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/OdehZone : java/lang/Enum {
+	public static final field A Lcom/khushu/engine/astronomy/OdehZone;
+	public static final field B Lcom/khushu/engine/astronomy/OdehZone;
+	public static final field C Lcom/khushu/engine/astronomy/OdehZone;
+	public static final field D Lcom/khushu/engine/astronomy/OdehZone;
+	public final fun getCode ()C
+	public final fun getDescription ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/astronomy/OdehZone;
+	public static fun values ()[Lcom/khushu/engine/astronomy/OdehZone;
+}
+
+public final class com/khushu/engine/astronomy/RiseSet {
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;)V
+	public final fun component1 ()Ljava/lang/Long;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun copy (Ljava/lang/Long;Ljava/lang/Long;)Lcom/khushu/engine/astronomy/RiseSet;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/RiseSet;Ljava/lang/Long;Ljava/lang/Long;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/RiseSet;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRiseEpochMs ()Ljava/lang/Long;
+	public final fun getSetEpochMs ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/SightingVerdict {
+	public fun <init> (Ljava/lang/String;ZII)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun copy (Ljava/lang/String;ZII)Lcom/khushu/engine/astronomy/SightingVerdict;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SightingVerdict;Ljava/lang/String;ZIIILjava/lang/Object;)Lcom/khushu/engine/astronomy/SightingVerdict;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAuthority ()Ljava/lang/String;
+	public final fun getCriteriaMet ()I
+	public final fun getCriteriaTotal ()I
+	public final fun getPassed ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/SolarEvent {
+	public fun <init> (Lcom/khushu/engine/astronomy/SolarEventType;J)V
+	public final fun component1 ()Lcom/khushu/engine/astronomy/SolarEventType;
+	public final fun component2 ()J
+	public final fun copy (Lcom/khushu/engine/astronomy/SolarEventType;J)Lcom/khushu/engine/astronomy/SolarEvent;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SolarEvent;Lcom/khushu/engine/astronomy/SolarEventType;JILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEpochMs ()J
+	public final fun getType ()Lcom/khushu/engine/astronomy/SolarEventType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/SolarEventType : java/lang/Enum {
+	public static final field ASTRONOMICAL_DAWN Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field ASTRONOMICAL_DUSK Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field BLUE_HOUR_EVENING_START Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field BLUE_HOUR_MORNING_START Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field CIVIL_DAWN Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field CIVIL_DUSK Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field GOLDEN_HOUR_EVENING_START Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field GOLDEN_HOUR_MORNING_END Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field GOLDEN_HOUR_MORNING_START Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field NAUTICAL_DAWN Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field NAUTICAL_DUSK Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field SOLAR_NOON Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field SUNRISE Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field SUNSET Lcom/khushu/engine/astronomy/SolarEventType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/astronomy/SolarEventType;
+	public static fun values ()[Lcom/khushu/engine/astronomy/SolarEventType;
+}
+
+public final class com/khushu/engine/astronomy/SolarEvents {
+	public fun <init> (Ljava/time/LocalDate;Ljava/util/List;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/time/LocalDate;Ljava/util/List;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SolarEvents;Ljava/time/LocalDate;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getEvents ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/SolarPosition {
+	public fun <init> (DDDDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun copy (DDDDD)Lcom/khushu/engine/astronomy/SolarPosition;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/SolarPosition;DDDDDILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarPosition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAltitudeDeg ()D
+	public final fun getAzimuthDeg ()D
+	public final fun getDeclinationDeg ()D
+	public final fun getDistanceAu ()D
+	public final fun getRightAscensionHours ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/UpcomingMoonPhase {
+	public fun <init> (DJ)V
+	public final fun component1 ()D
+	public final fun component2 ()J
+	public final fun copy (DJ)Lcom/khushu/engine/astronomy/UpcomingMoonPhase;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/UpcomingMoonPhase;DJILjava/lang/Object;)Lcom/khushu/engine/astronomy/UpcomingMoonPhase;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEpochMs ()J
+	public final fun getPhaseName ()Ljava/lang/String;
+	public final fun getTargetPhaseDeg ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/YallopGrade : java/lang/Enum {
+	public static final field A Lcom/khushu/engine/astronomy/YallopGrade;
+	public static final field B Lcom/khushu/engine/astronomy/YallopGrade;
+	public static final field C Lcom/khushu/engine/astronomy/YallopGrade;
+	public static final field D Lcom/khushu/engine/astronomy/YallopGrade;
+	public static final field F Lcom/khushu/engine/astronomy/YallopGrade;
+	public final fun getCode ()C
+	public final fun getDescription ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/astronomy/YallopGrade;
+	public static fun values ()[Lcom/khushu/engine/astronomy/YallopGrade;
+}
+

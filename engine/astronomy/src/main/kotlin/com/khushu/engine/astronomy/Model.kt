@@ -1,6 +1,7 @@
 package com.khushu.engine.astronomy
 
 import com.khushu.engine.core.geo.Location
+import com.khushu.engine.core.units.ArcMinutes
 
 /** Topocentric horizontal position with equatorial detail attached. */
 data class SolarPosition(
@@ -154,7 +155,7 @@ data class HilalReport(
     val moonAgeHours: Int,
     val arcvDeg: Double,
     val elongationDeg: Double,
-    val crescentWidthArcmin: Double,
+    val crescentWidthArcmin: ArcMinutes,
     val illuminationFraction: Double,
     val yallop: YallopGrade,
     val odeh: OdehZone,

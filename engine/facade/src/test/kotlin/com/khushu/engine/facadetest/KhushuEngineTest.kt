@@ -31,7 +31,7 @@ class KhushuEngineTest {
 
         assertEquals("Ramadan", engine.calendar.hijri(LocalDate.of(2025, 3, 5)).monthName)
 
-        assertTrue(engine.qibla.bearing(london).bearingDegFromNorth in 0.0..360.0)
+        assertTrue(engine.qibla.bearing(london).bearingDegFromNorth.value in 0.0..360.0)
 
         assertTrue(engine.zakat.fitrana(dependents = 2, pricePerKg = 2.0, madhab = com.khushu.engine.zakat.ZakatMadhab.HANAFI).totalForHousehold > 0.0)
     }

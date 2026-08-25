@@ -1,0 +1,126 @@
+public final class com/khushu/engine/core/geo/AltitudeMeters {
+	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/geo/AltitudeMeters;
+	public static fun constructor-impl (D)D
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (DLjava/lang/Object;)Z
+	public static final fun equals-impl0 (DD)Z
+	public final fun getMeters ()D
+	public fun hashCode ()I
+	public static fun hashCode-impl (D)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (D)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()D
+}
+
+public final class com/khushu/engine/core/geo/Latitude {
+	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/geo/Latitude;
+	public static fun constructor-impl (D)D
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (DLjava/lang/Object;)Z
+	public static final fun equals-impl0 (DD)Z
+	public final fun getDegrees ()D
+	public fun hashCode ()I
+	public static fun hashCode-impl (D)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (D)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()D
+}
+
+public final class com/khushu/engine/core/geo/Location {
+	public static final field Companion Lcom/khushu/engine/core/geo/Location$Companion;
+	public synthetic fun <init> (DDDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (DDDLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-FFFJEIY ()D
+	public final fun component2-HABJ4FA ()D
+	public final fun component3-zbHCIek ()D
+	public final fun copy-1S9x8K4 (DDD)Lcom/khushu/engine/core/geo/Location;
+	public static synthetic fun copy-1S9x8K4$default (Lcom/khushu/engine/core/geo/Location;DDDILjava/lang/Object;)Lcom/khushu/engine/core/geo/Location;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAltitudeMeters-zbHCIek ()D
+	public final fun getLatitude-FFFJEIY ()D
+	public final fun getLongitude-HABJ4FA ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/core/geo/Location$Companion {
+	public final fun of (DDD)Lcom/khushu/engine/core/geo/Location;
+	public static synthetic fun of$default (Lcom/khushu/engine/core/geo/Location$Companion;DDDILjava/lang/Object;)Lcom/khushu/engine/core/geo/Location;
+}
+
+public final class com/khushu/engine/core/geo/Longitude {
+	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/geo/Longitude;
+	public static fun constructor-impl (D)D
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (DLjava/lang/Object;)Z
+	public static final fun equals-impl0 (DD)Z
+	public final fun getDegrees ()D
+	public fun hashCode ()I
+	public static fun hashCode-impl (D)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (D)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()D
+}
+
+public final class com/khushu/engine/core/units/ArcMinutes {
+	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/units/ArcMinutes;
+	public static fun constructor-impl (D)D
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (DLjava/lang/Object;)Z
+	public static final fun equals-impl0 (DD)Z
+	public final fun getValue ()D
+	public fun hashCode ()I
+	public static fun hashCode-impl (D)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (D)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()D
+}
+
+public final class com/khushu/engine/core/units/Degrees {
+	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/units/Degrees;
+	public static fun constructor-impl (D)D
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (DLjava/lang/Object;)Z
+	public static final fun equals-impl0 (DD)Z
+	public final fun getValue ()D
+	public fun hashCode ()I
+	public static fun hashCode-impl (D)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (D)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()D
+}
+
+public final class com/khushu/engine/core/units/Kilometers {
+	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/units/Kilometers;
+	public static fun constructor-impl (D)D
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (DLjava/lang/Object;)Z
+	public static final fun equals-impl0 (DD)Z
+	public final fun getValue ()D
+	public fun hashCode ()I
+	public static fun hashCode-impl (D)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (D)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()D
+}
+
+public final class com/khushu/engine/core/units/Radians {
+	public static final field Companion Lcom/khushu/engine/core/units/Radians$Companion;
+	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/units/Radians;
+	public static fun constructor-impl (D)D
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (DLjava/lang/Object;)Z
+	public static final fun equals-impl0 (DD)Z
+	public final fun getValue ()D
+	public fun hashCode ()I
+	public static fun hashCode-impl (D)I
+	public static final fun toDegrees-Uf8F044 (D)D
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (D)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()D
+}
+
+public final class com/khushu/engine/core/units/Radians$Companion {
+	public final fun ofDegrees-zOj8m3g (D)D
+}
+

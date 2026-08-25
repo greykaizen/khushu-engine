@@ -1,0 +1,20 @@
+public final class com/khushu/engine/qibla/Qibla {
+	public static final field INSTANCE Lcom/khushu/engine/qibla/Qibla;
+	public static final field KAABA_LATITUDE_DEG D
+	public static final field KAABA_LONGITUDE_DEG D
+	public final fun bearing (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
+}
+
+public final class com/khushu/engine/qibla/QiblaBearing {
+	public synthetic fun <init> (DDLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-Uf8F044 ()D
+	public final fun component2-1xieZJw ()D
+	public final fun copy-AIj9kzk (DD)Lcom/khushu/engine/qibla/QiblaBearing;
+	public static synthetic fun copy-AIj9kzk$default (Lcom/khushu/engine/qibla/QiblaBearing;DDILjava/lang/Object;)Lcom/khushu/engine/qibla/QiblaBearing;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBearingDegFromNorth-Uf8F044 ()D
+	public final fun getGreatCircleDistanceKm-1xieZJw ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

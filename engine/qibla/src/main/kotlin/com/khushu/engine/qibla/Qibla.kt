@@ -1,13 +1,15 @@
 package com.khushu.engine.qibla
 
 import com.khushu.engine.core.geo.Location
+import com.khushu.engine.core.units.Degrees
+import com.khushu.engine.core.units.Kilometers
 
 /** Initial great-circle bearing from north, plus the remaining distance to the Kaaba. */
 data class QiblaBearing(
     /** Compass bearing in degrees [0, 360). */
-    val bearingDegFromNorth: Double,
-    /** Great-circle distance to the Kaaba in kilometres. */
-    val greatCircleDistanceKm: Double,
+    val bearingDegFromNorth: Degrees,
+    /** Great-circle distance to the Kaaba. */
+    val greatCircleDistanceKm: Kilometers,
 )
 
 /**
@@ -44,8 +46,8 @@ object Qibla {
         )
 
         return QiblaBearing(
-            bearingDegFromNorth = bearing,
-            greatCircleDistanceKm = EARTH_RADIUS_KM * centralAngleRad,
+            bearingDegFromNorth = Degrees(bearing),
+            greatCircleDistanceKm = Kilometers(EARTH_RADIUS_KM * centralAngleRad),
         )
     }
 }

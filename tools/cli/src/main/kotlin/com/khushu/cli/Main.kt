@@ -201,7 +201,7 @@ private fun events(a: Args) {
 
 private fun qibla(a: Args) {
     val b = engine.qibla.bearing(location(a))
-    println("qibla bearing %.2f° from north · distance %.0f km".format(b.bearingDegFromNorth, b.greatCircleDistanceKm))
+    println("qibla bearing %.2f° from north · distance %.0f km".format(b.bearingDegFromNorth.value, b.greatCircleDistanceKm.value))
 }
 
 private fun repoRoot(): java.nio.file.Path {
