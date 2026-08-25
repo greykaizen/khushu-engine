@@ -60,14 +60,62 @@ class KhushuEngine {
     // ── Namespaces: pure delegation, zero logic ─────────────────────────────
 
     class PrayerApi internal constructor() {
-        fun times(location: Location, date: LocalDate, params: PrayerConfiguration = PrayerConfiguration()): PrayerTimesResult =
-            Prayer.times(location, date, params)
+        fun times(location: Location, date: LocalDate, config: PrayerConfiguration = PrayerConfiguration()): PrayerTimesResult =
+            Prayer.times(location, date, config)
 
-        fun status(location: Location, now: Instant, zoneId: ZoneId, params: PrayerConfiguration = PrayerConfiguration()): PrayerStatus =
-            Prayer.status(location, now, zoneId, params)
+        fun timesForRange(
+            location: Location,
+            start: LocalDate,
+            endInclusive: LocalDate,
+            config: PrayerConfiguration = PrayerConfiguration(),
+        ): List<PrayerTimesResult> = Prayer.timesForRange(location, start, endInclusive, config)
 
-        fun tahajjudWindow(location: Location, date: LocalDate, params: PrayerConfiguration = PrayerConfiguration()): TahajjudWindow? =
-            Prayer.tahajjudWindow(location, date, params)
+        fun month(location: Location, yearMonth: YearMonth, config: PrayerConfiguration = PrayerConfiguration()): List<PrayerTimesResult> =
+            Prayer.month(location, yearMonth, config)
+
+        fun status(location: Location, now: Instant, zoneId: ZoneId, config: PrayerConfiguration = PrayerConfiguration()): PrayerStatus =
+            Prayer.status(location, now, zoneId, config)
+
+        /** Compact sequence around [now]: previous/current/next by radius. */
+        fun navigationSequence(
+            location: Location,
+            now: Instant,
+            zoneId: ZoneId,
+            before: Int = 0,
+            after: Int = 1,
+            config: PrayerConfiguration = PrayerConfiguration(),
+        ): List<Prayer.Entry> = Prayer.navigation(location, now, zoneId, before, after, config)
+
+        /** Category-labeled worship occurrences for a civil day. */
+        fun occasionsOn(location: Location, date: LocalDate, config: PrayerConfiguration = PrayerConfiguration()): List<Prayer.Occurrence> =
+            Prayer.occasionsOn(location, date, config)
+
+        fun tahajjudWindow(location: Location, date: LocalDate, config: PrayerConfiguration = PrayerConfiguration()): TahajjudWindow? =
+            Prayer.tahajjudWindow(location, date, config)
+
+        val windows = WindowsApi()
+
+        inner class WindowsApi internal constructor() {
+            fun imsak(location: Location, date: LocalDate, minutesBeforeFajr: Int = 10, config: PrayerConfiguration = PrayerConfiguration()): Instant? =
+                Prayer.imsak(location, date, minutesBeforeFajr, config)
+
+            fun duha(location: Location, date: LocalDate, config: PrayerConfiguration = PrayerConfiguration()): ClosedRange<Instant>? =
+                Prayer.duhaWindow(location, date, config)
+
+            fun forbidden(location: Location, date: LocalDate, lateAfternoonMarginMinutes: Int = 20, config: PrayerConfiguration = PrayerConfiguration()): Prayer.ForbiddenWindows =
+                Prayer.forbiddenWindows(location, date, lateAfternoonMarginMinutes, config)
+
+            fun fastingFacts(location: Location, date: LocalDate, imsakMinutesBeforeFajr: Int = 10, config: PrayerConfiguration = PrayerConfiguration()): Prayer.FastingFacts =
+                Prayer.fastingFacts(location, date, imsakMinutesBeforeFajr, config)
+
+            fun travelFacts(
+                location: Location,
+                date: LocalDate,
+                travelledDistanceKm: Double,
+                distanceThresholdKm: Double? = null,
+                config: PrayerConfiguration = PrayerConfiguration(),
+            ): Prayer.TravelFacts = Prayer.travelFacts(location, date, travelledDistanceKm, distanceThresholdKm, config)
+        }
     }
 
     class AstronomyApi internal constructor() {

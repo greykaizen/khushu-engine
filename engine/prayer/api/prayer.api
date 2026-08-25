@@ -72,8 +72,20 @@ public final class com/khushu/engine/prayer/Madhab : java/lang/Enum {
 
 public final class com/khushu/engine/prayer/Prayer {
 	public static final field INSTANCE Lcom/khushu/engine/prayer/Prayer;
+	public final fun duhaWindow (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lkotlin/ranges/ClosedRange;
+	public static synthetic fun duhaWindow$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lkotlin/ranges/ClosedRange;
+	public final fun fastingFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
+	public static synthetic fun fastingFacts$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
+	public final fun forbiddenWindows (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
+	public static synthetic fun forbiddenWindows$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
+	public final fun imsak (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/time/Instant;
+	public static synthetic fun imsak$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/time/Instant;
 	public final fun month (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun month$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun navigation (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;IILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun navigation$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;IILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun occasionsOn (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun occasionsOn$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun status (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerStatus;
 	public static synthetic fun status$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerStatus;
 	public final fun tahajjudWindow (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/TahajjudWindow;
@@ -82,6 +94,102 @@ public final class com/khushu/engine/prayer/Prayer {
 	public static synthetic fun times$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
 	public final fun timesForRange (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun timesForRange$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun travelFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+	public static synthetic fun travelFacts$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+}
+
+public final class com/khushu/engine/prayer/Prayer$Entry {
+	public fun <init> (Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;)V
+	public final fun component1 ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun copy (Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;)Lcom/khushu/engine/prayer/Prayer$Entry;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Prayer$Entry;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$Entry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInstant ()Ljava/time/Instant;
+	public final fun getKind ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Prayer$FastingFacts {
+	public fun <init> (Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/time/Instant;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun copy (Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Prayer$FastingFacts;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFastEnd ()Ljava/time/Instant;
+	public final fun getFastStart ()Ljava/time/Instant;
+	public final fun getImsak ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Prayer$ForbiddenWindows {
+	public fun <init> (Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;)V
+	public final fun component1 ()Lkotlin/ranges/ClosedRange;
+	public final fun component2 ()Lkotlin/ranges/ClosedRange;
+	public final fun component3 ()Lkotlin/ranges/ClosedRange;
+	public final fun copy (Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;Lkotlin/ranges/ClosedRange;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAfterFajrUntilSunrise ()Lkotlin/ranges/ClosedRange;
+	public final fun getBeforeSunset ()Lkotlin/ranges/ClosedRange;
+	public final fun getZawaal ()Lkotlin/ranges/ClosedRange;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Prayer$NightDivisionMethod : java/lang/Enum {
+	public static final field MAGHRIB_TO_FAJR Lcom/khushu/engine/prayer/Prayer$NightDivisionMethod;
+	public static final field SUNSET_TO_FAJR Lcom/khushu/engine/prayer/Prayer$NightDivisionMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/Prayer$NightDivisionMethod;
+	public static fun values ()[Lcom/khushu/engine/prayer/Prayer$NightDivisionMethod;
+}
+
+public final class com/khushu/engine/prayer/Prayer$OccasionCategory : java/lang/Enum {
+	public static final field BOUNDARY_EVENT Lcom/khushu/engine/prayer/Prayer$OccasionCategory;
+	public static final field OBLIGATORY Lcom/khushu/engine/prayer/Prayer$OccasionCategory;
+	public static final field VOLUNTARY Lcom/khushu/engine/prayer/Prayer$OccasionCategory;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/Prayer$OccasionCategory;
+	public static fun values ()[Lcom/khushu/engine/prayer/Prayer$OccasionCategory;
+}
+
+public final class com/khushu/engine/prayer/Prayer$Occurrence {
+	public fun <init> (Ljava/lang/String;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;Lcom/khushu/engine/prayer/Prayer$OccasionCategory;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Lcom/khushu/engine/prayer/Prayer$OccasionCategory;
+	public final fun copy (Ljava/lang/String;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;Lcom/khushu/engine/prayer/Prayer$OccasionCategory;)Lcom/khushu/engine/prayer/Prayer$Occurrence;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Prayer$Occurrence;Ljava/lang/String;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;Lcom/khushu/engine/prayer/Prayer$OccasionCategory;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$Occurrence;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCategory ()Lcom/khushu/engine/prayer/Prayer$OccasionCategory;
+	public final fun getInstant ()Ljava/time/Instant;
+	public final fun getKind ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public final fun getLabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Prayer$TravelFacts {
+	public fun <init> (Ljava/lang/Boolean;Ljava/util/Set;Ljava/time/Instant;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/lang/Boolean;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun copy (Ljava/lang/Boolean;Ljava/util/Set;Ljava/time/Instant;Ljava/time/Instant;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Prayer$TravelFacts;Ljava/lang/Boolean;Ljava/util/Set;Ljava/time/Instant;Ljava/time/Instant;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDhuhrJoinsAsrAt ()Ljava/time/Instant;
+	public final fun getMaghribJoinsIshaAt ()Ljava/time/Instant;
+	public final fun getQasrEligibleByDistance ()Ljava/lang/Boolean;
+	public final fun getShortenable ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/khushu/engine/prayer/PrayerAudit {

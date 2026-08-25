@@ -110,6 +110,7 @@ class DayApi internal constructor() {
 class CachedEngine(val delegate: KhushuEngine = KhushuEngine()) {
 
     private val prayerCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.prayer.PrayerTimesResult>()
+    private val prayerMonthCache = java.util.concurrent.ConcurrentHashMap<String, List<com.khushu.engine.prayer.PrayerTimesResult>>()
     private val sunCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.astronomy.SolarPosition>()
     private val moonStateCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.astronomy.MoonState>()
     private val hijriCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.calendar.HijriDate>()
@@ -121,6 +122,19 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine()) {
     fun prayerTimes(location: Location, date: LocalDate, params: PrayerConfiguration = PrayerConfiguration()) =
         prayerCache.getOrPut("${location.key()}|$date|${params.hashCode()}") {
             delegate.prayer.times(location, date, params)
+        }
+
+    /**
+     * Whole-month memoization for calendar/scroll UIs: prefetch next month on
+     * swipe; repeated swipes never recompute. Keyed (Location, YearMonth, Config).
+     */
+    fun prayerMonth(
+        location: Location,
+        yearMonth: java.time.YearMonth,
+        params: PrayerConfiguration = PrayerConfiguration(),
+    ): List<com.khushu.engine.prayer.PrayerTimesResult> =
+        prayerMonthCache.getOrPut("${location.key()}|$yearMonth|${params.hashCode()}") {
+            delegate.prayer.month(location, yearMonth, params)
         }
 
     fun sunPosition(location: Location, instant: Instant) =
@@ -137,6 +151,6 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine()) {
         hijriCache.getOrPut("$date|$offsetDays") { delegate.calendar.hijri(date, offsetDays) }
 
     fun clearCaches() {
-        prayerCache.clear(); sunCache.clear(); moonStateCache.clear(); hijriCache.clear()
+        prayerCache.clear(); prayerMonthCache.clear(); sunCache.clear(); moonStateCache.clear(); hijriCache.clear()
     }
 }
