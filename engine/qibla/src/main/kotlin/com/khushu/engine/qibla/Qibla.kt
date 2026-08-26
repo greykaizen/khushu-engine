@@ -32,7 +32,7 @@ object Qibla {
      * Generic initial great-circle bearing from [from] toward [to], plus the
      * distance between them. [bearing] delegates here with Kaaba constants.
      */
-    fun bearingBetween(from: Location, to: Location): Pair<Double, Double> {
+    fun bearingBetween(from: Location, to: Location): BearingAndDistance {
         val lat1 = Math.toRadians(from.latitude.degrees)
         val lon1 = Math.toRadians(from.longitude.degrees)
         val lat2 = Math.toRadians(to.latitude.degrees)
@@ -49,7 +49,7 @@ object Qibla {
                 kotlin.math.cos(lat1) * kotlin.math.cos(lat2) * kotlin.math.cos(dLon))
                 .coerceIn(-1.0, 1.0),
         )
-        return Pair(b, EARTH_RADIUS_KM * central)
+        return BearingAndDistance(Degrees(b), Kilometers(EARTH_RADIUS_KM * central))
     }
 
     /**
@@ -94,28 +94,12 @@ object Qibla {
         return out.sortedBy { it.instant }
     }
 
+    /** Bearing + distance from [location] toward the Kaaba. */
     fun bearing(location: Location): QiblaBearing {
-        val lat1 = Math.toRadians(location.latitude.degrees)
-        val lon1 = Math.toRadians(location.longitude.degrees)
-        val lat2 = Math.toRadians(KAABA_LATITUDE_DEG)
-        val lon2 = Math.toRadians(KAABA_LONGITUDE_DEG)
-
-        val dLon = lon2 - lon1
-        val y = kotlin.math.sin(dLon)
-        val x = kotlin.math.cos(lat1) * kotlin.math.tan(lat2) - kotlin.math.sin(lat1) * kotlin.math.cos(dLon)
-        var bearing = Math.toDegrees(kotlin.math.atan2(y, x)) % 360.0
-        if (bearing < 0) bearing += 360.0
-
-        // Central angle via the spherical law of cosines.
-        val centralAngleRad = kotlin.math.acos(
-            (kotlin.math.sin(lat1) * kotlin.math.sin(lat2) +
-                kotlin.math.cos(lat1) * kotlin.math.cos(lat2) * kotlin.math.cos(dLon))
-                .coerceIn(-1.0, 1.0),
-        )
-
+        val generic = bearingBetween(location, Location.of(KAABA_LATITUDE_DEG, KAABA_LONGITUDE_DEG))
         return QiblaBearing(
-            bearingDegFromNorth = Degrees(bearing),
-            greatCircleDistanceKm = Kilometers(EARTH_RADIUS_KM * centralAngleRad),
+            bearingDegFromNorth = generic.bearingDegFromNorth,
+            greatCircleDistanceKm = generic.distanceKm,
         )
     }
 }

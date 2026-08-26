@@ -193,7 +193,7 @@ public final class com/khushu/engine/KhushuEngine$PrayerApi$WindowsApi {
 
 public final class com/khushu/engine/KhushuEngine$QiblaApi {
 	public final fun bearing (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
-	public final fun bearingBetween (Lcom/khushu/engine/core/geo/Location;Lcom/khushu/engine/core/geo/Location;)Lkotlin/Pair;
+	public final fun bearingBetween (Lcom/khushu/engine/core/geo/Location;Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/BearingAndDistance;
 	public final fun relativeSunAngle (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;D)Lcom/khushu/engine/qibla/SunQiblaRelation;
 	public static synthetic fun relativeSunAngle$default (Lcom/khushu/engine/KhushuEngine$QiblaApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;DILjava/lang/Object;)Lcom/khushu/engine/qibla/SunQiblaRelation;
 	public final fun shadowVerification (ILcom/khushu/engine/core/geo/Location;)Ljava/util/List;

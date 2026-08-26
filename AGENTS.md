@@ -68,7 +68,8 @@ khushu-engine/
 ```
 
 ```
-core ↑ astronomy ↑ {calendar, prayer}      qibla, zakat → core only
+core ↑ astronomy ↑ {calendar, prayer}      qibla → core+astronomy
+zakat → core+calendar (hawl hijri-day math; acyclic)
 ```
 
 Hard rules, enforced by Gradle (undeclared/reverse deps fail the build):

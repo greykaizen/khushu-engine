@@ -150,8 +150,8 @@ public final class com/khushu/engine/zakat/ZakatRules {
 	public final fun getCAMEL_SCHEDULE ()Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
 	public final fun getCATTLE_SCHEDULE ()Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
 	public final fun getSHEEP_SCHEDULE ()Lcom/khushu/engine/zakat/ZakatRules$LivestockSchedule;
-	public final fun hawlPeriod (Ljava/time/LocalDate;ILkotlin/jvm/functions/Function2;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
-	public static synthetic fun hawlPeriod$default (Lcom/khushu/engine/zakat/ZakatRules;Ljava/time/LocalDate;ILkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public final fun hawlPeriod (Ljava/time/LocalDate;I)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
+	public static synthetic fun hawlPeriod$default (Lcom/khushu/engine/zakat/ZakatRules;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
 	public final fun livestockDue (Lcom/khushu/engine/zakat/ZakatRules$Species;I)Lcom/khushu/engine/zakat/ZakatRules$LivestockDue;
 	public final fun livestockNisab (Lcom/khushu/engine/zakat/ZakatRules$Species;)I
 	public final fun rikazDue (D)D

@@ -12,13 +12,10 @@ import kotlin.test.assertTrue
  */
 class ZakatRulesTest {
 
-    private fun hijriBridge(d: LocalDate, off: Int) =
-        com.khushu.engine.calendar.HijriCalendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
-
     @Test
     fun hawlAnniversaryIsOneHijriYearLater() {
         // Owned 2025-03-01 = 1 Ramadan 1446 → anniversary = 1 Ramadan 1447.
-        val period = ZakatRules.hawlPeriod(LocalDate.of(2025, 3, 1), 0, ::hijriBridge)
+        val period = ZakatRules.hawlPeriod(LocalDate.of(2025, 3, 1))
         val h = com.khushu.engine.calendar.HijriCalendar.hijri(period.anniversary)
         assertEquals(1447, h.year)
         assertEquals(9, h.month)

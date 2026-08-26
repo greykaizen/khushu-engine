@@ -27,12 +27,12 @@ object ZakatRules {
     fun hawlPeriod(
         ownershipStart: LocalDate,
         offsetDays: Int = 0,
-        hijri: (LocalDate, Int) -> Triple<Int, Int, Int>,
     ): HawlPeriod {
-        val (y, m, d) = hijri(ownershipStart, offsetDays)
+        val h = com.khushu.engine.calendar.HijriCalendar.hijri(ownershipStart, offsetDays)
+        val y = h.year; val m = h.month; val d = h.day
         val targetYear = y + 1
         for (day in d downTo maxOf(1, d - 2)) {
-            val candidate = findCivilDate(targetYear, m, day, offsetDays, hijri)
+            val candidate = findCivilDate(targetYear, m, day, offsetDays)
             if (candidate != null && !candidate.isBefore(ownershipStart)) {
                 return HawlPeriod(
                     starts = ownershipStart,
@@ -58,11 +58,10 @@ object ZakatRules {
 
     private fun findCivilDate(
         year: Int, month: Int, day: Int, offsetDays: Int,
-        hijri: (LocalDate, Int) -> Triple<Int, Int, Int>,
     ): LocalDate? {
         fun rank(date: LocalDate): Long {
-            val (hy, hm, hd) = hijri(date, offsetDays)
-            return hy.toLong() * 10000 + hm * 100 + hd
+            val h = com.khushu.engine.calendar.HijriCalendar.hijri(date, offsetDays)
+            return h.year.toLong() * 10000 + h.month * 100 + h.day
         }
         val target = year.toLong() * 10000 + month * 100 + day
 

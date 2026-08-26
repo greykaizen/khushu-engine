@@ -27,7 +27,7 @@ subprojects {
                     from(components["java"])
                     groupId = "com.khushu"
                     artifactId = module
-                    version = "1.3.0"
+                    version = "1.3.1"
                     pom {
                         name.set("Khushu Engine — ${project.name}")
                         description.set(

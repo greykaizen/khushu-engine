@@ -252,7 +252,7 @@ class KhushuEngine {
         fun bearing(location: Location): QiblaBearing = Qibla.bearing(location)
 
         /** Generic great-circle initial bearing + distance between two locations. */
-        fun bearingBetween(from: Location, to: Location): Pair<Double, Double> =
+        fun bearingBetween(from: Location, to: Location): com.khushu.engine.qibla.BearingAndDistance =
             Qibla.bearingBetween(from, to)
 
         /**
@@ -301,9 +301,7 @@ class KhushuEngine {
          * capability — the zakat module stays independent of calendar.
          */
         fun hawlPeriod(ownershipStart: LocalDate, offsetDays: Int = 0): com.khushu.engine.zakat.ZakatRules.HawlPeriod =
-            com.khushu.engine.zakat.ZakatRules.hawlPeriod(ownershipStart, offsetDays) { d, off ->
-                HijriCalendar.hijri(d, off).let { Triple(it.year, it.month, it.day) }
-            }
+            com.khushu.engine.zakat.ZakatRules.hawlPeriod(ownershipStart, offsetDays)
 
         fun livestockSchedule(kind: com.khushu.engine.zakat.ZakatRules.Species) =
             com.khushu.engine.zakat.ZakatRules.scheduleFor(kind)

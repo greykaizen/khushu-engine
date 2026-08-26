@@ -20,8 +20,21 @@ data class QiblaAudit(
     val warnings: List<String> = emptyList(),
 )
 
+/** Generic great-circle bearing + distance between two locations. */
+data class BearingAndDistance(
+    /** Initial great-circle bearing from north, degrees [0, 360). */
+    val bearingDegFromNorth: Degrees,
+    val distanceKm: com.khushu.engine.core.units.Kilometers,
+)
+
 /**
  * One shadow-qibla verification window.
+ *
+ * `shadowBearingDeg` semantics by method:
+ * - [ShadowMethod.FACE_TOWARD_SUN]: the direction TO FACE (== local qibla);
+ *   your physical shadow falls exactly opposite this bearing.
+ * - [ShadowMethod.FACE_AWAY_FROM_SUN]: the direction TO FACE is opposite the
+ *   sun's azimuth; your shadow points along the qibla itself.
  *
  * Twice a year the sun stands directly over the Kaaba: anywhere the sun is up,
  * its azimuth equals the local qibla direction (shadow points AWAY from qibla).
