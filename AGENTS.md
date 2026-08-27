@@ -314,3 +314,14 @@ warehouse.
 migrate ONE domain (astronomy) → prove with tests → only then build out the
 remaining modules. Ten modules of speculative architecture before one proven
 domain is how this regrows the bloat we're escaping.
+
+### Deferred work queue (gated decisions, status 2026-08-28)
+
+| Item | Status | Gate |
+|---|---|---|
+| Host-app transplant (Osprey AR) | ⬜ deferred by user decision | `docs/ar-transplant.md` is the seam contract when resumed |
+| Qada/excused-range helpers | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/qada-design.md` citations, then code |
+| Zakat expansion (debt/shares/agri/jewelry/fitr) | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/v1.3-zakat-design.md` citations, then code |
+| Observed/moonsighting calendar mode | ⬜ not started | design-on-paper first (house rule) |
+| khushu-data content-pipeline sibling | ✅ superseded | absorbed by `khushu-data-api` (greykaizen/khushu-data-api) — do NOT scaffold separately |
+| KMP targets, recitation audio mirroring, adhan2↔cosinekitty rise/set unification | ⬜ open deferrals | unchanged |
