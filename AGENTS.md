@@ -62,7 +62,8 @@ khushu-engine/
 │   ├── calendar     ← Hijri conversion, Islamic events, fast-day rules
 │   ├── prayer       ← prayer time rules, madhab/convention/high-latitude params
 │   ├── qibla        ← great-circle bearing to the Kaaba
-│   └── zakat        ← nisab/rate rules (mal + fitrana)
+│   ├── zakat        ← nisab/rate rules (mal + fitrana)
+│   └── mushaf       ← glyph-atlas layout math: word/line/page fitting, RTL placement
 ├── tools/cli        ← human spot-check harness. NOT part of the public API.
 └── docs/            ← this file, divergences.md, api snapshots
 ```
@@ -280,8 +281,9 @@ The API is the product; internals are replaceable.
 | prayer | ✅ locked | wraps `com.batoulapps.adhan:adhan2-jvm:0.0.7`; 6184-case golden matrix green; polar-safe; see docs/divergences.md D1–D4 |
 | qibla | ✅ locked | bearing + distance owned by engine; cross-checked vs adhan2 (docs/divergences.md D5) |
 | zakat | ✅ locked | pure extraction from donor UI; fiqh spot cases + property tests; rate 0.025, madhab rules, saʿ conventions documented |
+| mushaf | ✅ locked | glyph-atlas layout math ported from donor QuranApp rasterizer/measurer; `Mushaf` capability (fit/measure/layout); golden + property tests green; atlas SPEC DATA lives in khushu-data-api (`inventory/atlas/`), engine stays content-free |
 | facade | ✅ locked | thin delegation namespaces (`engine.astronomy.sun.*` etc.), zero logic |
-| cli | 🟨 usable | all spec §7 commands incl. `verify` (both golden suites PASS); not part of public API |
+| cli | ✅ locked | all spec §7 commands incl. `verify` (both golden suites PASS); not part of public API |
 | goldens | ✅ dumped | prayer 6184 cases (adhan2 0.0.7, incl. date-line site); astronomy 576 cases (donor AR path); regenerable in-repo via tools/golden-dumper |
 
 Legend: ⬜ planned · 🟨 in progress · ✅ locked (all verification green)

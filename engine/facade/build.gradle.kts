@@ -11,6 +11,7 @@ dependencies {
     api(project(":engine:prayer"))
     api(project(":engine:qibla"))
     api(project(":engine:zakat"))
+    api(project(":engine:mushaf"))
     testImplementation(kotlin("test"))
 }
 

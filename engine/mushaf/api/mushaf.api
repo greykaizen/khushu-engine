@@ -1,0 +1,251 @@
+public final class com/khushu/engine/mushaf/AtlasFontMetrics {
+	public fun <init> (IIIII)V
+	public synthetic fun <init> (IIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun copy (IIIII)Lcom/khushu/engine/mushaf/AtlasFontMetrics;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/AtlasFontMetrics;IIIIIILjava/lang/Object;)Lcom/khushu/engine/mushaf/AtlasFontMetrics;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAscenderFu ()I
+	public final fun getDescenderFu ()I
+	public final fun getHeightFu ()I
+	public final fun getLineGapFu ()I
+	public final fun getUnitsPerEm ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/AtlasSpec {
+	public fun <init> (Lcom/khushu/engine/mushaf/AtlasFontMetrics;ILjava/util/Map;)V
+	public final fun component1 ()Lcom/khushu/engine/mushaf/AtlasFontMetrics;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/util/Map;
+	public final fun copy (Lcom/khushu/engine/mushaf/AtlasFontMetrics;ILjava/util/Map;)Lcom/khushu/engine/mushaf/AtlasSpec;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/AtlasSpec;Lcom/khushu/engine/mushaf/AtlasFontMetrics;ILjava/util/Map;ILjava/lang/Object;)Lcom/khushu/engine/mushaf/AtlasSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFont ()Lcom/khushu/engine/mushaf/AtlasFontMetrics;
+	public final fun getGlyphs ()Ljava/util/Map;
+	public final fun getPpem ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/AyahLayout {
+	public fun <init> (IILjava/util/List;Ljava/util/List;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (IILjava/util/List;Ljava/util/List;)Lcom/khushu/engine/mushaf/AyahLayout;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/AyahLayout;IILjava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/mushaf/AyahLayout;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGlyphs ()Ljava/util/List;
+	public final fun getHeightPx ()I
+	public final fun getLines ()Ljava/util/List;
+	public final fun getWidthPx ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/AyahLine {
+	public fun <init> (IFFFLjava/util/List;)V
+	public final fun component1 ()I
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (IFFFLjava/util/List;)Lcom/khushu/engine/mushaf/AyahLine;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/AyahLine;IFFFLjava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/mushaf/AyahLine;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBoxHeightPx ()F
+	public final fun getGlyphs ()Ljava/util/List;
+	public final fun getIndex ()I
+	public final fun getTopPx ()F
+	public final fun getWidthPx ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/GlyphMetrics {
+	public fun <init> (Lcom/khushu/engine/mushaf/GlyphSrcRect;IID)V
+	public synthetic fun <init> (Lcom/khushu/engine/mushaf/GlyphSrcRect;IIDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/mushaf/GlyphSrcRect;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()D
+	public final fun copy (Lcom/khushu/engine/mushaf/GlyphSrcRect;IID)Lcom/khushu/engine/mushaf/GlyphMetrics;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/GlyphMetrics;Lcom/khushu/engine/mushaf/GlyphSrcRect;IIDILjava/lang/Object;)Lcom/khushu/engine/mushaf/GlyphMetrics;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdvance ()D
+	public final fun getBearingX ()I
+	public final fun getBearingY ()I
+	public final fun getRect ()Lcom/khushu/engine/mushaf/GlyphSrcRect;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/GlyphPlacement {
+	public fun <init> (IDDDD)V
+	public synthetic fun <init> (IDDDDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun copy (IDDDD)Lcom/khushu/engine/mushaf/GlyphPlacement;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/GlyphPlacement;IDDDDILjava/lang/Object;)Lcom/khushu/engine/mushaf/GlyphPlacement;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGlyphId ()I
+	public final fun getXAdvanceFu ()D
+	public final fun getXOffsetFu ()D
+	public final fun getYAdvanceFu ()D
+	public final fun getYOffsetFu ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/GlyphSrcRect {
+	public fun <init> (IIIII)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun copy (IIIII)Lcom/khushu/engine/mushaf/GlyphSrcRect;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/GlyphSrcRect;IIIIIILjava/lang/Object;)Lcom/khushu/engine/mushaf/GlyphSrcRect;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getH ()I
+	public final fun getTextureIndex ()I
+	public final fun getW ()I
+	public final fun getX ()I
+	public final fun getY ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/LineLayout {
+	public fun <init> (FFFLjava/util/List;)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (FFFLjava/util/List;)Lcom/khushu/engine/mushaf/LineLayout;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/LineLayout;FFFLjava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/mushaf/LineLayout;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBaselineYPx ()F
+	public final fun getBoxHeightPx ()F
+	public final fun getWidthPx ()F
+	public final fun getWords ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/LineMeasure {
+	public fun <init> (ZLjava/util/List;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (ZLjava/util/List;)Lcom/khushu/engine/mushaf/LineMeasure;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/LineMeasure;ZLjava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/mushaf/LineMeasure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCentered ()Z
+	public final fun getWordWidthsPx ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/LineWord {
+	public fun <init> (IFFFFFLjava/util/List;)V
+	public final fun component1 ()I
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun component5 ()F
+	public final fun component6 ()F
+	public final fun component7 ()Ljava/util/List;
+	public final fun copy (IFFFFFLjava/util/List;)Lcom/khushu/engine/mushaf/LineWord;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/LineWord;IFFFFFLjava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/mushaf/LineWord;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGlyphs ()Ljava/util/List;
+	public final fun getLeftPx ()F
+	public final fun getTightHeightPx ()F
+	public final fun getTightMinYPx ()F
+	public final fun getTopPx ()F
+	public final fun getWidthPx ()F
+	public final fun getWordIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/Mushaf {
+	public static final field CENTERED_GAP_FRACTION F
+	public static final field FONT_SCALE_AT_MAX_WIDTH F
+	public static final field FONT_SCALE_AT_MIN_WIDTH F
+	public static final field INSTANCE Lcom/khushu/engine/mushaf/Mushaf;
+	public static final field LINE_HEIGHT_MULTIPLIER F
+	public static final field LINE_SHRINK_MIN F
+	public static final field MIN_INTER_WORD_GAP_FRACTION F
+	public static final field SCREEN_WIDTH_DP_MAX F
+	public static final field SCREEN_WIDTH_DP_MIN F
+	public static final field WIDE_LINE_FILL_THRESHOLD F
+	public final fun fitLineShrink (FFZ)F
+	public final fun fitPageScale (Ljava/util/List;FFF)F
+	public final fun layoutAyah (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;FFFF)Lcom/khushu/engine/mushaf/AyahLayout;
+	public static synthetic fun layoutAyah$default (Lcom/khushu/engine/mushaf/Mushaf;Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;FFFFILjava/lang/Object;)Lcom/khushu/engine/mushaf/AyahLayout;
+	public final fun layoutLine (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;FFF)Lcom/khushu/engine/mushaf/LineLayout;
+	public final fun layoutWord (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;F)Lcom/khushu/engine/mushaf/WordLayout;
+	public final fun lineHeightPx (F)F
+	public final fun measureLineWidthPx (Ljava/util/List;ZF)F
+	public final fun measureWordWidthPx (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;F)F
+	public final fun screenWidthScale (F)F
+	public final fun wordWidthFu (Ljava/util/List;)D
+}
+
+public final class com/khushu/engine/mushaf/PlacedGlyph {
+	public fun <init> (IIIIIIFFFF)V
+	public final fun component1 ()I
+	public final fun component10 ()F
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()F
+	public final fun component8 ()F
+	public final fun component9 ()F
+	public final fun copy (IIIIIIFFFF)Lcom/khushu/engine/mushaf/PlacedGlyph;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/PlacedGlyph;IIIIIIFFFFILjava/lang/Object;)Lcom/khushu/engine/mushaf/PlacedGlyph;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDstH ()F
+	public final fun getDstW ()F
+	public final fun getDstX ()F
+	public final fun getDstY ()F
+	public final fun getGlyphId ()I
+	public final fun getSrcH ()I
+	public final fun getSrcW ()I
+	public final fun getSrcX ()I
+	public final fun getSrcY ()I
+	public final fun getTextureIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/mushaf/WordLayout {
+	public fun <init> (FFFLjava/util/List;)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (FFFLjava/util/List;)Lcom/khushu/engine/mushaf/WordLayout;
+	public static synthetic fun copy$default (Lcom/khushu/engine/mushaf/WordLayout;FFFLjava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/mushaf/WordLayout;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGlyphs ()Ljava/util/List;
+	public final fun getTightHeightPx ()F
+	public final fun getTightMinYPx ()F
+	public final fun getWidthPx ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

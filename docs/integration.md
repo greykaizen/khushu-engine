@@ -177,6 +177,62 @@ engine.qibla.solarAlignmentInstants(2026).forEach { instant ->
 }
 ```
 
+## 10. Mushaf rendering (glyph-atlas pipeline)
+
+Pixel-perfect Quran pages without runtime font shaping: khushu-data-api
+distributes pre-rasterized glyph atlases (`inventory/atlas/{script}/6x.zip`),
+and the engine's `mushaf` module turns them into pixel positions. The engine
+never reads bundles — hosts hand it parsed specs.
+
+```kotlin
+// 1. Pull bundle pieces through the data-api (host-provided transport)
+val content = KhushuContent(fetcher)                       // khushu-data-api
+val meta  = content.quran.atlas.meta("uthmani")            // font metrics
+val layer = content.quran.atlas.glyphTable("uthmani")      // glyph rects+bearings
+val byWord = content.quran.atlas.placementsByWord("uthmani") // word text -> placements
+
+// 2. Map onto engine specs (field names mirror 1:1)
+val spec = AtlasSpec(
+    font = AtlasFontMetrics(meta.font.unitsPerEm, meta.font.ascenderFu, meta.font.descenderFu),
+    ppem = layer.ppem,
+    glyphs = layer.glyphs.mapValues { (_, g) ->
+        GlyphMetrics(GlyphSrcRect(g.textureIndex, g.x, g.y, g.w, g.h), g.bearingX, g.bearingY, g.advance)
+    }.mapKeys { it.key.toInt() },
+)
+
+// 3. Page fitting: measure the lines of one mushaf page, then one uniform scale
+val pageLines = content.quran.pageLines("qpc", page)       // data-api layout spec
+val words = content.quran.wordRegistry("uthmani")          // word id -> text
+val measures = pageLines.filter { it.type == LineType.AYAH }.map { line ->
+    LineMeasure(
+        centered = line.isCentered,
+        wordWidthsPx = /* line's words looked up in `byWord`,
+            Mushaf.measureWordWidthPx(spec, placements, baseFontSizePx) each */,
+    )
+}
+val scale = engine.mushaf.fitPageScale(measures, contentWidthPx, baseFontSizePx, fallbackScale)
+val fontSizePx = baseFontSizePx * scale
+
+// 4. Blit: absolute pixel destinations for every glyph on the page
+val layout: AyahLayout = engine.mushaf.layoutAyah(
+    spec, wordPlacementLists, fontSizePx,
+    lineHeightPx = engine.mushaf.lineHeightPx(fontSizePx),
+    wordGapPx = fontSizePx * Mushaf.MIN_INTER_WORD_GAP_FRACTION,
+)
+layout.glyphs.forEach { g ->
+    // draw texture page g.textureIndex rect (srcX,srcY,srcW,srcH)
+    // at (dstX,dstY,dstW,dstH) — RTL order is already resolved
+}
+```
+
+Notes:
+- `atlas` bundle ids mirror mushaf scripts: `uthmani` ↔ qpc mushaf,
+  `dk_indopak*` ↔ indopak mushafs; `kfqpc_*` scripts are font-rendered
+  (no upstream atlas exists for them).
+- Word lookup is by WORD TEXT (unique per bundle — the donor's scheme).
+- Hosts may persist `placementsByWord` for cold-start performance; the
+  engine itself stays stateless and content-free.
+
 ## What the engine deliberately does NOT do
 
 | Feature | Where it belongs | How |
@@ -198,7 +254,7 @@ repositories {
     maven { url = uri("https://jitpack.io") } // transitive: cosinekitty astronomy (via :engine:astronomy)
 }
 dependencies {
-    implementation("com.khushu:engine-facade:1.0.0") // pulls all engine modules transitively
+    implementation("com.khushu:engine-facade:1.4.0") // pulls all engine modules transitively
 }
 ```
 

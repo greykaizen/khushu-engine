@@ -25,6 +25,13 @@ import com.khushu.engine.qibla.Qibla
 import com.khushu.engine.qibla.QiblaShadowEvent
 import com.khushu.engine.qibla.SunQiblaRelation
 import com.khushu.engine.qibla.QiblaBearing
+import com.khushu.engine.mushaf.AtlasSpec
+import com.khushu.engine.mushaf.AyahLayout
+import com.khushu.engine.mushaf.GlyphPlacement
+import com.khushu.engine.mushaf.LineLayout
+import com.khushu.engine.mushaf.LineMeasure
+import com.khushu.engine.mushaf.Mushaf
+import com.khushu.engine.mushaf.WordLayout
 import com.khushu.engine.zakat.FitranaResult
 import com.khushu.engine.zakat.Zakat
 import com.khushu.engine.zakat.ZakatAssets
@@ -48,6 +55,7 @@ import java.time.ZoneOffset
  * engine.calendar.hijri(localDate, offsetDays)
  * engine.qibla.bearing(location)
  * engine.zakat.mal(assets, params)
+ * engine.mushaf.layoutAyah(atlasSpec, words, fontSizePx, lineHeightPx, wordGapPx)
  * ```
  */
 class KhushuEngine {
@@ -57,6 +65,7 @@ class KhushuEngine {
     val calendar = CalendarApi()
     val qibla = QiblaApi()
     val zakat = ZakatApi()
+    val mushaf = MushafApi()
 
     /** Whole-day composite: every fact of one civil date in a single pass. */
     val day = com.khushu.engine.DayApi()
@@ -317,5 +326,54 @@ class KhushuEngine {
 
         fun rikazDue(treasureValue: Double): Double =
             com.khushu.engine.zakat.ZakatRules.rikazDue(treasureValue)
+    }
+
+    class MushafApi internal constructor() {
+        fun wordWidthFu(placements: List<GlyphPlacement>): Double = Mushaf.wordWidthFu(placements)
+
+        fun measureWordWidthPx(spec: AtlasSpec, placements: List<GlyphPlacement>, fontSizePx: Float): Float =
+            Mushaf.measureWordWidthPx(spec, placements, fontSizePx)
+
+        fun measureLineWidthPx(wordWidthsPx: List<Float>, centered: Boolean, baseFontSizePx: Float): Float =
+            Mushaf.measureLineWidthPx(wordWidthsPx, centered, baseFontSizePx)
+
+        fun screenWidthScale(lineInnerWidthDp: Float): Float = Mushaf.screenWidthScale(lineInnerWidthDp)
+
+        /** One uniform font scale per page (median-fill; see `Mushaf.fitPageScale`). */
+        fun fitPageScale(
+            lines: List<LineMeasure>,
+            contentWidthPx: Float,
+            baseFontSizePx: Float,
+            fallbackScale: Float,
+        ): Float = Mushaf.fitPageScale(lines, contentWidthPx, baseFontSizePx, fallbackScale)
+
+        fun fitLineShrink(measuredWidthPx: Float, maxLineWidthPx: Float, bounded: Boolean): Float =
+            Mushaf.fitLineShrink(measuredWidthPx, maxLineWidthPx, bounded)
+
+        fun lineHeightPx(fontSizePx: Float): Float = Mushaf.lineHeightPx(fontSizePx)
+
+        fun layoutWord(spec: AtlasSpec, placements: List<GlyphPlacement>, fontSizePx: Float): WordLayout =
+            Mushaf.layoutWord(spec, placements, fontSizePx)
+
+        fun layoutLine(
+            spec: AtlasSpec,
+            words: List<List<GlyphPlacement>>,
+            fontSizePx: Float,
+            lineHeightPx: Float,
+            wordGapPx: Float,
+        ): LineLayout = Mushaf.layoutLine(spec, words, fontSizePx, lineHeightPx, wordGapPx)
+
+        /**
+         * Full ayah layout with optional greedy wrapping — absolute pixel
+         * destinations for every glyph (hosts blit atlas texture rects there).
+         */
+        fun layoutAyah(
+            spec: AtlasSpec,
+            words: List<List<GlyphPlacement>>,
+            fontSizePx: Float,
+            lineHeightPx: Float,
+            wordGapPx: Float,
+            maxLineWidthPx: Float = 0f,
+        ): AyahLayout = Mushaf.layoutAyah(spec, words, fontSizePx, lineHeightPx, wordGapPx, maxLineWidthPx)
     }
 }

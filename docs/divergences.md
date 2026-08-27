@@ -170,6 +170,21 @@ references, never gospel (AGENTS.md §2).
   `requiresScholarReview` instead of guessing. Grazing/trade-purpose
   distinctions remain caller policy (v1.3).
 
+### D20. Mushaf layout engine — port provenance, license, and placement
+- Glyph-atlas layout math (word measuring, median-fill page fitting,
+  line-shrink fitting, RTL glyph placement, tune constants) ported from
+  QuranApp's `AtlasAyahRasterizer.layoutWord`, `QuranTextMeasurer`
+  (fitPageScale/fitLineShrink) and `TextDecorator` constants. QuranApp is
+  GPLv3 family — compatible with the engine's GPLv3 LICENSE; no relicensing
+  involved.
+- Placement decision: the MATH lives in the engine
+  (`com.khushu.engine.mushaf`, deterministic, content-free); all atlas and
+  mushaf SPEC DATA (font metrics, glyph tables, page/line layouts, textures)
+  lives in khushu-data-api (`inventory/atlas/`, `inventory/mushaf_layout/`)
+  and enters the engine by value. The engine still ships zero Quran content.
+- Donor golden cases (uthmani 2:255 placements) plus invariant property
+  tests guard the port; donor tune constants kept verbatim.
+
 ## Maintenance log
 
 (Not divergences — environment and dependency decisions recorded for traceability.)

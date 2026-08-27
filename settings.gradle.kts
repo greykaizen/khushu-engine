@@ -14,6 +14,7 @@ include(
     ":engine:prayer",
     ":engine:qibla",
     ":engine:zakat",
+    ":engine:mushaf",
     ":engine:facade",
     ":tools:cli",
 )

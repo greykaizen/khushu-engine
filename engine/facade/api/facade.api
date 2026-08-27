@@ -89,6 +89,7 @@ public final class com/khushu/engine/KhushuEngine {
 	public final fun getAstronomy ()Lcom/khushu/engine/KhushuEngine$AstronomyApi;
 	public final fun getCalendar ()Lcom/khushu/engine/KhushuEngine$CalendarApi;
 	public final fun getDay ()Lcom/khushu/engine/DayApi;
+	public final fun getMushaf ()Lcom/khushu/engine/KhushuEngine$MushafApi;
 	public final fun getPrayer ()Lcom/khushu/engine/KhushuEngine$PrayerApi;
 	public final fun getQibla ()Lcom/khushu/engine/KhushuEngine$QiblaApi;
 	public final fun getZakat ()Lcom/khushu/engine/KhushuEngine$ZakatApi;
@@ -158,6 +159,20 @@ public final class com/khushu/engine/KhushuEngine$CalendarApi$LunarApi {
 
 public final class com/khushu/engine/KhushuEngine$CalendarApi$ObservanceApi {
 	public final fun on (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;Lcom/khushu/engine/calendar/ObservanceContext;Lcom/khushu/engine/calendar/EventRegistry;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/KhushuEngine$MushafApi {
+	public final fun fitLineShrink (FFZ)F
+	public final fun fitPageScale (Ljava/util/List;FFF)F
+	public final fun layoutAyah (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;FFFF)Lcom/khushu/engine/mushaf/AyahLayout;
+	public static synthetic fun layoutAyah$default (Lcom/khushu/engine/KhushuEngine$MushafApi;Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;FFFFILjava/lang/Object;)Lcom/khushu/engine/mushaf/AyahLayout;
+	public final fun layoutLine (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;FFF)Lcom/khushu/engine/mushaf/LineLayout;
+	public final fun layoutWord (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;F)Lcom/khushu/engine/mushaf/WordLayout;
+	public final fun lineHeightPx (F)F
+	public final fun measureLineWidthPx (Ljava/util/List;ZF)F
+	public final fun measureWordWidthPx (Lcom/khushu/engine/mushaf/AtlasSpec;Ljava/util/List;F)F
+	public final fun screenWidthScale (F)F
+	public final fun wordWidthFu (Ljava/util/List;)D
 }
 
 public final class com/khushu/engine/KhushuEngine$PrayerApi {

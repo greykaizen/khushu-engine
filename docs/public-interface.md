@@ -72,6 +72,27 @@ KhushuEngine()
   zakatDue, breakdown)` · `FitranaResult(saKg, dependents, pricePerKg,
   perPersonAmount, totalForHousehold)` — saʿ conventions 2.175 kg majority / 3.0 kg Hanafi
 
+## mushaf — com.khushu.engine.mushaf  (v1.4)
+Pure glyph-atlas layout computation for pixel-perfect mushaf rendering.
+Content-free: specs (font metrics, glyph table, word placements) are fed in
+by the host from khushu-data-api `inventory/atlas/` bundles.
+- Data: `AtlasFontMetrics(unitsPerEm, ascenderFu, descenderFu, heightFu, lineGapFu)` ·
+  `GlyphSrcRect(textureIndex, x, y, w, h)` · `GlyphMetrics(rect, bearingX, bearingY, advance)` ·
+  `AtlasSpec(font, ppem, glyphs)` · `GlyphPlacement(glyphId, xAdvanceFu, yAdvanceFu, xOffsetFu, yOffsetFu)` ·
+  `PlacedGlyph` · `WordLayout` · `LineLayout`/`LineWord` · `AyahLine`/`AyahLayout` · `LineMeasure`
+- `object Mushaf`:
+  - Tuning constants: `LINE_HEIGHT_MULTIPLIER 2f` · `FONT_SCALE_AT_MIN_WIDTH 0.85f` ·
+    `FONT_SCALE_AT_MAX_WIDTH 1.5f` · `SCREEN_WIDTH_DP_MIN 260f` · `SCREEN_WIDTH_DP_MAX 600f` ·
+    `CENTERED_GAP_FRACTION 0.22f` · `MIN_INTER_WORD_GAP_FRACTION 0.1f` ·
+    `LINE_SHRINK_MIN 0.16f` · `WIDE_LINE_FILL_THRESHOLD 0.82f`
+  - Measurement: `wordWidthFu(placements)` · `measureWordWidthPx(spec, placements, fontSizePx)` ·
+    `measureLineWidthPx(wordWidthsPx, centered, baseFontSizePx)` · `screenWidthScale(lineInnerWidthDp)`
+  - Fitting: `fitPageScale(lines, contentWidthPx, baseFontSizePx, fallbackScale)` ·
+    `fitLineShrink(measuredWidthPx, maxLineWidthPx, bounded)` · `lineHeightPx(fontSizePx)`
+  - Placement (RTL): `layoutWord(spec, placements, fontSizePx)` ·
+    `layoutLine(spec, words, fontSizePx, lineHeightPx, wordGapPx)` ·
+    `layoutAyah(spec, words, fontSizePx, lineHeightPx, wordGapPx, maxLineWidthPx=0)`
+
 ## tools (NOT public API)
 - `tools/cli`: prayer | sun | moon [--ym] | hijri | events | qibla | verify
 - `tools/golden-dumper/{prayer,astro}`: fixture regeneration (donor replicas)
