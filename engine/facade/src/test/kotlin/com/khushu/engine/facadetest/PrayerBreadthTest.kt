@@ -119,4 +119,43 @@ class PrayerBreadthTest {
         assertEquals("18.0°", info.fajrRule)
         assertEquals(PrayerStatus::class.java.simpleName.length > 0, true) // no-op guard for readability
     }
+
+    @Test
+    fun statsStreakIsReachableViaFacadeAndMatchesModule() {
+        val day1 = LocalDate.of(2026, 3, 2)
+        val obligatory = listOf(
+            PrayerStatus.Prayer.FAJR, PrayerStatus.Prayer.DHUHR, PrayerStatus.Prayer.ASR,
+            PrayerStatus.Prayer.MAGHRIB, PrayerStatus.Prayer.ISHA,
+        )
+        val records = obligatory.map { Prayer.PrayerLogRecord(day1, it, completed = true) }
+        val viaFacade = engine.prayer.stats.streak(records)
+        val viaModule = Prayer.streakStats(records)
+        assertEquals(viaModule, viaFacade)
+        assertEquals(1, viaFacade.currentStreakDays)
+    }
+
+    @Test
+    fun nextOccurrenceAndJumuahAndNightDivisionsReachableViaFacade() {
+        val anchor = LocalDate.of(2026, 8, 26).atTime(9, 0).atZone(zone).toInstant()
+
+        val fajr = engine.prayer.nextOccurrenceOf(PrayerStatus.Prayer.FAJR, london, anchor, zone)
+        assertNotNull(fajr)
+        assertTrue(fajr.instant > anchor)
+
+        val jumuah = engine.prayer.nextJumuah(london, anchor, zone)
+        assertNotNull(jumuah)
+        assertEquals(java.time.DayOfWeek.FRIDAY, jumuah.date.dayOfWeek)
+
+        val nd = engine.prayer.nightDivisions(london, LocalDate.of(2026, 3, 14))
+        assertNotNull(nd)
+        assertTrue(nd.firstThirdBegins < nd.midpoint)
+    }
+
+    @Test
+    fun fastingFactsForMonthReachableViaFacade() {
+        val facts = engine.prayer.windows.fastingFactsForMonth(london, YearMonth.of(2026, 4))
+        assertEquals(30, facts.size)
+        val day = engine.prayer.windows.fastingFacts(london, LocalDate.of(2026, 4, 15))
+        assertEquals(day, facts[14])
+    }
 }

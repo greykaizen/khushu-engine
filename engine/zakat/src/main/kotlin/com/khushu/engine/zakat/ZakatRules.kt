@@ -1,5 +1,7 @@
 package com.khushu.engine.zakat
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import java.time.LocalDate
 import kotlin.math.floor
 
@@ -171,7 +173,7 @@ object ZakatRules {
 
     /** Structured obligation for [count] animals of [kind]; null below nisab. */
     fun livestockDue(kind: Species, count: Int): LivestockDue? {
-        require(count >= 0)
+        validate(count >= 0) { InvalidParameterException("count", "$count", "must be >= 0") }
         val schedule = scheduleFor(kind)
         if (count < schedule.nisabThreshold) return null
 
@@ -242,7 +244,9 @@ object ZakatRules {
     }
 
     fun ushrDue(harvestValue: Double, irrigation: Irrigation): Double {
-        require(harvestValue >= 0.0)
+        validate(harvestValue >= 0.0) {
+            InvalidParameterException("harvestValue", "$harvestValue", "must be >= 0")
+        }
         return harvestValue * ushrRate(irrigation)
     }
 
@@ -251,7 +255,9 @@ object ZakatRules {
     const val RIKAZ_RATE = 0.20
 
     fun rikazDue(treasureValue: Double): Double {
-        require(treasureValue >= 0.0)
+        validate(treasureValue >= 0.0) {
+            InvalidParameterException("treasureValue", "$treasureValue", "must be >= 0")
+        }
         return treasureValue * RIKAZ_RATE
     }
 }

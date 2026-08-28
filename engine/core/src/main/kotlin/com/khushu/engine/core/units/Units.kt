@@ -1,5 +1,8 @@
 package com.khushu.engine.core.units
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
+
 /**
  * Dimensional units for boundaries where confusion between degrees, radians,
  * kilometres and arc-minutes is a real hazard. Raw Double still flows inside
@@ -9,15 +12,18 @@ package com.khushu.engine.core.units
 @JvmInline
 value class Degrees(val value: Double) {
     init {
-        require(value.isFinite()) { "angle must be finite" }
+        validate(value.isFinite()) {
+            InvalidParameterException("degrees", "$value", "must be finite")
+        }
     }
 }
 
 @JvmInline
 value class Radians(val value: Double) {
     init {
-        require(value.isFinite()) { "angle must be finite" }
-
+        validate(value.isFinite()) {
+            InvalidParameterException("radians", "$value", "must be finite")
+        }
     }
 
     companion object {
@@ -30,7 +36,9 @@ value class Radians(val value: Double) {
 @JvmInline
 value class Kilometers(val value: Double) {
     init {
-        require(value.isFinite() && value >= 0.0) { "distance must be finite and >= 0" }
+        validate(value.isFinite() && value >= 0.0) {
+            InvalidParameterException("kilometers", "$value", "must be finite and >= 0")
+        }
     }
 }
 
@@ -38,6 +46,8 @@ value class Kilometers(val value: Double) {
 @JvmInline
 value class ArcMinutes(val value: Double) {
     init {
-        require(value.isFinite()) { "arc length must be finite" }
+        validate(value.isFinite()) {
+            InvalidParameterException("arcMinutes", "$value", "must be finite")
+        }
     }
 }

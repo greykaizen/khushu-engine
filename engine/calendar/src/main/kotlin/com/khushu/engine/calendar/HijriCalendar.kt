@@ -1,6 +1,11 @@
 package com.khushu.engine.calendar
 
 import com.github.msarhan.ummalqura.calendar.UmmalquraCalendar
+import com.khushu.engine.core.error.HijriDayDoesNotExistException
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.NoResultException
+import com.khushu.engine.core.error.UpstreamComputationException
+import com.khushu.engine.core.error.validate
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -16,16 +21,26 @@ import java.util.Calendar
 object HijriCalendar {
 
     fun hijri(localDate: LocalDate, offsetDays: Int = 0): HijriDate {
-        require(offsetDays in -2..2) { "offsetDays must be within −2..+2" }
-        val cal = UmmalquraCalendar()
-        cal.timeInMillis = epochOf(localDate) + offsetDays * 86_400_000L
-        return HijriDate(
-            year = cal.get(Calendar.YEAR),
-            month = cal.get(Calendar.MONTH) + 1,
-            day = cal.get(Calendar.DAY_OF_MONTH),
-            monthName = monthName(cal.get(Calendar.MONTH) + 1),
-            offsetApplied = offsetDays,
-        )
+        validate(offsetDays in -2..2) {
+            InvalidParameterException("offsetDays", "$offsetDays", "must be within −2..+2")
+        }
+        return try {
+            val cal = UmmalquraCalendar()
+            cal.timeInMillis = epochOf(localDate) + offsetDays * 86_400_000L
+            HijriDate(
+                year = cal.get(Calendar.YEAR),
+                month = cal.get(Calendar.MONTH) + 1,
+                day = cal.get(Calendar.DAY_OF_MONTH),
+                monthName = monthName(cal.get(Calendar.MONTH) + 1),
+                offsetApplied = offsetDays,
+            )
+        } catch (e: Exception) {
+            throw UpstreamComputationException(
+                "ummalqura conversion of $localDate (offset $offsetDays); the Umm al-Qura " +
+                    "table covers 1300–1600 AH (≈ 1882–2174 CE)",
+                e,
+            )
+        }
     }
 
     /**
@@ -72,7 +87,13 @@ object HijriCalendar {
      * Throws when no such date exists (e.g. day 30 in a 29-day month).
      */
     fun hijriToGregorian(hijriYear: Int, hijriMonth: Int, hijriDay: Int, offsetDays: Int = 0): LocalDate {
-        require(hijriMonth in 1..12 && hijriDay in 1..30 && hijriYear > 0) { "invalid hijri date" }
+        validate(hijriMonth in 1..12 && hijriDay in 1..30 && hijriYear > 0) {
+            InvalidParameterException(
+                "hijriDate",
+                "$hijriDay-$hijriMonth-$hijriYear",
+                "year > 0, month in 1..12, day in 1..30",
+            )
+        }
         val estimate = LocalDate.of(2018, 9, 11)
             .plusDays(Math.round((hijriYear - 1440) * 354.36673))
             .plusDays(((hijriMonth - 1) * 29.530589).toLong())
@@ -92,8 +113,8 @@ object HijriCalendar {
         }
         val result = lo
         val h = hijri(result, offsetDays)
-        require(h.year == hijriYear && h.month == hijriMonth && h.day == hijriDay) {
-            "no civil date maps to $hijriDay-$hijriMonth-$hijriYear AH with offset $offsetDays (day may not exist)"
+        validate(h.year == hijriYear && h.month == hijriMonth && h.day == hijriDay) {
+            HijriDayDoesNotExistException(hijriYear, hijriMonth, hijriDay, offsetDays)
         }
         return result
     }
@@ -110,7 +131,9 @@ object HijriCalendar {
 
     /** Next civil date on which the given fixed hijri [month]/[day] falls, at or after [after]. */
     fun nextOccurrence(month: Int, day: Int, after: LocalDate, offsetDays: Int = 0): LocalDate {
-        require(month in 1..12 && day in 1..30) { "invalid hijri month/day" }
+        validate(month in 1..12 && day in 1..30) {
+            InvalidParameterException("hijriMonth/day", "$day-$month", "month in 1..12, day in 1..30")
+        }
         var probe = after
         // Hijri year of `probe`, then walk forward at most two years.
         val hStart = hijri(probe, offsetDays)
@@ -120,7 +143,7 @@ object HijriCalendar {
             }.getOrNull()
             if (target != null && !target.isBefore(after)) return target
         }
-        throw IllegalArgumentException(
+        throw NoResultException(
             "$day-$month does not occur in hijri years ${hStart.year} or ${hStart.year + 1} " +
                 "(the day may not exist in either year)",
         )

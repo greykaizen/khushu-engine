@@ -5,6 +5,8 @@ import com.khushu.engine.astronomy.internal.Ephemeris
 import com.khushu.engine.astronomy.internal.MoonTrackSolver
 import com.khushu.engine.astronomy.internal.HilalEngine
 import com.khushu.engine.astronomy.internal.LunarOrientationMath
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import com.khushu.engine.core.geo.Location
 import io.github.cosinekitty.astronomy.Body
 import java.time.Instant
@@ -177,8 +179,8 @@ object Astronomy {
 
         /** First occurrence of [targetPhaseDeg] (0/90/180/270) at or after [after]. */
         fun nextPhase(targetPhaseDeg: Double, after: Instant): UpcomingMoonPhase? {
-            require(targetPhaseDeg in listOf(0.0, 90.0, 180.0, 270.0)) {
-                "targetPhaseDeg must be one of 0/90/180/270"
+            validate(targetPhaseDeg in listOf(0.0, 90.0, 180.0, 270.0)) {
+                InvalidParameterException("targetPhaseDeg", "$targetPhaseDeg", "must be one of 0/90/180/270")
             }
             return Ephemeris.nextMoonPhaseMs(targetPhaseDeg, after.toEpochMilli())
                 ?.let { UpcomingMoonPhase(targetPhaseDeg, it) }
@@ -237,7 +239,9 @@ object Astronomy {
         fun distanceExtremes(from: Instant, to: Instant): List<MoonDistanceExtreme> {
             val fromMs = from.toEpochMilli()
             val toMs = to.toEpochMilli()
-            require(toMs > fromMs) { "empty scan window" }
+            validate(toMs > fromMs) {
+                InvalidParameterException("from/to", "$from..$to", "to must be after from (empty scan window)")
+            }
             val auKm = Ephemeris.AU_KM
             fun dist(tMs: Long): Double =
                 io.github.cosinekitty.astronomy.geoVector(
@@ -360,7 +364,9 @@ object Astronomy {
             zoneId: ZoneId,
             nights: Int = 8,
         ): List<com.khushu.engine.astronomy.HilalForecastDay> {
-            require(nights in 1..60)
+            validate(nights in 1..60) {
+                InvalidParameterException("nights", "$nights", "must be within 1..60")
+            }
             return (0 until nights).map { i ->
                 val d = from.plusDays(i.toLong())
                 com.khushu.engine.astronomy.HilalForecastDay(d, visibility(location, d, zoneId))

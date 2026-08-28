@@ -1,5 +1,7 @@
 package com.khushu.engine.calendar
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import java.time.LocalDate
 
 /**
@@ -16,7 +18,9 @@ data class CalendarParams(
     val tasuaAshura: Boolean = false,
 ) {
     init {
-        require(hijriOffsetDays in -2..2) { "hijriOffsetDays must be within −2..+2, was $hijriOffsetDays" }
+        validate(hijriOffsetDays in -2..2) {
+            InvalidParameterException("hijriOffsetDays", "$hijriOffsetDays", "must be within −2..+2")
+        }
     }
 }
 

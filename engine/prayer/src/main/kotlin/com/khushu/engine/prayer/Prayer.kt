@@ -1,5 +1,7 @@
 package com.khushu.engine.prayer
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.internal.PrayerCalculator
 import java.time.Instant
@@ -81,9 +83,15 @@ data class PrayerConfiguration(
     val rounding: RoundingPolicy? = null,
 ) {
     init {
-        require(ishaIntervalMinutes >= 0) { "ishaIntervalMinutes must be >= 0" }
-        require(fajrAngle in -60.0..60.0 && ishaAngle in -60.0..60.0) {
-            "twilight angles must be within [-60, 60] degrees"
+        validate(ishaIntervalMinutes >= 0) {
+            InvalidParameterException("ishaIntervalMinutes", "$ishaIntervalMinutes", "must be >= 0")
+        }
+        validate(fajrAngle in -60.0..60.0 && ishaAngle in -60.0..60.0) {
+            InvalidParameterException(
+                "fajrAngle/ishaAngle",
+                "$fajrAngle/$ishaAngle",
+                "twilight angles must be within [-60, 60] degrees",
+            )
         }
     }
 }
@@ -264,7 +272,9 @@ object Prayer {
         after: Int = 1,
         config: PrayerConfiguration = PrayerConfiguration(),
     ): List<Entry> {
-        require(before >= 0 && after >= 0)
+        validate(before >= 0 && after >= 0) {
+            InvalidParameterException("before/after", "$before/$after", "must both be >= 0")
+        }
         val civilToday = LocalDate.ofInstant(now, zoneId)
 
         fun dayOccurrences(date: LocalDate): List<Entry> {
@@ -335,7 +345,9 @@ object Prayer {
         excusedRanges: List<ClosedRange<LocalDate>> = emptyList(),
         config: PrayerConfiguration = PrayerConfiguration(),
     ): StreakStats {
-        require(records.isNotEmpty()) { "records must not be empty" }
+        validate(records.isNotEmpty()) {
+            InvalidParameterException("records", "empty", "must not be empty")
+        }
         val applicable = setOf(
             PrayerStatus.Prayer.FAJR,
             PrayerStatus.Prayer.DHUHR,
@@ -522,6 +534,110 @@ object Prayer {
     }
 
     private const val DEFAULT_MAJORITY_THRESHOLD_KM = 77.25
+
+    /**
+     * Objective fasting facts for every civil day of [yearMonth] — convenience
+     * over [fastingFacts] for Ramadan/seasonal screens. List order is day order.
+     */
+    fun fastingFactsForMonth(
+        location: Location,
+        yearMonth: java.time.YearMonth,
+        imsakMinutesBeforeFajr: Int = 10,
+        config: PrayerConfiguration = PrayerConfiguration(),
+    ): List<FastingFacts> =
+        generateSequence(yearMonth.atDay(1)) { it.plusDays(1) }
+            .takeWhile { java.time.YearMonth.from(it) == yearMonth }
+            .map { fastingFacts(location, it, imsakMinutesBeforeFajr, config) }
+            .toList()
+
+    // ── Night divisions ─────────────────────────────────────────────────────
+
+    /**
+     * The night following [date]'s sunset split into its fiqh divisions.
+     * Null when either boundary is uncomputable (polar).
+     */
+    data class NightDivisions(
+        /** Night begins: maghrib of [date]. */
+        val nightStarts: Instant,
+        /** First third of the night begins. */
+        val firstThirdBegins: Instant,
+        /** Islamic midnight — midpoint of the night (matches tahajjudWindow). */
+        val midpoint: Instant,
+        /** Last third of the night begins — the preferred Tahajjud time. */
+        val lastThirdBegins: Instant,
+        /** Night ends: fajr of the following day. */
+        val nightEnds: Instant,
+    )
+
+    /**
+     * Full night-division set for the night beginning at [date]'s maghrib.
+     * `midpoint` and `lastThirdBegins` reuse the adhan2-derived values when
+     * available; the first third is the exact one-third point of the night span.
+     */
+    fun nightDivisions(
+        location: Location,
+        date: LocalDate,
+        config: PrayerConfiguration = PrayerConfiguration(),
+    ): NightDivisions? {
+        val today = times(location, date, config)
+        val tomorrow = times(location, date.plusDays(1), config)
+        val start = today.maghrib.adjusted ?: return null
+        val end = tomorrow.fajr.adjusted ?: return null
+        val durMs = end.toEpochMilli() - start.toEpochMilli()
+        if (durMs <= 0) return null
+        return NightDivisions(
+            nightStarts = start,
+            firstThirdBegins = Instant.ofEpochMilli(start.toEpochMilli() + durMs / 3),
+            midpoint = today.midnight ?: Instant.ofEpochMilli(start.toEpochMilli() + durMs / 2),
+            lastThirdBegins = today.lastThirdOfNight
+                ?: Instant.ofEpochMilli(start.toEpochMilli() + 2 * durMs / 3),
+            nightEnds = end,
+        )
+    }
+
+    // ── Next-of-kind & Jumu'ah ──────────────────────────────────────────────
+
+    /**
+     * The next occurrence of a specific prayer [kind] strictly after [after].
+     * Returns null only when no such occurrence exists within the navigation
+     * horizon (extreme polar cases).
+     */
+    fun nextOccurrenceOf(
+        kind: PrayerStatus.Prayer,
+        location: Location,
+        after: Instant,
+        zoneId: java.time.ZoneId,
+        config: PrayerConfiguration = PrayerConfiguration(),
+    ): Entry? =
+        navigation(location, after, zoneId, before = 0, after = 35, config)
+            .firstOrNull { it.kind == kind }
+
+    /** The next Friday congregational prayer at or after an instant. */
+    data class Jumuah(val date: LocalDate, val dhuhr: Instant)
+
+    /**
+     * Next Jumu'ah (Friday dhuhr) strictly after [after]. Scans consecutive
+     * Fridays in [zoneId]; dhuhr falls back to the transit-anchored entry when
+     * the adjusted time is uncomputable.
+     */
+    fun nextJumuah(
+        location: Location,
+        after: Instant,
+        zoneId: java.time.ZoneId,
+        config: PrayerConfiguration = PrayerConfiguration(),
+    ): Jumuah? {
+        var d = LocalDate.ofInstant(after, zoneId)
+        while (d.dayOfWeek != java.time.DayOfWeek.FRIDAY) d = d.plusDays(1)
+        repeat(MAX_JUMUAH_SCAN_WEEKS) {
+            val t = times(location, d, config)
+            val dhuhr = t.dhuhr.adjusted ?: t.dhuhrEnters
+            if (dhuhr != null && dhuhr > after) return Jumuah(d, dhuhr)
+            d = d.plusDays(7)
+        }
+        return null
+    }
+
+    private const val MAX_JUMUAH_SCAN_WEEKS = 4
 
     // ── Occasions: category-labeled occurrences for a civil day ────────────
 

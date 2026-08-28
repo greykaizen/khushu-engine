@@ -2,6 +2,8 @@ package com.khushu.engine.astronomy.internal
 
 import com.khushu.engine.astronomy.CelestialPathPoint
 import com.khushu.engine.astronomy.DayMoon
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import com.khushu.engine.core.geo.Location
 import io.github.cosinekitty.astronomy.Body
 import java.time.LocalDate
@@ -84,7 +86,9 @@ internal object MoonTrackSolver {
         samples: Int,
         location: Location,
     ): List<CelestialPathPoint> {
-        require(samples > 1) { "pathSamplesPerDay must be > 1" }
+        validate(samples > 1) {
+            InvalidParameterException("pathSamplesPerDay", "$samples", "must be > 1")
+        }
         val span = nextDayStartMs - dayStartMs
         val step = span / (samples - 1).coerceAtLeast(1)
         return (0 until samples).mapNotNull { i ->

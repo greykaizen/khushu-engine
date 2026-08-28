@@ -1,5 +1,7 @@
 package com.khushu.engine.zakat
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import kotlin.math.roundToLong
 
 /**
@@ -69,8 +71,15 @@ object Zakat {
             NisabSource.GOLD -> assets.goldPricePerGram
             NisabSource.SILVER -> assets.silverPricePerGram
         }
-        require(priceOfNisabMetal > 0.0) {
-            "nisab source is ${params.nisabSource} but its market price was not provided"
+        validate(priceOfNisabMetal > 0.0) {
+            InvalidParameterException(
+                when (params.nisabSource) {
+                    NisabSource.GOLD -> "goldPricePerGram"
+                    NisabSource.SILVER -> "silverPricePerGram"
+                },
+                "$priceOfNisabMetal",
+                "nisab source is ${params.nisabSource} but its market price was not provided",
+            )
         }
         val threshold = round(nisabWeight * priceOfNisabMetal)
         val reached = net >= threshold && net > 0.0
@@ -97,8 +106,12 @@ object Zakat {
         pricePerKg: Double,
         madhab: ZakatMadhab = ZakatMadhab.HANAFI,
     ): FitranaResult {
-        require(dependents > 0) { "dependents must be positive" }
-        require(pricePerKg > 0.0) { "staple price must be positive" }
+        validate(dependents > 0) {
+            InvalidParameterException("dependents", "$dependents", "must be positive")
+        }
+        validate(pricePerKg > 0.0) {
+            InvalidParameterException("pricePerKg", "$pricePerKg", "staple price must be positive")
+        }
         val saKg = if (madhab == ZakatMadhab.HANAFI) SA_KG_HANAFI else SA_KG_MAJORITY
         val perPerson = round(saKg * pricePerKg)
         return FitranaResult(

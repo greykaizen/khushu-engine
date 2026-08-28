@@ -172,3 +172,45 @@ CachedEngine(delegate)  // opt-in memoization; semantic keys per AGENTS §6:
 
 ### fixtures
 - calendar: `hijri_golden.json` (3655 cases, donor ummalqura call path), regenerable via tools/golden-dumper/calendar.
+
+## v1.5 additions (2026-08)
+
+### core — error model (graceful failures)
+```
+KhushuInputFailure : IllegalArgumentException        // bad caller argument
+KhushuComputationFailure : IllegalStateException     // no legitimate answer / upstream
+InvalidParameterException(parameter, value, constraint) : KhushuInputFailure
+HijriDayDoesNotExistException(hijriYear, hijriMonth, hijriDay, offsetDays) : KhushuInputFailure
+NoResultException(detail) : KhushuComputationFailure
+UpstreamComputationException(detail, cause) : KhushuComputationFailure
+validate(condition) { failure }                       // structured require()
+```
+All engine entry points migrated from bare `require()`; ummalqura out-of-table
+dates (outside 1300–1600 AH) surface as typed UpstreamComputationException.
+Catch-compat: IAE/ISE catches keep working. See README §Error handling.
+
+### prayer
+```
+prayer.stats.streak(records, excusedRanges = [], config): StreakStats
+  // observance statistics over caller-supplied logs (streaks, per-prayer rates)
+prayer.nextOccurrenceOf(kind, location, after, zoneId, config): Entry?
+  // next occurrence of a specific prayer strictly after an instant
+prayer.nextJumuah(location, after, zoneId, config): Jumuah?   // (date, dhuhr)
+prayer.nightDivisions(location, date, config): NightDivisions?
+  // nightStarts/firstThirdBegins/midpoint/lastThirdBegins/nightEnds
+prayer.windows.fastingFactsForMonth(location, yearMonth, imsakMinutesBeforeFajr = 10, config)
+  : List<FastingFacts>
+```
+`NightDivisionMethod` enum: kept, intentionally unwired (deferred queue).
+
+### zakat / calendar gaps
+```
+zakat.ushrRate(irrigation): Double              // 0.10 natural / 0.05 artificial
+calendar.facts.dayOfYear(date, config): Int
+calendar.facts.remainingDaysInMonth(date, config): Int
+```
+
+### hygiene
+- KDoc on every public facade member (incl. @throws error contracts).
+- Removed dead `gradle/libs.versions.toml`; removed stale test-only @Suppress.
+- Dependency-bump runbook: docs/dependency-bumps.md. Deprecation policy: README.

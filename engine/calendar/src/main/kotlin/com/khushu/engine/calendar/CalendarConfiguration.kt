@@ -1,5 +1,8 @@
 package com.khushu.engine.calendar
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
+
 /**
  * Calendar-system strategy: extensible without rewriting the API.
  */
@@ -18,10 +21,16 @@ data class CalendarConfiguration(
     enum class Side { HIJRI, GREGORIAN }
 
     init {
-        require(primary == Side.HIJRI || secondary == Side.HIJRI) {
-            "at least one calendar must be Hijri — this engine's calendar capability is Islamic-first"
+        validate(primary == Side.HIJRI || secondary == Side.HIJRI) {
+            InvalidParameterException(
+                "primary/secondary",
+                "$primary/$secondary",
+                "at least one calendar must be Hijri — this engine's calendar capability is Islamic-first",
+            )
         }
-        require(hijriOffsetDays in -2..2) { "hijriOffsetDays must be within −2..+2" }
+        validate(hijriOffsetDays in -2..2) {
+            InvalidParameterException("hijriOffsetDays", "$hijriOffsetDays", "must be within −2..+2")
+        }
     }
 }
 

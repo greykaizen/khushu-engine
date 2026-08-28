@@ -256,7 +256,7 @@ repositories {
     maven { url = uri("https://jitpack.io") }
 }
 dependencies {
-    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.4.2")
+    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.5.0")
     // pulls all engine modules transitively (JitPack rewrites inter-module deps)
 }
 ```
@@ -274,7 +274,7 @@ repositories {
     maven { url = uri("https://jitpack.io") } // transitive: cosinekitty astronomy (via :engine:astronomy)
 }
 dependencies {
-    implementation("com.khushu:engine-facade:1.4.2") // pulls all engine modules transitively
+    implementation("com.khushu:engine-facade:1.5.0") // pulls all engine modules transitively
 }
 ```
 
@@ -285,7 +285,7 @@ dependencies {
 includeBuild("/path/to/khushu-engine")
 ```
 
-then depend on `com.khushu:engine-facade:1.4.2` — Gradle substitutes the
+then depend on `com.khushu:engine-facade:1.5.0` — Gradle substitutes the
 local project. Note: `jitpack.yml` pins the engine's CI/JitPack JDK to 21
 (`kotlin { jvmToolchain(21) }` everywhere).
 

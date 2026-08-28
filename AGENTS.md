@@ -275,14 +275,14 @@ The API is the product; internals are replaceable.
 
 | Module | Status | Donor source (Osprey path) |
 |---|---|---|
-| core | ✅ locked | typed geo units (`Latitude`/`Longitude`/`AltitudeMeters`/`Location`) |
-| astronomy | ✅ locked | cosinekitty 2.1.19 (JitPack) behind capability API; sun/moon/hilal + one-pass `moon.track`; 576-case golden matrix green; divergences D7-D8 |
-| calendar | ✅ locked | ummalqura-calendar 2.0.2 behind capability API; hijri/events/fastDays; authoritative anchor dates + round-trip properties; D10-D11 |
-| prayer | ✅ locked | wraps `com.batoulapps.adhan:adhan2-jvm:0.0.7`; 6184-case golden matrix green; polar-safe; see docs/divergences.md D1–D4 |
-| qibla | ✅ locked | bearing + distance owned by engine; cross-checked vs adhan2 (docs/divergences.md D5) |
-| zakat | ✅ locked | pure extraction from donor UI; fiqh spot cases + property tests; rate 0.025, madhab rules, saʿ conventions documented |
+| core | ✅ locked | typed geo units (`Latitude`/`Longitude`/`AltitudeMeters`/`Location`) + typed unit classes + **error model** (`KhushuInputFailure`/`KhushuComputationFailure`, fielded subtypes, IAE/ISE catch-compat; README §Error handling) |
+| astronomy | ✅ locked | cosinekitty 2.1.19 (JitPack) behind capability API; sun/moon/hilal + one-pass `moon.track` + eclipses/distance-extremes; 576-case golden matrix green; divergences D7-D8 |
+| calendar | ✅ locked | ummalqura-calendar 2.0.2 behind capability API; hijri/events/fastDays + `date`/`month`/`facts`/`events(registry)`/`observance`/`lunar` namespaces; out-of-table dates throw typed `UpstreamComputationException`; D10-D11 |
+| prayer | ✅ locked | wraps `com.batoulapps.adhan:adhan2-jvm:0.0.7`; 6184-case golden matrix green; polar-safe; + `stats.streak`, `nextOccurrenceOf`, `nextJumuah`, `nightDivisions`, `fastingFactsForMonth`; see docs/divergences.md D1–D4 |
+| qibla | ✅ locked | bearing + distance owned by engine; shadow-verification + relative sun angle; cross-checked vs adhan2 (docs/divergences.md D5) |
+| zakat | ✅ locked | mal + fitrana + hawl + livestock schedules + ushr + rikaz; fiqh spot cases + property tests; rate 0.025, madhab rules, saʿ conventions documented |
 | mushaf | ✅ locked | glyph-atlas layout math ported from donor QuranApp rasterizer/measurer; `Mushaf` capability (fit/measure/layout); golden + property tests green; atlas SPEC DATA lives in khushu-data-api (`inventory/atlas/`), engine stays content-free |
-| facade | ✅ locked | thin delegation namespaces (`engine.astronomy.sun.*` etc.), zero logic |
+| facade | ✅ locked | thin delegation namespaces (`engine.astronomy.sun.*` etc.), zero logic; KDoc on all public members; `DayApi.summary` composite + `CachedEngine` LRU decorator |
 | cli | ✅ locked | all spec §7 commands incl. `verify` (both golden suites PASS); not part of public API |
 | goldens | ✅ dumped | prayer 6184 cases (adhan2 0.0.7, incl. date-line site); astronomy 576 cases (donor AR path); regenerable in-repo via tools/golden-dumper |
 
@@ -323,5 +323,7 @@ domain is how this regrows the bloat we're escaping.
 | Qada/excused-range helpers | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/qada-design.md` citations, then code |
 | Zakat expansion (debt/shares/agri/jewelry/fitr) | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/v1.3-zakat-design.md` citations, then code |
 | Observed/moonsighting calendar mode | ⬜ not started | design-on-paper first (house rule) |
+| `NightDivisionMethod` wiring (sunset→fajr vs maghrib→fajr night division) | ⬜ enum kept, intentionally unwired (v1.5.0) | a host needing it + fiqh-source verification for both divisions |
+| Typed `Kilometers`-at-boundary retypes (`travelFacts`, `passagesOver` raw Doubles) | ⬜ breaking → 2.0.0 | host-integration milestone |
 | khushu-data content-pipeline sibling | ✅ superseded | absorbed by `khushu-data-api` (greykaizen/khushu-data-api) — do NOT scaffold separately |
 | KMP targets, recitation audio mirroring, adhan2↔cosinekitty rise/set unification | ⬜ open deferrals | unchanged |

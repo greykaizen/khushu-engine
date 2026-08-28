@@ -3,6 +3,7 @@ package com.khushu.engine
 import com.khushu.engine.astronomy.Astronomy
 import com.khushu.engine.astronomy.MoonState
 import com.khushu.engine.astronomy.RiseSet
+import com.khushu.engine.core.error.InvalidParameterException
 import com.khushu.engine.astronomy.SolarEvents
 import com.khushu.engine.calendar.HijriCalendar
 import com.khushu.engine.calendar.CalendarParams
@@ -45,6 +46,11 @@ data class DaySummary(
 
 class DayApi internal constructor() {
 
+    /**
+     * The full "today screen" composite: hijri date, events, fast rules,
+     * prayer times, sun/moon rise-set, solar events, and a noon moon sample —
+     * every fact computed exactly once in a single call.
+     */
     fun summary(
         location: Location,
         date: LocalDate,
@@ -226,6 +232,10 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
     internal fun cacheSize(name: String): Int = when (name) {
         "sunRiseSet" -> sunRiseSetCache.size()
         "daySummary" -> daySummaryCache.size()
-        else -> error("unknown cache: $name")
+        else -> throw InvalidParameterException(
+            "cacheName",
+            name,
+            "unknown cache; expected sunRiseSet or daySummary",
+        )
     }
 }

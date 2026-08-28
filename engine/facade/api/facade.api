@@ -79,6 +79,7 @@ public final class com/khushu/engine/DaySummary {
 public final class com/khushu/engine/FactsApi {
 	public final fun arafah (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
 	public final fun ashura (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
+	public final fun dayOfYear (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)I
 	public final fun eidAlAdha (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
 	public final fun eidAlFitr (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
 	public final fun firstTenDhulHijjah (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
@@ -89,6 +90,7 @@ public final class com/khushu/engine/FactsApi {
 	public final fun oddNightSeekCandidates (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
 	public final fun ramadan (ILcom/khushu/engine/calendar/CalendarConfiguration;)Lcom/khushu/engine/calendar/Facts$RamadanFacts;
 	public final fun ramadanProgress (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)Lkotlin/Pair;
+	public final fun remainingDaysInMonth (Ljava/time/LocalDate;Lcom/khushu/engine/calendar/CalendarConfiguration;)I
 	public final fun sacredMonths (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
 	public final fun tashreeqDays (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/util/List;
 	public final fun tasua (ILcom/khushu/engine/calendar/CalendarConfiguration;)Ljava/time/LocalDate;
@@ -193,11 +195,18 @@ public final class com/khushu/engine/KhushuEngine$MushafApi {
 }
 
 public final class com/khushu/engine/KhushuEngine$PrayerApi {
+	public final fun getStats ()Lcom/khushu/engine/KhushuEngine$PrayerApi$StatsApi;
 	public final fun getWindows ()Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;
 	public final fun month (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun month$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun navigationSequence (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;IILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun navigationSequence$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;IILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun nextJumuah (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$Jumuah;
+	public static synthetic fun nextJumuah$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$Jumuah;
+	public final fun nextOccurrenceOf (Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$Entry;
+	public static synthetic fun nextOccurrenceOf$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$Entry;
+	public final fun nightDivisions (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
+	public static synthetic fun nightDivisions$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
 	public final fun occasionsOn (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun occasionsOn$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun status (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerStatus;
@@ -210,11 +219,18 @@ public final class com/khushu/engine/KhushuEngine$PrayerApi {
 	public static synthetic fun timesForRange$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 }
 
+public final class com/khushu/engine/KhushuEngine$PrayerApi$StatsApi {
+	public final fun streak (Ljava/util/List;Ljava/util/List;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$StreakStats;
+	public static synthetic fun streak$default (Lcom/khushu/engine/KhushuEngine$PrayerApi$StatsApi;Ljava/util/List;Ljava/util/List;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$StreakStats;
+}
+
 public final class com/khushu/engine/KhushuEngine$PrayerApi$WindowsApi {
 	public final fun duha (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lkotlin/ranges/ClosedRange;
 	public static synthetic fun duha$default (Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lkotlin/ranges/ClosedRange;
 	public final fun fastingFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
 	public static synthetic fun fastingFacts$default (Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
+	public final fun fastingFactsForMonth (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;ILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun fastingFactsForMonth$default (Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun forbidden (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
 	public static synthetic fun forbidden$default (Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
 	public final fun imsak (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/time/Instant;
@@ -242,6 +258,7 @@ public final class com/khushu/engine/KhushuEngine$ZakatApi {
 	public static synthetic fun mal$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Lcom/khushu/engine/zakat/ZakatAssets;Lcom/khushu/engine/zakat/ZakatParams;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatResult;
 	public final fun rikazDue (D)D
 	public final fun ushrDue (DLcom/khushu/engine/zakat/ZakatRules$Irrigation;)D
+	public final fun ushrRate (Lcom/khushu/engine/zakat/ZakatRules$Irrigation;)D
 }
 
 public final class com/khushu/engine/MonthApi {

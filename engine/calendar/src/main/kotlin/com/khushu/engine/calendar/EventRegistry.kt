@@ -1,5 +1,7 @@
 package com.khushu.engine.calendar
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
@@ -79,8 +81,9 @@ class EventRegistry(private val offsetDays: Int = 0) {
 
     /** Next occurrence dates of a definition id at or after [after]. */
     fun upcoming(definitionId: String, after: LocalDate, count: Int = 1): List<EventOccurrence> {
-        require(count >= 1)
-        val def = definitions[definitionId] ?: throw IllegalArgumentException("unknown event id $definitionId")
+        validate(count >= 1) { InvalidParameterException("count", "$count", "must be >= 1") }
+        val def = definitions[definitionId]
+            ?: throw InvalidParameterException("definitionId", definitionId, "unknown event id; see EventRegistry.all")
         val out = mutableListOf<EventOccurrence>()
         var probeYear = HijriCalendar.hijri(after, offsetDays).year
         while (out.size < count && probeYear < after.year + 5) {

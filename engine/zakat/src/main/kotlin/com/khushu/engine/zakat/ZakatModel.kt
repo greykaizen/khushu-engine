@@ -1,5 +1,8 @@
 package com.khushu.engine.zakat
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
+
 /** Asr-school rules affecting what is zakatable and what is deductible. */
 enum class ZakatMadhab {
     /** Worn jewelry is zakatable · debts are deducted. */
@@ -42,11 +45,25 @@ data class ZakatAssets(
     val liabilities: Double = 0.0,
 ) {
     init {
-        listOf(
-            cash, investments, receivables, inventoryValue,
-            goldGrams, silverGrams, wornGoldGrams, wornSilverGrams, liabilities,
-        ).forEach { v -> require(v >= 0.0 && v.isFinite()) { "asset amounts must be finite and >= 0" } }
-        require(goldPricePerGram >= 0.0 && silverPricePerGram >= 0.0) { "prices must be >= 0" }
+        mapOf(
+            "cash" to cash,
+            "investments" to investments,
+            "receivables" to receivables,
+            "inventoryValue" to inventoryValue,
+            "goldGrams" to goldGrams,
+            "silverGrams" to silverGrams,
+            "wornGoldGrams" to wornGoldGrams,
+            "wornSilverGrams" to wornSilverGrams,
+            "liabilities" to liabilities,
+        ).forEach { (name, v) ->
+            validate(v >= 0.0 && v.isFinite()) {
+                InvalidParameterException(name, "$v", "must be finite and >= 0")
+            }
+        }
+        mapOf("goldPricePerGram" to goldPricePerGram, "silverPricePerGram" to silverPricePerGram)
+            .forEach { (name, v) ->
+                validate(v >= 0.0) { InvalidParameterException(name, "$v", "must be >= 0") }
+            }
     }
 }
 

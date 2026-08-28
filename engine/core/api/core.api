@@ -1,3 +1,41 @@
+public final class com/khushu/engine/core/error/ErrorsKt {
+	public static final fun validate (ZLkotlin/jvm/functions/Function0;)V
+}
+
+public final class com/khushu/engine/core/error/HijriDayDoesNotExistException : com/khushu/engine/core/error/KhushuInputFailure {
+	public fun <init> (IIII)V
+	public final fun getHijriDay ()I
+	public final fun getHijriMonth ()I
+	public final fun getHijriYear ()I
+	public final fun getOffsetDays ()I
+}
+
+public final class com/khushu/engine/core/error/InvalidParameterException : com/khushu/engine/core/error/KhushuInputFailure {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getConstraint ()Ljava/lang/String;
+	public final fun getParameter ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+}
+
+public class com/khushu/engine/core/error/KhushuComputationFailure : java/lang/IllegalStateException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public class com/khushu/engine/core/error/KhushuInputFailure : java/lang/IllegalArgumentException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/khushu/engine/core/error/NoResultException : com/khushu/engine/core/error/KhushuComputationFailure {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getDetail ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/core/error/UpstreamComputationException : com/khushu/engine/core/error/KhushuComputationFailure {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public final fun getDetail ()Ljava/lang/String;
+}
+
 public final class com/khushu/engine/core/geo/AltitudeMeters {
 	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/geo/AltitudeMeters;
 	public static fun constructor-impl (D)D

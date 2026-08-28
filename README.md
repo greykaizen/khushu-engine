@@ -41,7 +41,7 @@ repositories {
 
 dependencies {
     // The facade pulls every module transitively — one line is enough.
-    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.4.2")
+    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.5.0")
 }
 ```
 
@@ -54,7 +54,7 @@ cd khushu-engine && ./gradlew publishToMavenLocal
 
 ```kotlin
 repositories { mavenLocal(); mavenCentral(); maven { url = uri("https://jitpack.io") } }
-dependencies { implementation("com.khushu:engine-facade:1.4.2") }
+dependencies { implementation("com.khushu:engine-facade:1.5.0") }
 ```
 
 ### Composite build (developing the engine alongside your app)
@@ -64,7 +64,7 @@ dependencies { implementation("com.khushu:engine-facade:1.4.2") }
 includeBuild("/path/to/khushu-engine")
 ```
 
-then depend on `com.khushu:engine-facade:1.4.2` — Gradle substitutes the
+then depend on `com.khushu:engine-facade:1.5.0` — Gradle substitutes the
 local project.
 
 ## Usage
@@ -108,7 +108,7 @@ and bounded as LRU (GPS jitter never grows memory without bound).
 
 Every module above is published as its **own artifact** and can be consumed
 directly — e.g. a qibla-only tool needs just
-`com.github.greykaizen.khushu-engine:engine-qibla:1.4.2` (it drags in only
+`com.github.greykaizen.khushu-engine:engine-qibla:1.5.0` (it drags in only
 what it uses). The **facade is the recommended entry point** for
 full-featured apps: one dependency, capability namespaces, and room to grow
 without build-file churn.
@@ -122,8 +122,39 @@ without build-file churn.
   regenerable via `tools/golden-dumper`.
 - **Typed units at the boundary** — degrees/radians, latitudes, distances are
   distinct types; raw doubles never cross an API edge.
+- **Structured failures** — when a call fails you get a typed, fielded
+  exception, never a guess (see below).
 - Deterministic: no clocks, no caches, no ambient state inside the engine
   (caching is an opt-in decorator).
+
+## Error handling
+
+The engine never throws bare, unstructured exceptions. Every failure is a
+subtype of `com.khushu.engine.core.error.KhushuInputFailure` (bad argument) or
+`KhushuComputationFailure` (no legitimate answer / upstream library failure):
+
+| Type | Meaning | Carries |
+|---|---|---|
+| `InvalidParameterException` | one named parameter violated the contract | `parameter`, `value`, `constraint` |
+| `HijriDayDoesNotExistException` | the hijri date does not exist (e.g. 30 in a 29-day month) | `hijriYear/Month/Day`, `offsetDays` |
+| `NoResultException` | requested fact absent (no occurrence in the search window, empty scan window) | `detail` |
+| `UpstreamComputationException` | adhan2 / cosinekitty / ummalqura rejected the input (message names the valid range) | `detail`, original `cause` |
+
+Compatibility: input failures extend `IllegalArgumentException`, computation
+failures extend `IllegalStateException` — existing catches keep working. Catch
+`KhushuInputFailure` / `KhushuComputationFailure` for broad handling, or the
+concrete class to read the structured fields. Message format is stable and
+log-greppable: `khushu: invalid <parameter> = <value> (<constraint>)`.
+Legitimate absence is never an exception: polar days return null fields /
+empty lists, and `PrayerTimesResult.audit.warnings` explains why.
+
+## Deprecation policy
+
+- Removals/renames are **breaking** and only happen in a major version, with at
+  least one minor version of `@Deprecated(WARNING, ReplaceWith=…)` beforehand.
+- Additions are minor versions (the API today is addition-only).
+- Every deprecation updates the `api/*.api` snapshots and the README in the
+  same change. Third-party dependency bumps follow `docs/dependency-bumps.md`.
 
 ## Requirements
 
@@ -138,6 +169,8 @@ without build-file churn.
 - `docs/public-interface.md` — full API snapshot
 - `docs/divergences.md` — every deliberate deviation from donor code, with
   provenance
+- `docs/dependency-bumps.md` — runbook for upgrading pinned libraries without
+  silent behavior drift
 
 ## Content pairing
 
