@@ -306,6 +306,8 @@ public final class com/khushu/engine/calendar/HijriArithmetic {
 public final class com/khushu/engine/calendar/HijriCalendar {
 	public static final field INSTANCE Lcom/khushu/engine/calendar/HijriCalendar;
 	public final fun builtInDefinitions ()Ljava/util/List;
+	public final fun daysUntil (IILjava/time/LocalDate;I)J
+	public static synthetic fun daysUntil$default (Lcom/khushu/engine/calendar/HijriCalendar;IILjava/time/LocalDate;IILjava/lang/Object;)J
 	public final fun events (Ljava/time/LocalDate;I)Ljava/util/List;
 	public static synthetic fun events$default (Lcom/khushu/engine/calendar/HijriCalendar;Ljava/time/LocalDate;IILjava/lang/Object;)Ljava/util/List;
 	public final fun eventsInRange (Lkotlin/ranges/ClosedRange;I)Ljava/util/List;
@@ -323,8 +325,10 @@ public final class com/khushu/engine/calendar/HijriCalendar {
 	public static synthetic fun nextOccurrence$default (Lcom/khushu/engine/calendar/HijriCalendar;IILjava/time/LocalDate;IILjava/lang/Object;)Ljava/time/LocalDate;
 }
 
-public final class com/khushu/engine/calendar/HijriDate {
+public final class com/khushu/engine/calendar/HijriDate : java/lang/Comparable {
 	public fun <init> (IIILjava/lang/String;I)V
+	public fun compareTo (Lcom/khushu/engine/calendar/HijriDate;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public final fun component1 ()I
 	public final fun component2 ()I
 	public final fun component3 ()I

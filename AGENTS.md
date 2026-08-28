@@ -280,14 +280,14 @@ The API is the product; internals are replaceable.
 |---|---|---|
 | core | ✅ locked | typed geo units (`Latitude`/`Longitude`/`AltitudeMeters`/`Location`) + typed unit classes + **error model** (`KhushuInputFailure`/`KhushuComputationFailure`, fielded subtypes, IAE/ISE catch-compat; README §Error handling) |
 | astronomy | ✅ locked | cosinekitty 2.1.19 (JitPack) behind capability API; sun/moon/hilal + one-pass `moon.track` + eclipses/distance-extremes; 576-case golden matrix green; divergences D7-D8 |
-| calendar | ✅ locked | ummalqura-calendar 2.0.2 behind capability API; hijri/events/fastDays + `date`/`month`/`facts`/`events(registry)`/`observance`/`lunar` namespaces; out-of-table dates throw typed `UpstreamComputationException`; D10-D11 |
+| calendar | ✅ locked | ummalqura-calendar 2.0.2 behind capability API; hijri/events/fastDays + `date`/`month`/`facts`/`events(registry)`/`observance`/`lunar` namespaces; out-of-table dates throw typed `UpstreamComputationException`; D10-D11; v1.8: seek-nights+Tashreeq unified into `builtInDefinitions` (events()↔registry agree), offset-correct definition-driven `upcomingEvents`, `daysUntil` countdowns, `HijriDate : Comparable` |
 | prayer | ✅ locked | wraps `com.batoulapps.adhan:adhan2-jvm:0.0.7`; 6184-case golden matrix green; polar-safe; + `stats.streak`, `nextOccurrenceOf`, `nextJumuah`, `nightDivisions`, `fastingFactsForMonth`; see docs/divergences.md D1–D4 |
 | qibla | ✅ locked | bearing + distance owned by engine; shadow-verification + relative sun angle; cross-checked vs adhan2 (docs/divergences.md D5) |
 | zakat | ✅ locked | mal + fitrana + hawl + livestock schedules + ushr + rikaz; fiqh spot cases + property tests; rate 0.025, madhab rules, saʿ conventions documented |
 | mushaf | ✅ locked | glyph-atlas layout math ported from donor QuranApp rasterizer/measurer; `Mushaf` capability (fit/measure/layout); golden + property tests green; atlas SPEC DATA lives in khushu-data-api (`inventory/atlas/`), engine stays content-free |
-| facade | ✅ locked | thin delegation namespaces (`engine.astronomy.sun.*` etc.), zero logic; KDoc on all public members; `DayApi.summary` composite + `CachedEngine` LRU decorator |
+| facade | ✅ locked | thin delegation namespaces (`engine.astronomy.sun.*` etc.), zero logic; KDoc on all public members; `DayApi.summary` composite + `CachedEngine` LRU decorator (prayer + calendar + astronomy + qibla caches, forceRecompute overwrite, per-domain clear) |
 | cli | ✅ locked | all spec §7 commands incl. `verify` (both golden suites PASS); not part of public API |
-| store | ✅ locked | companion persistence (v1.7.0): `SettingsSnapshot` DTOs covering every tunable, `SettingsCodec` (versioned JSON + migration seam), `KhushuSettingsStore` DataStore binding; outside engine purity lock; observance logs stay host-owned — README §Observance logs / §Disk caching guidance |
+| store | ✅ locked | companion persistence (v1.7.0): `SettingsSnapshot` DTOs covering every tunable, `SettingsCodec` (versioned JSON + migration seam), `KhushuSettingsStore` DataStore binding; outside engine purity lock; observance logs stay host-owned — README §Observance logs / §Disk caching guidance; v1.8: calendar display sides persisted (primary/secondary) |
 | goldens | ✅ dumped | prayer 6184 cases (adhan2 0.0.7, incl. date-line site); astronomy 576 cases (donor AR path); regenerable in-repo via tools/golden-dumper |
 
 Legend: ⬜ planned · 🟨 in progress · ✅ locked (all verification green)

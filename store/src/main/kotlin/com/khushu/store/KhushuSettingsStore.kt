@@ -4,6 +4,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
+import com.khushu.engine.calendar.CalendarConfiguration
 import com.khushu.engine.calendar.CalendarParams
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.PrayerConfiguration
@@ -72,8 +73,24 @@ class KhushuSettingsStore(private val dataStore: DataStore<SettingsSnapshot>) {
     suspend fun updatePrayer(config: PrayerConfiguration): SettingsSnapshot =
         update { it.copy(prayer = config.toDto()) }
 
+    /** Updates fast flags + offset; display sides ([SettingsSnapshot.calendar] sides) are preserved. */
     suspend fun updateCalendar(params: CalendarParams): SettingsSnapshot =
-        update { it.copy(calendar = params.toDto()) }
+        update { it.copy(calendar = params.toDto().copy(primarySide = it.calendar.primarySide, secondarySide = it.calendar.secondarySide)) }
+
+    /**
+     * Updates dual-calendar display sides + hijri offset from an engine
+     * [CalendarConfiguration]; optional-fast flags are preserved.
+     */
+    suspend fun updateCalendarConfiguration(config: CalendarConfiguration): SettingsSnapshot =
+        update {
+            it.copy(
+                calendar = it.calendar.copy(
+                    primarySide = config.primary,
+                    secondarySide = config.secondary,
+                    hijriOffsetDays = config.hijriOffsetDays,
+                ),
+            )
+        }
 
     suspend fun updateZakat(params: ZakatParams): SettingsSnapshot =
         update { it.copy(zakat = params.toDto()) }

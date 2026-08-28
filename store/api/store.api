@@ -1,8 +1,8 @@
 public final class com/khushu/store/CalendarSettingsDto {
 	public static final field Companion Lcom/khushu/store/CalendarSettingsDto$Companion;
 	public fun <init> ()V
-	public fun <init> (IZZZZZZ)V
-	public synthetic fun <init> (IZZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IZZZZZZLcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;)V
+	public synthetic fun <init> (IZZZZZZLcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()Z
 	public final fun component3 ()Z
@@ -10,12 +10,16 @@ public final class com/khushu/store/CalendarSettingsDto {
 	public final fun component5 ()Z
 	public final fun component6 ()Z
 	public final fun component7 ()Z
-	public final fun copy (IZZZZZZ)Lcom/khushu/store/CalendarSettingsDto;
-	public static synthetic fun copy$default (Lcom/khushu/store/CalendarSettingsDto;IZZZZZZILjava/lang/Object;)Lcom/khushu/store/CalendarSettingsDto;
+	public final fun component8 ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public final fun component9 ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public final fun copy (IZZZZZZLcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;)Lcom/khushu/store/CalendarSettingsDto;
+	public static synthetic fun copy$default (Lcom/khushu/store/CalendarSettingsDto;IZZZZZZLcom/khushu/engine/calendar/CalendarConfiguration$Side;Lcom/khushu/engine/calendar/CalendarConfiguration$Side;ILjava/lang/Object;)Lcom/khushu/store/CalendarSettingsDto;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDhulHijjahFirstNine ()Z
 	public final fun getHijriOffsetDays ()I
 	public final fun getMondaysThursdays ()Z
+	public final fun getPrimarySide ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
+	public final fun getSecondarySide ()Lcom/khushu/engine/calendar/CalendarConfiguration$Side;
 	public final fun getShaban ()Z
 	public final fun getShawwalSix ()Z
 	public final fun getTasuaAshura ()Z
@@ -59,6 +63,7 @@ public final class com/khushu/store/KhushuSettingsStore {
 	public final fun resetSettings (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun update (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateCalendar (Lcom/khushu/engine/calendar/CalendarParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateCalendarConfiguration (Lcom/khushu/engine/calendar/CalendarConfiguration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateLocation (Lcom/khushu/engine/core/geo/Location;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updatePrayer (Lcom/khushu/engine/prayer/PrayerConfiguration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateZakat (Lcom/khushu/engine/zakat/ZakatParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -236,6 +241,7 @@ public final class com/khushu/store/SettingsSnapshot$Companion {
 
 public final class com/khushu/store/SettingsSnapshotKt {
 	public static final field SETTINGS_SCHEMA_VERSION I
+	public static final fun toConfiguration (Lcom/khushu/store/CalendarSettingsDto;)Lcom/khushu/engine/calendar/CalendarConfiguration;
 	public static final fun toConfiguration (Lcom/khushu/store/PrayerSettingsDto;)Lcom/khushu/engine/prayer/PrayerConfiguration;
 	public static final fun toDto (Lcom/khushu/engine/calendar/CalendarParams;)Lcom/khushu/store/CalendarSettingsDto;
 	public static final fun toDto (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/store/LocationDto;

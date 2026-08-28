@@ -191,20 +191,46 @@ class FactsApi internal constructor() {
     }
 
     /**
-     * Next [count] fixed-hijri events after [date] (widget/home-screen feeds).
+     * Next [count] fixed-hijri events at or after [after] (widget/home-screen
+     * feeds). Definition-driven, not day-scanning: each event definition is
+     * resolved to its next occurrence with [config]'s offset applied, then the
+     * earliest dates are merged until [count] is reached. Same-day events keep
+     * definition (title) order.
      * @throws com.khushu.engine.core.error.InvalidParameterException when [count] < 1
      */
     fun upcomingEvents(after: LocalDate, count: Int, config: CalendarConfiguration): List<Pair<LocalDate, String>> {
         validate(count >= 1) { InvalidParameterException("count", "$count", "must be >= 1") }
+
+        data class Candidate(val date: LocalDate, val title: String, val def: com.khushu.engine.calendar.EventDefinition)
+
+        val horizon = after.plusYears(3)
+        val queue = java.util.PriorityQueue<Candidate>(compareBy({ it.date }, { it.title }))
+
+        fun schedule(def: com.khushu.engine.calendar.EventDefinition, from: LocalDate) {
+            if (from.isAfter(horizon)) return
+            runCatching {
+                HijriCalendar.nextOccurrence(def.hijriMonth, def.hijriDay, from, config.hijriOffsetDays)
+            }.getOrNull()?.let { queue += Candidate(it, def.title, def) }
+        }
+
+        HijriCalendar.builtInDefinitions().forEach { schedule(it, after) }
+
         val out = mutableListOf<Pair<LocalDate, String>>()
-        var probe = after
-        while (out.size < count && probe < after.plusYears(3)) {
-            for ((d, e) in HijriCalendar.eventsInRange(probe..probe)) {
-                out += d to e.title
-                if (out.size == count) break
-            }
-            probe = probe.plusDays(1)
+        while (out.size < count) {
+            val next = queue.poll() ?: break
+            if (next.date >= horizon) break
+            out += next.date to next.title
+            schedule(next.def, next.date.plusDays(1))
         }
         return out
     }
+
+    /**
+     * Whole civil days from [after] until the fixed hijri [month]/[day] next
+     * falls — 0 on the day itself, hijri-year wrap handled. The call behind
+     * "N days to Ramadan / Eid" countdowns.
+     * @throws com.khushu.engine.core.error.NoResultException when the day does not occur within the search window
+     */
+    fun daysUntil(month: Int, day: Int, after: LocalDate, config: CalendarConfiguration): Long =
+        HijriCalendar.daysUntil(month, day, after, config.hijriOffsetDays)
 }

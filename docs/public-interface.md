@@ -171,6 +171,8 @@ CachedEngine(delegate)  // opt-in memoization; semantic keys per AGENTS §6:
     // daySummary → (Location, date, zone, prayer+calendar params)
     // sun→(Location,instant|date+zone) moonState→(Location,instant)
     // moonRiseSet→(Location,date+zone) hijri→(date,offset) qibla→(Location)
+    // calendar events→(date|range,offset) fastDays→(range,params)
+    // monthMatrix→(YearMonth,config) lunarMonthView→(Location,zone,hijriY/M,config)
     // forceRecompute=true on any method → bypass + recompute + OVERWRITE entry
     // clearCaches() all; clearCaches(domain) per CachedEngine.DOMAINS
 ```
@@ -311,3 +313,60 @@ KhushuSettingsStores.file(file, codec = SettingsCodec())
   host feeds logs + excusedRanges into stats.streak.
 - README §Disk caching guidance — in-memory default, forceRecompute after
   settings changes, semantic-key recipe if a measured need ever appears.
+
+## v1.8 additions (2026-08) — calendar module hardening
+
+### event unification (one source of truth)
+- Qadr seek-nights (Ramadan 9/21,23,25,27,29 — COMPUTATIONAL) and Tashreeq
+  (12/11–13 — ESTABLISHED/HAJJ) are now real entries in
+  `HijriCalendar.builtInDefinitions()`; `events()` no longer special-cases
+  them, so `events()` and `EventRegistry.occurrencesOn` agree exactly and
+  `builtInPackJson()` gains the 8 definitions additively.
+
+### upcomingEvents fix + speedup (facade `calendar.facts`)
+- BUG FIXED: previously ignored `config.hijriOffsetDays` (silently used 0).
+- Rewritten definition-driven: each definition resolved via `nextOccurrence`
+  (offset applied), earliest merged via priority queue — O(defs) not O(days);
+  same return shape, same-day events keep title order.
+
+### daysUntil countdowns
+```
+calendar.daysUntil(month, day, after, offsetDays = 0): Long   // module
+calendar.facts.daysUntil(month, day, after, config): Long     // facade
+```
+Whole civil days until the fixed-hijri day next falls (0 on the day itself);
+wraps the hijri year. Powers "N days to Ramadan/Eid" widgets.
+
+### HijriDate : Comparable<HijriDate>
+Chronological (year, month, day) ordering — hosts no longer hand-roll
+comparators for sorting/range checks.
+
+### CachedEngine calendar extension
+New cached methods (forceRecompute on each; all cleared by `clearCaches("calendar")`):
+```
+calendarEvents(date, offsetDays)            → (date, offset)
+calendarEventsInRange(range, offsetDays)    → (range, offset)
+calendarFastDays(range, params)             → (range, CalendarParams)
+calendarMonthMatrix(yearMonth, config)      → (YearMonth, CalendarConfiguration)
+lunarMonthView(hijriY, hijriM, location, zone, config)
+                                            → (Location, ZoneId, hijriY/M, config)
+```
+`lunarMonthView` is the astronomically expensive op — repeated month swipes
+never recompute. Instant-anchored facts stay uncached by design.
+
+### store — calendar display sides
+`CalendarSettingsDto` gains `primarySide` (default GREGORIAN) /
+`secondarySide` (default HIJRI) as `CalendarConfiguration.Side`;
+`CalendarSettingsDto.toConfiguration()` rebuilds the engine config
+(at-least-one-Hijri rule surfaces as typed InvalidParameterException);
+`KhushuSettingsStore.updateCalendarConfiguration(config)` updates sides +
+offset preserving fast flags, and `updateCalendar(params)` now preserves
+persisted sides. Codec: explicit nulls now round-trip (secondarySide=null
+stays null; missing keys still default).
+
+### tests
+- events()↔registry equivalence across seek/ordinary/tashreeq/eid days.
+- daysUntil zero-on-day + hijri-year wrap; HijriDate ordering.
+- upcomingEvents equals the day-scan at offsets 0/+1/−1; count/ascending.
+- cache hit/overwrite/clear for all five calendar caches.
+- store sides round-trip + flag/side preservation + invalid-combo typed error.

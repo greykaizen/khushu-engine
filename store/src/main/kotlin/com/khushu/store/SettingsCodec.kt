@@ -11,7 +11,9 @@ import kotlinx.serialization.json.Json
  * Decode leniency (forward/backward compatibility):
  * - unknown keys are ignored (file written by a newer release),
  * - missing fields fall back to field defaults (file from an older release),
- * - unknown enum values coerce to the field's default.
+ * - unknown enum values coerce to the field's default,
+ * - explicit nulls round-trip (a field set to null stays null, distinct from
+ *   its default), so nullable knobs like the secondary calendar side survive.
  */
 class SettingsCodec {
 
@@ -19,7 +21,6 @@ class SettingsCodec {
         encodeDefaults = true
         ignoreUnknownKeys = true
         coerceInputValues = true
-        explicitNulls = false
     }
 
     fun encode(snapshot: SettingsSnapshot): ByteArray =

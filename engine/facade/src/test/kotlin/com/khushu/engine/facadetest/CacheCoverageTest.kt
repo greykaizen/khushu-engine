@@ -145,4 +145,51 @@ class CacheCoverageTest {
         )
         assertEquals(upcoming.last().instant, fajr?.instant)
     }
+
+    @Test
+    fun calendarDomainCachesHitOverwriteAndClearTogether() {
+        val cached = CachedEngine(engine)
+        val calendarConfig = com.khushu.engine.calendar.CalendarConfiguration(
+            primary = com.khushu.engine.calendar.CalendarConfiguration.Side.HIJRI,
+        )
+        val ramadan = LocalDate.of(2026, 3, 1)
+        val range = ramadan..ramadan.plusDays(29)
+
+        val events1 = cached.calendarEvents(ramadan)
+        assertSame(events1, cached.calendarEvents(ramadan))
+        // different offset keys a separate entry (proven by cacheSize below,
+        // since empty results share Kotlin's emptyList() singleton)
+        cached.calendarEvents(ramadan, offsetDays = 1)
+
+        val range1 = cached.calendarEventsInRange(range)
+        assertSame(range1, cached.calendarEventsInRange(range))
+
+        val params = com.khushu.engine.calendar.CalendarParams(whiteDays = true)
+        val fast1 = cached.calendarFastDays(range, params)
+        assertSame(fast1, cached.calendarFastDays(range, params))
+        assertNotSame(fast1, cached.calendarFastDays(range, params.copy(whiteDays = false)))
+
+        val ym = java.time.YearMonth.of(2026, 3)
+        val matrix1 = cached.calendarMonthMatrix(ym, calendarConfig)
+        assertSame(matrix1, cached.calendarMonthMatrix(ym, calendarConfig))
+        assertEquals(31, matrix1.size)
+
+        val lunar1 = cached.lunarMonthView(1447, 9, london, zone, calendarConfig)
+        assertSame(lunar1, cached.lunarMonthView(1447, 9, london, zone, calendarConfig))
+        assertTrue(lunar1.isNotEmpty())
+        val lunarFresh = cached.lunarMonthView(1447, 9, london, zone, calendarConfig, forceRecompute = true)
+        assertEquals(lunar1, lunarFresh)
+        assertNotSame(lunar1, lunarFresh)
+        assertSame(lunarFresh, cached.lunarMonthView(1447, 9, london, zone, calendarConfig))
+
+        assertTrue(cached.cacheSize("calendarEvents") == 2)
+        assertTrue(cached.cacheSize("lunarMonthView") == 1)
+        cached.clearCaches("calendar")
+        assertEquals(0, cached.cacheSize("hijri"))
+        assertEquals(0, cached.cacheSize("calendarEvents"))
+        assertEquals(0, cached.cacheSize("calendarEventsInRange"))
+        assertEquals(0, cached.cacheSize("fastDays"))
+        assertEquals(0, cached.cacheSize("monthMatrix"))
+        assertEquals(0, cached.cacheSize("lunarMonthView"))
+    }
 }

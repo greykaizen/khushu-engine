@@ -32,8 +32,12 @@ data class HijriDate(
     val monthName: String,
     /** Offset that was applied during conversion (echoes [CalendarParams.hijriOffsetDays]). */
     val offsetApplied: Int,
-) {
+) : Comparable<HijriDate> {
     val label: String get() = "$day $monthName $year AH"
+
+    /** Chronological order: year, then month, then day. */
+    override fun compareTo(other: HijriDate): Int =
+        compareValuesBy(this, other, { it.year }, { it.month }, { it.day })
 }
 
 enum class FastRule(val provenance: String) {

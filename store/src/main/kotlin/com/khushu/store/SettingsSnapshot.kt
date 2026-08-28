@@ -1,5 +1,6 @@
 package com.khushu.store
 
+import com.khushu.engine.calendar.CalendarConfiguration
 import com.khushu.engine.calendar.CalendarParams
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Convention
@@ -52,7 +53,7 @@ data class PrayerSettingsDto(
     val rounding: RoundingPolicy? = null,
 )
 
-/** Serializable mirror of [CalendarParams] — hijri offset plus optional-fast flags. */
+/** Serializable mirror of [CalendarParams] — hijri offset plus optional-fast flags and display sides. */
 @Serializable
 data class CalendarSettingsDto(
     val hijriOffsetDays: Int = 0,
@@ -62,6 +63,10 @@ data class CalendarSettingsDto(
     val shaban: Boolean = false,
     val dhulHijjahFirstNine: Boolean = false,
     val tasuaAshura: Boolean = false,
+    /** Primary calendar line for dual-calendar UIs (display setting). */
+    val primarySide: CalendarConfiguration.Side = CalendarConfiguration.Side.GREGORIAN,
+    /** Secondary calendar line; null hides it. At least one side must be HIJRI (engine-enforced). */
+    val secondarySide: CalendarConfiguration.Side? = CalendarConfiguration.Side.HIJRI,
 )
 
 /** Serializable mirror of [ZakatParams] — madhab rules and nisab valuation inputs. */
@@ -164,6 +169,17 @@ fun CalendarParams.toDto(): CalendarSettingsDto = CalendarSettingsDto(
     shaban = shaban,
     dhulHijjahFirstNine = dhulHijjahFirstNine,
     tasuaAshura = tasuaAshura,
+)
+
+/**
+ * Rebuild the engine's [CalendarConfiguration] (dual-calendar display +
+ * offset). Throws the engine's typed InvalidParameterException when a
+ * persisted combination violates the at-least-one-Hijri rule.
+ */
+fun CalendarSettingsDto.toConfiguration(): CalendarConfiguration = CalendarConfiguration(
+    primary = primarySide,
+    secondary = secondarySide,
+    hijriOffsetDays = hijriOffsetDays,
 )
 
 fun ZakatSettingsDto.toParams(): ZakatParams = ZakatParams(

@@ -1,6 +1,7 @@
 package com.khushu.store
 
 import androidx.datastore.core.CorruptionException
+import com.khushu.engine.calendar.CalendarConfiguration
 import com.khushu.engine.calendar.CalendarParams
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Convention
@@ -21,6 +22,7 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class StoreTest {
 
@@ -139,6 +141,64 @@ class StoreTest {
             assertEquals(SettingsSnapshot(location = tweaked.location), afterReset)
         } finally {
             file.delete()
+        }
+    }
+
+    @Test
+    fun defaultSnapshotDecodesToGregorianPrimaryWithHijriSecondary() {
+        val config = SettingsSnapshot().calendar.toConfiguration()
+        assertEquals(CalendarConfiguration.Side.GREGORIAN, config.primary)
+        assertEquals(CalendarConfiguration.Side.HIJRI, config.secondary)
+        assertEquals(0, config.hijriOffsetDays)
+    }
+
+    @Test
+    fun calendarSidesRoundTripThroughJson() {
+        val s = SettingsSnapshot().copy(
+            calendar = SettingsSnapshot().calendar.copy(
+                primarySide = CalendarConfiguration.Side.HIJRI,
+                secondarySide = null,
+                hijriOffsetDays = 1,
+            ),
+        )
+        assertEquals(s, codec.decode(codec.encode(s)))
+        val restored = codec.decode(codec.encode(s)).calendar.toConfiguration()
+        assertEquals(CalendarConfiguration.Side.HIJRI, restored.primary)
+        assertEquals(null, restored.secondary)
+        assertEquals(1, restored.hijriOffsetDays)
+    }
+
+    @Test
+    fun sideAndFlagUpdatesPreserveEachOther(): Unit = runBlocking {
+        val file = Files.createTempFile("khushu-store-sides", ".json").toFile()
+        try {
+            val store = KhushuSettingsStores.file(file)
+            store.updateCalendar(tweaked.calendar.toParams())
+            val afterSides = store.updateCalendarConfiguration(
+                CalendarConfiguration(
+                    primary = CalendarConfiguration.Side.HIJRI,
+                    secondary = null,
+                    hijriOffsetDays = -1,
+                ),
+            )
+            assertEquals(CalendarConfiguration.Side.HIJRI, afterSides.calendar.primarySide)
+            assertEquals(null, afterSides.calendar.secondarySide)
+            assertEquals(-1, afterSides.calendar.hijriOffsetDays)
+            assertTrue(afterSides.calendar.whiteDays, "fast flags must survive side updates")
+            // updateCalendar must not clobber the persisted sides
+            val afterParams = store.updateCalendar(CalendarParams())
+            assertEquals(CalendarConfiguration.Side.HIJRI, afterParams.calendar.primarySide)
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun invalidSideCombinationFailsWithTypedEngineError() {
+        val json = """{"calendar":{"primarySide":"GREGORIAN","secondarySide":"GREGORIAN"}}"""
+        val decoded = codec.decode(json.encodeToByteArray())
+        assertFailsWith<com.khushu.engine.core.error.InvalidParameterException> {
+            decoded.calendar.toConfiguration()
         }
     }
 }

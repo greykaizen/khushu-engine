@@ -46,27 +46,18 @@ object HijriCalendar {
     /**
      * Fixed-hijri-date Islamic events falling on this civil day.
      * Standard computational events only (see divergences D11 for scope).
+     * Everything — Qadr seek-nights and Tashreeq included — comes from
+     * [builtInDefinitions], so this and [EventRegistry.occurrencesOn] agree.
      */
     fun events(localDate: LocalDate, offsetDays: Int = 0): List<IslamicEvent> {
         val h = hijri(localDate, offsetDays)
         val label = h.label
-        val events = mutableListOf<IslamicEvent>()
-
-        for (def in builtInDefinitions()) {
-            if (def.hijriMonth == h.month && def.hijriDay == h.day) {
-                events += IslamicEvent(def.title, label)
-            }
-        }
-        // Convention pinned: a seek-night is marked on the civil day whose tabular
-        // hijri date is the odd Ramadan night — i.e. the night BEGINS at the
-        // maghrib preceding that civil date.
-        if (h.month == 9 && h.day in 21..29 && h.day % 2 == 1) {
-            events += IslamicEvent("Laylat al-Qadr Seek-Night (Ramadan ${h.day})", label)
-        }
-        if (h.month == 12 && h.day in 11..13) {
-            events += IslamicEvent("Days of Tashreeq", label)
-        }
-        return events.sortedBy { it.title }
+        return builtInDefinitions()
+            .asSequence()
+            .filter { it.hijriMonth == h.month && it.hijriDay == h.day }
+            .map { IslamicEvent(it.title, label) }
+            .sortedBy { it.title }
+            .toList()
     }
 
     /** All events within the civil-date range (inclusive). */
@@ -149,6 +140,15 @@ object HijriCalendar {
         )
     }
 
+    /**
+     * Whole civil days from [after] until the fixed hijri [month]/[day] next
+     * falls — 0 when it falls on [after] itself. Wraps the hijri year; this is
+     * the call behind "N days to Ramadan / Eid" countdowns.
+     * @throws NoResultException when the day does not occur within the search window
+     */
+    fun daysUntil(month: Int, day: Int, after: LocalDate, offsetDays: Int = 0): Long =
+        java.time.temporal.ChronoUnit.DAYS.between(after, nextOccurrence(month, day, after, offsetDays))
+
     /** True when this hijri month is one of the four sacred months. */
     fun isSacredMonth(hijriMonth: Int): Boolean =
         hijriMonth == 1 || hijriMonth == 7 || hijriMonth == 11 || hijriMonth == 12
@@ -208,6 +208,11 @@ object HijriCalendar {
     /**
      * The core fixed-hijri-date event pack — single source for [events] and the
      * canonical JSON export. Scope trimmed per divergences D11.
+     *
+     * Convention pinned for the seek-nights: a seek-night is marked on the
+     * civil day whose tabular hijri date is the odd Ramadan night — i.e. the
+     * night BEGINS at the maghrib preceding that civil date. The engine never
+     * identifies one specific night as Laylat al-Qadr.
      */
     fun builtInDefinitions(): List<EventDefinition> = listOf(
         EventDefinition("new_year", "Islamic New Year", 1, 1, EventCategory.HISTORICAL, confidence = Confidence.ESTABLISHED),
@@ -217,9 +222,17 @@ object HijriCalendar {
         EventDefinition("isra_miraj", "Isra and Mi'raj", 7, 27, EventCategory.HISTORICAL),
         EventDefinition("mid_shaban", "Mid-Sha'ban", 8, 15, EventCategory.HISTORICAL),
         EventDefinition("ramadan_begins", "Ramadan Begins", 9, 1, EventCategory.MONTH_START, confidence = Confidence.ESTABLISHED),
+        EventDefinition("qadr_seek_21", "Laylat al-Qadr Seek-Night (Ramadan 21)", 9, 21, confidence = Confidence.COMPUTATIONAL),
+        EventDefinition("qadr_seek_23", "Laylat al-Qadr Seek-Night (Ramadan 23)", 9, 23, confidence = Confidence.COMPUTATIONAL),
+        EventDefinition("qadr_seek_25", "Laylat al-Qadr Seek-Night (Ramadan 25)", 9, 25, confidence = Confidence.COMPUTATIONAL),
+        EventDefinition("qadr_seek_27", "Laylat al-Qadr Seek-Night (Ramadan 27)", 9, 27, confidence = Confidence.COMPUTATIONAL),
+        EventDefinition("qadr_seek_29", "Laylat al-Qadr Seek-Night (Ramadan 29)", 9, 29, confidence = Confidence.COMPUTATIONAL),
         EventDefinition("eid_al_fitr", "Eid al-Fitr", 10, 1, EventCategory.EID, confidence = Confidence.ESTABLISHED),
         EventDefinition("hajj_begins", "Hajj Begins", 12, 8, EventCategory.HAJJ),
         EventDefinition("arafah", "Day of Arafah", 12, 9, EventCategory.HAJJ, confidence = Confidence.ESTABLISHED),
         EventDefinition("eid_al_adha", "Eid al-Adha", 12, 10, EventCategory.EID, confidence = Confidence.ESTABLISHED),
+        EventDefinition("tashreeq_11", "Days of Tashreeq", 12, 11, EventCategory.HAJJ, confidence = Confidence.ESTABLISHED),
+        EventDefinition("tashreeq_12", "Days of Tashreeq", 12, 12, EventCategory.HAJJ, confidence = Confidence.ESTABLISHED),
+        EventDefinition("tashreeq_13", "Days of Tashreeq", 12, 13, EventCategory.HAJJ, confidence = Confidence.ESTABLISHED),
     )
 }

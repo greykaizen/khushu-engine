@@ -6,6 +6,7 @@ import com.khushu.engine.astronomy.RiseSet
 import com.khushu.engine.core.error.InvalidParameterException
 import com.khushu.engine.astronomy.SolarEvents
 import com.khushu.engine.calendar.HijriCalendar
+import com.khushu.engine.calendar.CalendarConfiguration
 import com.khushu.engine.calendar.CalendarParams
 import com.khushu.engine.calendar.FastRule
 import com.khushu.engine.calendar.HijriDate
@@ -117,6 +118,10 @@ class DayApi internal constructor() {
  *   moon state          → (Location, Instant)
  *   moon rise/set       → (Location, LocalDate, ZoneId)
  *   hijri               → (LocalDate, offsetDays)
+ *   calendar events     → (LocalDate | range, offsetDays)
+ *   fast days           → (range, CalendarParams)
+ *   month matrix        → (YearMonth, CalendarConfiguration)
+ *   lunar month view    → (Location, YearMonth(hijri), ZoneId, CalendarConfiguration)
  *   qibla               → (Location)
  * Configuration that affects results is part of every key — caching can never
  * hide a dependency. All caches are bounded LRU (GPS jitter must not grow
@@ -168,6 +173,13 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
     private val moonStateCache = Lru<com.khushu.engine.astronomy.MoonState>(capacity)
     private val moonRiseSetCache = Lru<com.khushu.engine.astronomy.RiseSet>(capacity)
     private val hijriCache = Lru<com.khushu.engine.calendar.HijriDate>(capacity)
+    private val calendarEventsCache = Lru<List<com.khushu.engine.calendar.IslamicEvent>>(capacity)
+    private val calendarEventsRangeCache =
+        Lru<List<Pair<LocalDate, com.khushu.engine.calendar.IslamicEvent>>>(capacity)
+    private val fastDaysCache = Lru<List<com.khushu.engine.calendar.FastDay>>(capacity)
+    private val monthMatrixCache = Lru<Map<LocalDate, com.khushu.engine.calendar.DualDate>>(capacity)
+    private val lunarMonthViewCache =
+        Lru<List<com.khushu.engine.calendar.LunarCalendarView.LunarDayFact>>(capacity)
     private val daySummaryCache = Lru<DaySummary>(capacity)
     private val qiblaCache = Lru<com.khushu.engine.qibla.QiblaBearing>(capacity)
 
@@ -357,6 +369,65 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
     fun hijri(date: LocalDate, offsetDays: Int = 0, forceRecompute: Boolean = false) =
         hijriCache.getOrPut("$date|$offsetDays", forceRecompute) { delegate.calendar.hijri(date, offsetDays) }
 
+    /** Fixed-hijri events for one civil day, memoized. */
+    fun calendarEvents(
+        date: LocalDate,
+        offsetDays: Int = 0,
+        forceRecompute: Boolean = false,
+    ): List<com.khushu.engine.calendar.IslamicEvent> =
+        calendarEventsCache.getOrPut("$date|$offsetDays", forceRecompute) {
+            delegate.calendar.events(date, offsetDays)
+        }
+
+    /** Events across a civil range, memoized per (range, offset). */
+    fun calendarEventsInRange(
+        range: ClosedRange<LocalDate>,
+        offsetDays: Int = 0,
+        forceRecompute: Boolean = false,
+    ): List<Pair<LocalDate, com.khushu.engine.calendar.IslamicEvent>> =
+        calendarEventsRangeCache.getOrPut(
+            "${range.start}|${range.endInclusive}|$offsetDays",
+            forceRecompute,
+        ) { delegate.calendar.eventsInRange(range, offsetDays) }
+
+    /** Optional fast days across a civil range, memoized per (range, params). */
+    fun calendarFastDays(
+        range: ClosedRange<LocalDate>,
+        params: CalendarParams,
+        forceRecompute: Boolean = false,
+    ): List<com.khushu.engine.calendar.FastDay> =
+        fastDaysCache.getOrPut(
+            "${range.start}|${range.endInclusive}|${params.hashCode()}",
+            forceRecompute,
+        ) { delegate.calendar.fastDays(range, params) }
+
+    /** Dual-calendar month grid, memoized per (YearMonth, configuration). */
+    fun calendarMonthMatrix(
+        civilMonth: java.time.YearMonth,
+        config: CalendarConfiguration,
+        forceRecompute: Boolean = false,
+    ): Map<LocalDate, com.khushu.engine.calendar.DualDate> =
+        monthMatrixCache.getOrPut("$civilMonth|${config.hashCode()}", forceRecompute) {
+            delegate.calendar.month.monthMatrix(civilMonth, config)
+        }
+
+    /**
+     * Per-evening moon facts for a hijri month, memoized — the astronomically
+     * expensive calendar op; repeated month swipes never recompute.
+     */
+    fun lunarMonthView(
+        hijriYear: Int,
+        hijriMonth: Int,
+        location: Location,
+        zoneId: ZoneId,
+        config: CalendarConfiguration = CalendarConfiguration(primary = CalendarConfiguration.Side.HIJRI),
+        forceRecompute: Boolean = false,
+    ): List<com.khushu.engine.calendar.LunarCalendarView.LunarDayFact> =
+        lunarMonthViewCache.getOrPut(
+            "${location.key()}|$zoneId|$hijriYear|$hijriMonth|${config.hashCode()}",
+            forceRecompute,
+        ) { delegate.calendar.lunar.monthView(hijriYear, hijriMonth, location, zoneId, config) }
+
     fun qibla(location: Location, forceRecompute: Boolean = false) =
         qiblaCache.getOrPut(location.key(), forceRecompute) { delegate.qibla.bearing(location) }
 
@@ -382,7 +453,10 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
                 sunCache.clear(); sunRiseSetCache.clear(); sunEventsCache.clear(); sunPhasesCache.clear()
             }
             "astronomyMoon" -> { moonStateCache.clear(); moonRiseSetCache.clear() }
-            "calendar" -> hijriCache.clear()
+            "calendar" -> {
+                hijriCache.clear(); calendarEventsCache.clear(); calendarEventsRangeCache.clear()
+                fastDaysCache.clear(); monthMatrixCache.clear(); lunarMonthViewCache.clear()
+            }
             "qibla" -> qiblaCache.clear()
             "daySummary" -> daySummaryCache.clear()
             else -> throw InvalidParameterException("domain", domain, "unknown cache domain; expected one of $DOMAINS")
@@ -394,10 +468,17 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
         "sunRiseSet" -> sunRiseSetCache.size()
         "daySummary" -> daySummaryCache.size()
         "prayerTimes" -> prayerCache.size()
+        "hijri" -> hijriCache.size()
+        "calendarEvents" -> calendarEventsCache.size()
+        "calendarEventsInRange" -> calendarEventsRangeCache.size()
+        "fastDays" -> fastDaysCache.size()
+        "monthMatrix" -> monthMatrixCache.size()
+        "lunarMonthView" -> lunarMonthViewCache.size()
         else -> throw InvalidParameterException(
             "cacheName",
             name,
-            "unknown cache; expected sunRiseSet, daySummary or prayerTimes",
+            "unknown cache; expected one of: sunRiseSet, daySummary, prayerTimes, hijri, " +
+                "calendarEvents, calendarEventsInRange, fastDays, monthMatrix, lunarMonthView",
         )
     }
 }
