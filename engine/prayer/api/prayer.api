@@ -92,8 +92,8 @@ public final class com/khushu/engine/prayer/Prayer {
 	public static synthetic fun nextOccurrenceOf$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$Entry;
 	public final fun nightDivisions (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
 	public static synthetic fun nightDivisions$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
-	public final fun occasionsOn (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
-	public static synthetic fun occasionsOn$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun occasionsOn (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/util/Set;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun occasionsOn$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/util/Set;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun status (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerStatus;
 	public static synthetic fun status$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerStatus;
 	public final fun streakStats (Ljava/util/List;Ljava/util/List;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$StreakStats;
@@ -106,6 +106,8 @@ public final class com/khushu/engine/prayer/Prayer {
 	public static synthetic fun timesForRange$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun travelFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
 	public static synthetic fun travelFacts$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+	public final fun upcoming (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;ILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun upcoming$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 }
 
 public final class com/khushu/engine/prayer/Prayer$Entry {

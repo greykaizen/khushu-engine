@@ -106,30 +106,45 @@ class DayApi internal constructor() {
 /**
  * Opt-in memoization decorator around any [KhushuEngine]. Deterministic
  * capabilities only, keyed by their own semantic keys (AGENTS.md §6):
- *   prayer times → (Location, LocalDate, PrayerConfiguration)
- *   day summary  → (Location, LocalDate, ZoneId, PrayerConfiguration, CalendarParams)
- *   sun position → (Location, Instant)
+ *   prayer times        → (Location, LocalDate, PrayerConfiguration)
+ *   prayer month        → (Location, YearMonth, PrayerConfiguration)
+ *   prayer occasions    → (Location, LocalDate, PrayerConfiguration)
+ *   tahajjud/night div. → (Location, LocalDate, PrayerConfiguration)
+ *   prayer windows      → (Location, LocalDate, PrayerConfiguration, margins/distances)
+ *   day summary         → (Location, LocalDate, ZoneId, PrayerConfiguration, CalendarParams)
+ *   sun position        → (Location, Instant)
  *   sun rise/set/events/phases → (Location, LocalDate, ZoneId)
- *   moon state   → (Location, Instant)
- *   moon rise/set → (Location, LocalDate, ZoneId)
- *   hijri        → (LocalDate, offsetDays)
- *   qibla        → (Location)
+ *   moon state          → (Location, Instant)
+ *   moon rise/set       → (Location, LocalDate, ZoneId)
+ *   hijri               → (LocalDate, offsetDays)
+ *   qibla               → (Location)
  * Configuration that affects results is part of every key — caching can never
  * hide a dependency. All caches are bounded LRU (GPS jitter must not grow
  * memory without bound in long-lived hosts).
+ *
+ * `forceRecompute = true` on any method bypasses the lookup, recomputes, and
+ * OVERWRITES the stored entry — use after deliberate host-side events
+ * (settings import, time-travel debugging), never in hot paths.
+ * Null results are cached too: a polar-day null computed once is not recomputed.
  */
 class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capacity: Int = DEFAULT_CAPACITY) {
 
     companion object {
         const val DEFAULT_CAPACITY = 256
+
+        /** Valid domain names for [clearCaches]. */
+        val DOMAINS: Set<String> = setOf(
+            "prayer", "astronomySun", "astronomyMoon", "calendar", "qibla", "daySummary",
+        )
     }
 
     private class Lru<V>(private val cap: Int) {
         private val map = object : LinkedHashMap<String, V>(16, 0.75f, true) {
             override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, V>?) = size > cap
         }
-        fun getOrPut(key: String, compute: () -> V): V = synchronized(map) {
-            map[key] ?: compute().also { map[key] = it }
+        fun getOrPut(key: String, forceRecompute: Boolean = false, compute: () -> V): V = synchronized(map) {
+            if (!forceRecompute && map.containsKey(key)) map.getValue(key)
+            else compute().also { map[key] = it }
         }
         fun clear() = synchronized(map) { map.clear() }
         fun size() = synchronized(map) { map.size }
@@ -137,6 +152,15 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
 
     private val prayerCache = Lru<com.khushu.engine.prayer.PrayerTimesResult>(capacity)
     private val prayerMonthCache = Lru<List<com.khushu.engine.prayer.PrayerTimesResult>>(capacity)
+    private val occasionsCache = Lru<List<com.khushu.engine.prayer.Prayer.Occurrence>>(capacity)
+    private val tahajjudCache = Lru<com.khushu.engine.prayer.TahajjudWindow?>(capacity)
+    private val nightDivisionsCache = Lru<com.khushu.engine.prayer.Prayer.NightDivisions?>(capacity)
+    private val imsakCache = Lru<Instant?>(capacity)
+    private val duhaCache = Lru<ClosedRange<Instant>?>(capacity)
+    private val forbiddenCache = Lru<com.khushu.engine.prayer.Prayer.ForbiddenWindows>(capacity)
+    private val fastingFactsCache = Lru<com.khushu.engine.prayer.Prayer.FastingFacts>(capacity)
+    private val fastingFactsMonthCache = Lru<List<com.khushu.engine.prayer.Prayer.FastingFacts>>(capacity)
+    private val travelFactsCache = Lru<com.khushu.engine.prayer.Prayer.TravelFacts>(capacity)
     private val sunCache = Lru<com.khushu.engine.astronomy.SolarPosition>(capacity)
     private val sunRiseSetCache = Lru<com.khushu.engine.astronomy.RiseSet>(capacity)
     private val sunEventsCache = Lru<com.khushu.engine.astronomy.SolarEvents>(capacity)
@@ -151,10 +175,14 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
         latitude.degrees, longitude.degrees, altitudeMeters.meters,
     )
 
-    fun prayerTimes(location: Location, date: LocalDate, params: PrayerConfiguration = PrayerConfiguration()) =
-        prayerCache.getOrPut("${location.key()}|$date|${params.hashCode()}") {
-            delegate.prayer.times(location, date, params)
-        }
+    fun prayerTimes(
+        location: Location,
+        date: LocalDate,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ) = prayerCache.getOrPut("${location.key()}|$date|${params.hashCode()}", forceRecompute) {
+        delegate.prayer.times(location, date, params)
+    }
 
     /**
      * Whole-month memoization for calendar/scroll UIs: prefetch next month on
@@ -164,10 +192,119 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
         location: Location,
         yearMonth: java.time.YearMonth,
         params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
     ): List<com.khushu.engine.prayer.PrayerTimesResult> =
-        prayerMonthCache.getOrPut("${location.key()}|$yearMonth|${params.hashCode()}") {
+        prayerMonthCache.getOrPut("${location.key()}|$yearMonth|${params.hashCode()}", forceRecompute) {
             delegate.prayer.month(location, yearMonth, params)
         }
+
+    /**
+     * Category-labeled occurrences for a civil day, memoized. [categories] is
+     * part of the cache key (order-insensitive) — different filters coexist.
+     */
+    fun prayerOccasions(
+        location: Location,
+        date: LocalDate,
+        categories: Set<com.khushu.engine.prayer.Prayer.OccasionCategory> =
+            com.khushu.engine.prayer.Prayer.OccasionCategory.entries.toSet(),
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): List<com.khushu.engine.prayer.Prayer.Occurrence> {
+        val catKey = categories.map { it.name }.sorted().joinToString(",")
+        return occasionsCache.getOrPut("${location.key()}|$date|$catKey|${params.hashCode()}", forceRecompute) {
+            delegate.prayer.occasionsOn(location, date, categories, params)
+        }
+    }
+
+    fun tahajjudWindow(
+        location: Location,
+        date: LocalDate,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): com.khushu.engine.prayer.TahajjudWindow? =
+        tahajjudCache.getOrPut("${location.key()}|$date|${params.hashCode()}", forceRecompute) {
+            delegate.prayer.tahajjudWindow(location, date, params)
+        }
+
+    fun nightDivisions(
+        location: Location,
+        date: LocalDate,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): com.khushu.engine.prayer.Prayer.NightDivisions? =
+        nightDivisionsCache.getOrPut("${location.key()}|$date|${params.hashCode()}", forceRecompute) {
+            delegate.prayer.nightDivisions(location, date, params)
+        }
+
+    fun imsak(
+        location: Location,
+        date: LocalDate,
+        minutesBeforeFajr: Int = 10,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): Instant? = imsakCache.getOrPut(
+        "${location.key()}|$date|$minutesBeforeFajr|${params.hashCode()}",
+        forceRecompute,
+    ) { delegate.prayer.windows.imsak(location, date, minutesBeforeFajr, params) }
+
+    fun duha(
+        location: Location,
+        date: LocalDate,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): ClosedRange<Instant>? =
+        duhaCache.getOrPut("${location.key()}|$date|${params.hashCode()}", forceRecompute) {
+            delegate.prayer.windows.duha(location, date, params)
+        }
+
+    fun forbiddenWindows(
+        location: Location,
+        date: LocalDate,
+        lateAfternoonMarginMinutes: Int = 20,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): com.khushu.engine.prayer.Prayer.ForbiddenWindows =
+        forbiddenCache.getOrPut(
+            "${location.key()}|$date|$lateAfternoonMarginMinutes|${params.hashCode()}",
+            forceRecompute,
+        ) { delegate.prayer.windows.forbidden(location, date, lateAfternoonMarginMinutes, params) }
+
+    fun fastingFacts(
+        location: Location,
+        date: LocalDate,
+        imsakMinutesBeforeFajr: Int = 10,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): com.khushu.engine.prayer.Prayer.FastingFacts =
+        fastingFactsCache.getOrPut(
+            "${location.key()}|$date|$imsakMinutesBeforeFajr|${params.hashCode()}",
+            forceRecompute,
+        ) { delegate.prayer.windows.fastingFacts(location, date, imsakMinutesBeforeFajr, params) }
+
+    fun fastingFactsForMonth(
+        location: Location,
+        yearMonth: java.time.YearMonth,
+        imsakMinutesBeforeFajr: Int = 10,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): List<com.khushu.engine.prayer.Prayer.FastingFacts> =
+        fastingFactsMonthCache.getOrPut(
+            "${location.key()}|$yearMonth|$imsakMinutesBeforeFajr|${params.hashCode()}",
+            forceRecompute,
+        ) { delegate.prayer.windows.fastingFactsForMonth(location, yearMonth, imsakMinutesBeforeFajr, params) }
+
+    fun travelFacts(
+        location: Location,
+        date: LocalDate,
+        travelledDistanceKm: Double,
+        distanceThresholdKm: Double? = null,
+        params: PrayerConfiguration = PrayerConfiguration(),
+        forceRecompute: Boolean = false,
+    ): com.khushu.engine.prayer.Prayer.TravelFacts =
+        travelFactsCache.getOrPut(
+            "${location.key()}|$date|$travelledDistanceKm|$distanceThresholdKm|${params.hashCode()}",
+            forceRecompute,
+        ) { delegate.prayer.windows.travelFacts(location, date, travelledDistanceKm, distanceThresholdKm, params) }
 
     /**
      * The full "today screen" composite, memoized — hosts hitting the summary
@@ -179,63 +316,88 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
         zoneId: ZoneId,
         prayerParams: PrayerConfiguration = PrayerConfiguration(),
         calendarParams: com.khushu.engine.calendar.CalendarParams = com.khushu.engine.calendar.CalendarParams(),
+        forceRecompute: Boolean = false,
     ): DaySummary = daySummaryCache.getOrPut(
         "${location.key()}|$date|$zoneId|${prayerParams.hashCode()}|${calendarParams.hashCode()}",
+        forceRecompute,
     ) {
         delegate.day.summary(location, date, zoneId, prayerParams, calendarParams)
     }
 
-    fun sunPosition(location: Location, instant: Instant) =
-        sunCache.getOrPut("${location.key()}|${instant.toEpochMilli()}") {
+    fun sunPosition(location: Location, instant: Instant, forceRecompute: Boolean = false) =
+        sunCache.getOrPut("${location.key()}|${instant.toEpochMilli()}", forceRecompute) {
             delegate.astronomy.sun.position(location, instant)
         }
 
-    fun sunRiseSet(location: Location, date: LocalDate, zoneId: ZoneId) =
-        sunRiseSetCache.getOrPut("${location.key()}|$date|$zoneId") {
+    fun sunRiseSet(location: Location, date: LocalDate, zoneId: ZoneId, forceRecompute: Boolean = false) =
+        sunRiseSetCache.getOrPut("${location.key()}|$date|$zoneId", forceRecompute) {
             delegate.astronomy.sun.riseSet(location, date, zoneId)
         }
 
-    fun sunEvents(location: Location, date: LocalDate, zoneId: ZoneId) =
-        sunEventsCache.getOrPut("${location.key()}|$date|$zoneId") {
+    fun sunEvents(location: Location, date: LocalDate, zoneId: ZoneId, forceRecompute: Boolean = false) =
+        sunEventsCache.getOrPut("${location.key()}|$date|$zoneId", forceRecompute) {
             delegate.astronomy.sun.events(location, date, zoneId)
         }
 
-    fun sunPhases(location: Location, date: LocalDate, zoneId: ZoneId) =
-        sunPhasesCache.getOrPut("${location.key()}|$date|$zoneId") {
+    fun sunPhases(location: Location, date: LocalDate, zoneId: ZoneId, forceRecompute: Boolean = false) =
+        sunPhasesCache.getOrPut("${location.key()}|$date|$zoneId", forceRecompute) {
             delegate.astronomy.sun.phases(location, date, zoneId)
         }
 
-    fun moonState(location: Location, instant: Instant) =
-        moonStateCache.getOrPut("${location.key()}|${instant.toEpochMilli()}") {
+    fun moonState(location: Location, instant: Instant, forceRecompute: Boolean = false) =
+        moonStateCache.getOrPut("${location.key()}|${instant.toEpochMilli()}", forceRecompute) {
             delegate.astronomy.moon.state(location, instant)
         }
 
-    fun moonRiseSet(location: Location, date: LocalDate, zoneId: ZoneId) =
-        moonRiseSetCache.getOrPut("${location.key()}|$date|$zoneId") {
+    fun moonRiseSet(location: Location, date: LocalDate, zoneId: ZoneId, forceRecompute: Boolean = false) =
+        moonRiseSetCache.getOrPut("${location.key()}|$date|$zoneId", forceRecompute) {
             delegate.astronomy.moon.riseSet(location, date, zoneId)
         }
 
-    fun hijri(date: LocalDate, offsetDays: Int = 0) =
-        hijriCache.getOrPut("$date|$offsetDays") { delegate.calendar.hijri(date, offsetDays) }
+    fun hijri(date: LocalDate, offsetDays: Int = 0, forceRecompute: Boolean = false) =
+        hijriCache.getOrPut("$date|$offsetDays", forceRecompute) { delegate.calendar.hijri(date, offsetDays) }
 
-    fun qibla(location: Location) =
-        qiblaCache.getOrPut(location.key()) { delegate.qibla.bearing(location) }
+    fun qibla(location: Location, forceRecompute: Boolean = false) =
+        qiblaCache.getOrPut(location.key(), forceRecompute) { delegate.qibla.bearing(location) }
 
+    /** Clear every cache. */
     fun clearCaches() {
-        prayerCache.clear(); prayerMonthCache.clear(); sunCache.clear()
-        sunRiseSetCache.clear(); sunEventsCache.clear(); sunPhasesCache.clear()
-        moonStateCache.clear(); moonRiseSetCache.clear(); hijriCache.clear()
-        daySummaryCache.clear(); qiblaCache.clear()
+        DOMAINS.forEach { clearCaches(it) }
+    }
+
+    /**
+     * Clear one domain's caches. Valid names in [DOMAINS]: prayer,
+     * astronomySun, astronomyMoon, calendar, qibla, daySummary.
+     * @throws InvalidParameterException for an unknown domain name.
+     */
+    fun clearCaches(domain: String) {
+        when (domain) {
+            "prayer" -> {
+                prayerCache.clear(); prayerMonthCache.clear(); occasionsCache.clear()
+                tahajjudCache.clear(); nightDivisionsCache.clear(); imsakCache.clear()
+                duhaCache.clear(); forbiddenCache.clear(); fastingFactsCache.clear()
+                fastingFactsMonthCache.clear(); travelFactsCache.clear()
+            }
+            "astronomySun" -> {
+                sunCache.clear(); sunRiseSetCache.clear(); sunEventsCache.clear(); sunPhasesCache.clear()
+            }
+            "astronomyMoon" -> { moonStateCache.clear(); moonRiseSetCache.clear() }
+            "calendar" -> hijriCache.clear()
+            "qibla" -> qiblaCache.clear()
+            "daySummary" -> daySummaryCache.clear()
+            else -> throw InvalidParameterException("domain", domain, "unknown cache domain; expected one of $DOMAINS")
+        }
     }
 
     /** Visible for tests: number of memoized entries in a named cache. */
     internal fun cacheSize(name: String): Int = when (name) {
         "sunRiseSet" -> sunRiseSetCache.size()
         "daySummary" -> daySummaryCache.size()
+        "prayerTimes" -> prayerCache.size()
         else -> throw InvalidParameterException(
             "cacheName",
             name,
-            "unknown cache; expected sunRiseSet or daySummary",
+            "unknown cache; expected sunRiseSet, daySummary or prayerTimes",
         )
     }
 }

@@ -2,11 +2,16 @@ package com.khushu.engine.facadetest
 
 import com.khushu.engine.CachedEngine
 import com.khushu.engine.KhushuEngine
+import com.khushu.engine.core.error.InvalidParameterException
 import com.khushu.engine.core.geo.Location
+import com.khushu.engine.prayer.Prayer
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /** CachedEngine: extended coverage (rise/set, events, phases, summary, qibla) + LRU bound. */
@@ -71,5 +76,73 @@ class CacheCoverageTest {
         val track = engine.astronomy.sun.track(london, java.time.YearMonth.of(2025, 6), zone)
         assertEquals(30, track.days.size)
         assertEquals(engine.astronomy.sun.conventions().toString().isNotEmpty(), true)
+    }
+
+    @Test
+    fun forceRecomputeOverwritesTheStoredEntry() {
+        val cached = CachedEngine(engine)
+        val first = cached.prayerTimes(london, date)
+        assertSame(first, cached.prayerTimes(london, date), "second call must hit the cache")
+        val fresh = cached.prayerTimes(london, date, forceRecompute = true)
+        assertEquals(first, fresh, "recompute must be value-identical (deterministic)")
+        assertNotSame(first, fresh, "recompute must produce a new instance")
+        assertSame(fresh, cached.prayerTimes(london, date), "fresh value must be stored, not discarded")
+    }
+
+    @Test
+    fun clearCachesScopesByDomainAndRejectsUnknownNames() {
+        val cached = CachedEngine(engine)
+        cached.prayerTimes(london, date)
+        cached.qibla(london)
+        cached.hijri(date)
+        assertEquals(1, cached.cacheSize("prayerTimes"))
+        cached.clearCaches("prayer")
+        assertEquals(0, cached.cacheSize("prayerTimes"))
+        assertEquals(engine.prayer.times(london, date), cached.prayerTimes(london, date))
+        assertFailsWith<InvalidParameterException> { cached.clearCaches("bogus") }
+        cached.clearCaches()
+        assertEquals(0, cached.cacheSize("prayerTimes"))
+    }
+
+    @Test
+    fun occasionsAreMemoizedPerCategoryFilter() {
+        val cached = CachedEngine(engine)
+        val all = cached.prayerOccasions(london, date)
+        assertSame(all, cached.prayerOccasions(london, date))
+        val voluntary = cached.prayerOccasions(london, date, setOf(Prayer.OccasionCategory.VOLUNTARY))
+        assertTrue(all.containsAll(voluntary))
+        assertTrue(voluntary.all { it.category == Prayer.OccasionCategory.VOLUNTARY })
+        // filter is part of the key; set order must not change the key
+        val forward = cached.prayerOccasions(
+            london, date,
+            setOf(Prayer.OccasionCategory.OBLIGATORY, Prayer.OccasionCategory.BOUNDARY_EVENT),
+        )
+        val reverse = cached.prayerOccasions(
+            london, date,
+            setOf(Prayer.OccasionCategory.BOUNDARY_EVENT, Prayer.OccasionCategory.OBLIGATORY),
+        )
+        assertSame(forward, reverse)
+        assertEquals(forward, reverse)
+    }
+
+    @Test
+    fun facadeUpcomingRotatesCurrentFirstAcrossMidnight() {
+        val t = engine.prayer.times(london, date)
+        val afterMaghrib = (t.maghrib.adjusted ?: t.sunset.adjusted)!!.plusSeconds(60)
+        val upcoming = engine.prayer.upcoming(london, afterMaghrib, zone, count = 3)
+        assertEquals(
+            listOf(
+                com.khushu.engine.prayer.PrayerStatus.Prayer.MAGHRIB,
+                com.khushu.engine.prayer.PrayerStatus.Prayer.ISHA,
+                com.khushu.engine.prayer.PrayerStatus.Prayer.FAJR,
+            ),
+            upcoming.map { it.kind },
+        )
+        assertEquals(date.plusDays(1), upcoming.last().instant.atZone(zone).toLocalDate())
+        // nextOccurrenceOf + forceRecompute independence: navigation never caches
+        val fajr = engine.prayer.nextOccurrenceOf(
+            com.khushu.engine.prayer.PrayerStatus.Prayer.FAJR, london, afterMaghrib, zone,
+        )
+        assertEquals(upcoming.last().instant, fajr?.instant)
     }
 }

@@ -8,6 +8,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -117,5 +118,48 @@ class PrayerAdditionsTest {
         val j = Prayer.nextJumuah(tromso, Instant.parse("2026-06-20T12:00:00Z"), ZoneId.of("Europe/Oslo"))
         assertNotNull(j)
         assertEquals(DayOfWeek.FRIDAY, j.date.dayOfWeek)
+    }
+
+    @Test
+    fun upcomingAfterMaghribRotatesThroughTomorrowFajr() {
+        val d = LocalDate.of(2026, 3, 14)
+        val t = Prayer.times(london, d)
+        val afterMaghrib = assertNotNull(t.maghrib.adjusted).plusSeconds(60)
+        val entries = Prayer.upcoming(london, afterMaghrib, londonZone, count = 3)
+        assertEquals(
+            listOf(PrayerStatus.Prayer.MAGHRIB, PrayerStatus.Prayer.ISHA, PrayerStatus.Prayer.FAJR),
+            entries.map { it.kind },
+        )
+        assertEquals(
+            d.plusDays(1),
+            entries.last().instant.atZone(londonZone).toLocalDate(),
+            "rotation must span midnight into tomorrow's Fajr",
+        )
+    }
+
+    @Test
+    fun upcomingRejectsNonPositiveCount() {
+        val now = Instant.parse("2026-03-14T12:00:00Z")
+        assertFailsWith<com.khushu.engine.core.error.InvalidParameterException> {
+            Prayer.upcoming(london, now, londonZone, count = 0)
+        }
+    }
+
+    @Test
+    fun occasionsOnCategoryFilterRestrictsResults() {
+        val d = LocalDate.of(2026, 3, 14)
+        val all = Prayer.occasionsOn(london, d)
+        val voluntary = Prayer.occasionsOn(london, d, setOf(Prayer.OccasionCategory.VOLUNTARY))
+        val boundary = Prayer.occasionsOn(london, d, setOf(Prayer.OccasionCategory.BOUNDARY_EVENT))
+        val obligatory = Prayer.occasionsOn(london, d, setOf(Prayer.OccasionCategory.OBLIGATORY))
+        assertTrue(all.isNotEmpty())
+        assertTrue(voluntary.isNotEmpty())
+        assertTrue(voluntary.all { it.category == Prayer.OccasionCategory.VOLUNTARY })
+        assertTrue(boundary.all { it.category == Prayer.OccasionCategory.BOUNDARY_EVENT })
+        assertTrue(obligatory.all { it.category == Prayer.OccasionCategory.OBLIGATORY })
+        assertEquals(all.size, voluntary.size + boundary.size + obligatory.size)
+        assertTrue(Prayer.occasionsOn(london, d, emptySet()).isEmpty())
+        // results stay time-ordered after filtering
+        assertEquals(voluntary, voluntary.sortedBy { it.instant })
     }
 }

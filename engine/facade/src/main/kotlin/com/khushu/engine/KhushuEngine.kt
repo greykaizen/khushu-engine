@@ -114,10 +114,32 @@ class KhushuEngine {
             config: PrayerConfiguration = PrayerConfiguration(),
         ): List<Prayer.Entry> = Prayer.navigation(location, now, zoneId, before, after, config)
 
-        /** Category-labeled worship occurrences for a civil day. */
-        fun occasionsOn(location: Location, date: LocalDate, config: PrayerConfiguration = PrayerConfiguration()): List<Prayer.Occurrence> =
-            Prayer.occasionsOn(location, date, config)
+        /** Category-labeled worship occurrences for a civil day; restrict with [categories] (default: all). */
+        fun occasionsOn(
+            location: Location,
+            date: LocalDate,
+            categories: Set<Prayer.OccasionCategory> = Prayer.OccasionCategory.entries.toSet(),
+            config: PrayerConfiguration = PrayerConfiguration(),
+        ): List<Prayer.Occurrence> =
+            Prayer.occasionsOn(location, date, categories, config)
 
+        /**
+         * Current-first rotation around [now]: the in-progress prayer plus the
+         * next [count] - 1 occurrences — "what's next" widgets and swipe
+         * rotation. Spans midnight (after Isha, tomorrow's Fajr follows).
+         */
+        fun upcoming(
+            location: Location,
+            now: Instant,
+            zoneId: ZoneId,
+            count: Int = 5,
+            config: PrayerConfiguration = PrayerConfiguration(),
+        ): List<Prayer.Entry> = Prayer.upcoming(location, now, zoneId, count, config)
+
+        /**
+         * Tahajjud window for the night beginning at [date]'s maghrib; also
+         * the Witr window (see [TahajjudWindow]). Null when polar.
+         */
         fun tahajjudWindow(location: Location, date: LocalDate, config: PrayerConfiguration = PrayerConfiguration()): TahajjudWindow? =
             Prayer.tahajjudWindow(location, date, config)
 

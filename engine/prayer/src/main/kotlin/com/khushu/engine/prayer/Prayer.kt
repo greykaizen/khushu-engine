@@ -131,6 +131,10 @@ data class PrayerTimesResult(
     val maghrib: PrayerTiming,
     /** Astronomical sunset — independent display offset from maghrib (D3). */
     val sunset: PrayerTiming,
+    /**
+     * Isha prayer time. Note: the span from Isha until the next day's Fajr is
+     * also the Witr (odd-numbered prayer) window — no separate computation.
+     */
     val isha: PrayerTiming,
     /** Midpoint of (maghrib today, fajr tomorrow) — the Islamic midnight. */
     val midnight: Instant?,
@@ -173,7 +177,11 @@ data class PrayerStatus(
     }
 }
 
-/** Tahajjud night-prayer window for the night following [date]'s maghrib. Null when uncomputable. */
+/**
+ * Tahajjud night-prayer window for the night following [date]'s maghrib.
+ * Null when uncomputable. This window is simultaneously the Witr / qiyam
+ * window — hosts need no separate witr computation.
+ */
 data class TahajjudWindow(
     /** Islamic midnight — midpoint of (maghrib today, fajr tomorrow). */
     val windowOpens: Instant,
@@ -314,6 +322,24 @@ object Prayer {
     }
 
     private const val MAX_NAVIGATION_RADIUS_DAYS = 15
+
+    /**
+     * Current-first rotation: the in-progress (or most recently entered)
+     * prayer plus [count] - 1 following occurrences after [now]. Convenience
+     * over [navigation] with before=0 — the call behind "what's next" widgets
+     * and swipe rotation. Spans midnight transparently: after today's Isha,
+     * tomorrow's Fajr is next.
+     */
+    fun upcoming(
+        location: Location,
+        now: Instant,
+        zoneId: java.time.ZoneId,
+        count: Int = 5,
+        config: PrayerConfiguration = PrayerConfiguration(),
+    ): List<Entry> {
+        validate(count > 0) { InvalidParameterException("count", "$count", "must be > 0") }
+        return navigation(location, now, zoneId, before = 0, after = count - 1, config)
+    }
 
     // ── Observance statistics: pure functions over caller-supplied logs ────
 
@@ -655,10 +681,13 @@ object Prayer {
      * Base occasions for [date]: the five obligatory prayers, sunrise as a
      * boundary event, and voluntary Duha/Tahajjud references. Eid/Jumu'ah
      * enrichment is composed at the facade with the calendar capability.
+     * Restrict with [categories] (default: all); an empty set yields an
+     * empty list.
      */
     fun occasionsOn(
         location: Location,
         date: LocalDate,
+        categories: Set<OccasionCategory> = OccasionCategory.entries.toSet(),
         config: PrayerConfiguration = PrayerConfiguration(),
     ): List<Occurrence> {
         val t = times(location, date, config)
@@ -671,6 +700,6 @@ object Prayer {
             t.isha.adjusted?.let { add(Occurrence("Isha", PrayerStatus.Prayer.ISHA, it, OccasionCategory.OBLIGATORY)) }
             t.ishraq?.let { add(Occurrence("Duha (voluntary)", null, it, OccasionCategory.VOLUNTARY)) }
             t.lastThirdOfNight?.let { add(Occurrence("Tahajjud preferred from", null, it, OccasionCategory.VOLUNTARY)) }
-        }.sortedBy { it.instant }
+        }.filter { it.category in categories }.sortedBy { it.instant }
     }
 }

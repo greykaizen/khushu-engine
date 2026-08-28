@@ -166,8 +166,13 @@ engine.day.summary(location, date, zoneId, prayerParams, calendarParams): DaySum
     // one-pass whole-day composite — shared facts computed once internally
 
 CachedEngine(delegate)  // opt-in memoization; semantic keys per AGENTS §6:
-                        // prayer→(Location,date,params) sun→(Location,instant)
-                        // moonState→(Location,instant) hijri→(date,offset)
+    // prayer times/month/occasions/tahajjud/nightDivisions/windows
+    //   → (Location, date|YearMonth, params, margins/categories)
+    // daySummary → (Location, date, zone, prayer+calendar params)
+    // sun→(Location,instant|date+zone) moonState→(Location,instant)
+    // moonRiseSet→(Location,date+zone) hijri→(date,offset) qibla→(Location)
+    // forceRecompute=true on any method → bypass + recompute + OVERWRITE entry
+    // clearCaches() all; clearCaches(domain) per CachedEngine.DOMAINS
 ```
 
 ### fixtures
@@ -214,3 +219,42 @@ calendar.facts.remainingDaysInMonth(date, config): Int
 - KDoc on every public facade member (incl. @throws error contracts).
 - Removed dead `gradle/libs.versions.toml`; removed stale test-only @Suppress.
 - Dependency-bump runbook: docs/dependency-bumps.md. Deprecation policy: README.
+
+## v1.6 additions (2026-08)
+
+### prayer
+```
+prayer.upcoming(location, now, zoneId, count = 5, config): List<Entry>
+  // current-first rotation: in-progress prayer + next count-1 occurrences;
+  // spans midnight (after Isha → tomorrow's Fajr). Convenience over
+  // navigationSequence(before=0, after=count-1) — throws InvalidParameterException
+  // for count <= 0.
+prayer.occasionsOn(location, date, categories = all, config): List<Occurrence>
+  // categories: Set<OccasionCategory> filter (default all); empty set → empty
+  // list; time-ordered. Facade + CachedEngine take the same parameter.
+```
+Witr: no separate API — the window from Isha to next Fajr is also the Witr
+window; documented on `PrayerTimesResult.isha` and `TahajjudWindow` (KDoc only).
+
+### CachedEngine++
+```
+forceRecompute: Boolean = false   // every cached method; bypasses the lookup,
+                                  // recomputes, and OVERWRITES the stored entry
+CachedEngine.DOMAINS              // "prayer", "astronomySun", "astronomyMoon",
+                                  // "calendar", "qibla", "daySummary"
+clearCaches()                     // everything
+clearCaches(domain)               // one domain; unknown name → InvalidParameterException
+```
+Newly memoized: prayerOccasions (categories in key, order-insensitive),
+tahajjudWindow, nightDivisions, imsak, duha, forbiddenWindows, fastingFacts,
+fastingFactsForMonth, travelFacts — all date/month-keyed with margins in key.
+Instant-anchored navigation (status, navigationSequence, upcoming,
+nextOccurrenceOf, nextJumuah) stays uncached by design.
+Null results are cached too: a polar-day null computed once is not recomputed.
+
+### tests
+- upcoming rotation after maghrib: [MAGHRIB, ISHA, FAJR(tomorrow)].
+- forceRecompute: cache hit is same-ref; recompute is new-ref, value-identical,
+  and stored (subsequent reads return the overwritten entry).
+- clearCaches scoping + unknown-domain rejection.
+- occasions category filter coexistence + order-insensitive cache key.

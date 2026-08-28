@@ -41,7 +41,7 @@ repositories {
 
 dependencies {
     // The facade pulls every module transitively — one line is enough.
-    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.5.0")
+    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.6.0")
 }
 ```
 
@@ -54,7 +54,7 @@ cd khushu-engine && ./gradlew publishToMavenLocal
 
 ```kotlin
 repositories { mavenLocal(); mavenCentral(); maven { url = uri("https://jitpack.io") } }
-dependencies { implementation("com.khushu:engine-facade:1.5.0") }
+dependencies { implementation("com.khushu:engine-facade:1.6.0") }
 ```
 
 ### Composite build (developing the engine alongside your app)
@@ -64,7 +64,7 @@ dependencies { implementation("com.khushu:engine-facade:1.5.0") }
 includeBuild("/path/to/khushu-engine")
 ```
 
-then depend on `com.khushu:engine-facade:1.5.0` — Gradle substitutes the
+then depend on `com.khushu:engine-facade:1.6.0` — Gradle substitutes the
 local project.
 
 ## Usage
@@ -99,16 +99,21 @@ val day = engine.day.summary(london, LocalDate.of(2025, 3, 30), ZoneId.of("Europ
 ```
 
 `CachedEngine(engine)` adds cross-feature memoization so each fact is
-computed once and reused: prayer times (day and whole-month), day summary,
-sun position/rise-set/events/phases, moon state/rise-set, Hijri date and
-qibla. Every cache is keyed by its semantic key *including configuration*
-and bounded as LRU (GPS jitter never grows memory without bound).
+computed once and reused: prayer times (day and whole-month), occasions,
+tahajjud/night divisions, day-summary windows (imsak, duha, forbidden,
+fasting facts, travel facts), day summary, sun position/rise-set/events/
+phases, moon state/rise-set, Hijri date and qibla. Every cache is keyed by
+its semantic key *including configuration* and bounded as LRU (GPS jitter
+never grows memory without bound). Pass `forceRecompute = true` to bypass
+the lookup, recompute, and overwrite the stored entry (settings import,
+time-travel debugging — never hot paths); `clearCaches(domain)` drops one
+domain's caches (`CachedEngine.DOMAINS`), `clearCaches()` drops everything.
 
 ## Facade vs individual modules
 
 Every module above is published as its **own artifact** and can be consumed
 directly — e.g. a qibla-only tool needs just
-`com.github.greykaizen.khushu-engine:engine-qibla:1.5.0` (it drags in only
+`com.github.greykaizen.khushu-engine:engine-qibla:1.6.0` (it drags in only
 what it uses). The **facade is the recommended entry point** for
 full-featured apps: one dependency, capability namespaces, and room to grow
 without build-file churn.

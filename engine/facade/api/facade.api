@@ -5,25 +5,52 @@ public final class com/khushu/engine/CachedEngine {
 	public fun <init> (Lcom/khushu/engine/KhushuEngine;I)V
 	public synthetic fun <init> (Lcom/khushu/engine/KhushuEngine;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun clearCaches ()V
-	public final fun daySummary (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;)Lcom/khushu/engine/DaySummary;
-	public static synthetic fun daySummary$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;ILjava/lang/Object;)Lcom/khushu/engine/DaySummary;
+	public final fun clearCaches (Ljava/lang/String;)V
+	public final fun daySummary (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;Z)Lcom/khushu/engine/DaySummary;
+	public static synthetic fun daySummary$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;ZILjava/lang/Object;)Lcom/khushu/engine/DaySummary;
+	public final fun duha (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;Z)Lkotlin/ranges/ClosedRange;
+	public static synthetic fun duha$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lkotlin/ranges/ClosedRange;
+	public final fun fastingFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;Z)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
+	public static synthetic fun fastingFacts$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$FastingFacts;
+	public final fun fastingFactsForMonth (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;ILcom/khushu/engine/prayer/PrayerConfiguration;Z)Ljava/util/List;
+	public static synthetic fun fastingFactsForMonth$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;ILcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Ljava/util/List;
+	public final fun forbiddenWindows (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;Z)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
+	public static synthetic fun forbiddenWindows$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$ForbiddenWindows;
 	public final fun getDelegate ()Lcom/khushu/engine/KhushuEngine;
-	public final fun hijri (Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/HijriDate;
-	public static synthetic fun hijri$default (Lcom/khushu/engine/CachedEngine;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
-	public final fun moonRiseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
-	public final fun moonState (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/MoonState;
-	public final fun prayerMonth (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
-	public static synthetic fun prayerMonth$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
-	public final fun prayerTimes (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerTimesResult;
-	public static synthetic fun prayerTimes$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
-	public final fun qibla (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
-	public final fun sunEvents (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;
-	public final fun sunPhases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarDayPhases;
-	public final fun sunPosition (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
-	public final fun sunRiseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
+	public final fun hijri (Ljava/time/LocalDate;IZ)Lcom/khushu/engine/calendar/HijriDate;
+	public static synthetic fun hijri$default (Lcom/khushu/engine/CachedEngine;Ljava/time/LocalDate;IZILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
+	public final fun imsak (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;Z)Ljava/time/Instant;
+	public static synthetic fun imsak$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Ljava/time/Instant;
+	public final fun moonRiseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/RiseSet;
+	public static synthetic fun moonRiseSet$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/RiseSet;
+	public final fun moonState (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Z)Lcom/khushu/engine/astronomy/MoonState;
+	public static synthetic fun moonState$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/MoonState;
+	public final fun nightDivisions (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;Z)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
+	public static synthetic fun nightDivisions$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
+	public final fun prayerMonth (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;Z)Ljava/util/List;
+	public static synthetic fun prayerMonth$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Ljava/util/List;
+	public final fun prayerOccasions (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/util/Set;Lcom/khushu/engine/prayer/PrayerConfiguration;Z)Ljava/util/List;
+	public static synthetic fun prayerOccasions$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/util/Set;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Ljava/util/List;
+	public final fun prayerTimes (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;Z)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public static synthetic fun prayerTimes$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public final fun qibla (Lcom/khushu/engine/core/geo/Location;Z)Lcom/khushu/engine/qibla/QiblaBearing;
+	public static synthetic fun qibla$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;ZILjava/lang/Object;)Lcom/khushu/engine/qibla/QiblaBearing;
+	public final fun sunEvents (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SolarEvents;
+	public static synthetic fun sunEvents$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun sunPhases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SolarDayPhases;
+	public static synthetic fun sunPhases$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarDayPhases;
+	public final fun sunPosition (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Z)Lcom/khushu/engine/astronomy/SolarPosition;
+	public static synthetic fun sunPosition$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarPosition;
+	public final fun sunRiseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/RiseSet;
+	public static synthetic fun sunRiseSet$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/RiseSet;
+	public final fun tahajjudWindow (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;Z)Lcom/khushu/engine/prayer/TahajjudWindow;
+	public static synthetic fun tahajjudWindow$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lcom/khushu/engine/prayer/TahajjudWindow;
+	public final fun travelFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;Z)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+	public static synthetic fun travelFacts$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
 }
 
 public final class com/khushu/engine/CachedEngine$Companion {
+	public final fun getDOMAINS ()Ljava/util/Set;
 }
 
 public final class com/khushu/engine/DateApi {
@@ -207,8 +234,8 @@ public final class com/khushu/engine/KhushuEngine$PrayerApi {
 	public static synthetic fun nextOccurrenceOf$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$Entry;
 	public final fun nightDivisions (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
 	public static synthetic fun nightDivisions$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$NightDivisions;
-	public final fun occasionsOn (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
-	public static synthetic fun occasionsOn$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun occasionsOn (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/util/Set;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun occasionsOn$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/util/Set;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun status (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerStatus;
 	public static synthetic fun status$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerStatus;
 	public final fun tahajjudWindow (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/TahajjudWindow;
@@ -217,6 +244,8 @@ public final class com/khushu/engine/KhushuEngine$PrayerApi {
 	public static synthetic fun times$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
 	public final fun timesForRange (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun timesForRange$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
+	public final fun upcoming (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;ILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
+	public static synthetic fun upcoming$default (Lcom/khushu/engine/KhushuEngine$PrayerApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 }
 
 public final class com/khushu/engine/KhushuEngine$PrayerApi$StatsApi {
