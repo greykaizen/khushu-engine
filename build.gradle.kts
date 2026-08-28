@@ -27,7 +27,7 @@ subprojects {
                     from(components["java"])
                     groupId = "com.khushu"
                     artifactId = module
-                    version = "1.4.0"
+                    version = "1.4.1"
                     pom {
                         name.set("Khushu Engine — ${project.name}")
                         description.set(
@@ -40,7 +40,7 @@ subprojects {
                                 url.set("https://www.gnu.org/licenses/gpl-3.0.txt")
                             }
                         }
-                        url.set("https://github.com/khushu/khushu-engine")
+                        url.set("https://github.com/greykaizen/khushu-engine")
                     }
                 }
             }

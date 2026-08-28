@@ -248,15 +248,46 @@ Notes:
 
 ## Dependency setup for consumers
 
+**A. JitPack (recommended — zero account setup, builds from git tags):**
+
 ```kotlin
 repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+dependencies {
+    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.4.1")
+    // pulls all engine modules transitively (JitPack rewrites inter-module deps)
+}
+```
+
+**B. publishToMavenLocal (machine-local, no network):**
+
+```bash
+cd khushu-engine && ./gradlew publishToMavenLocal
+```
+
+```kotlin
+repositories {
+    mavenLocal()
     mavenCentral()
     maven { url = uri("https://jitpack.io") } // transitive: cosinekitty astronomy (via :engine:astronomy)
 }
 dependencies {
-    implementation("com.khushu:engine-facade:1.4.0") // pulls all engine modules transitively
+    implementation("com.khushu:engine-facade:1.4.1") // pulls all engine modules transitively
 }
 ```
+
+**C. Composite build (engine developed alongside the host):**
+
+```kotlin
+// settings.gradle.kts of the host
+includeBuild("/path/to/khushu-engine")
+```
+
+then depend on `com.khushu:engine-facade:1.4.1` — Gradle substitutes the
+local project. Note: `jitpack.yml` pins the engine's CI/JitPack JDK to 21
+(`kotlin { jvmToolchain(21) }` everywhere).
 
 Reference consumer project: `~/AndroidStudioProjects/khushu-engine-consumer-test`
 (validates the published artifact outside this repository).
