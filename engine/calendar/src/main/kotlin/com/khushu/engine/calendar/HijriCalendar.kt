@@ -149,6 +149,37 @@ object HijriCalendar {
     fun daysUntil(month: Int, day: Int, after: LocalDate, offsetDays: Int = 0): Long =
         java.time.temporal.ChronoUnit.DAYS.between(after, nextOccurrence(month, day, after, offsetDays))
 
+    /**
+     * Most recent civil date on which the fixed hijri [month]/[day] fell, at or
+     * before [before] — mirror of [nextOccurrence].
+     * @throws NoResultException when the day does not occur within the search window
+     */
+    fun previousOccurrence(month: Int, day: Int, before: LocalDate, offsetDays: Int = 0): LocalDate {
+        validate(month in 1..12 && day in 1..30) {
+            InvalidParameterException("hijriMonth/day", "$day-$month", "month in 1..12, day in 1..30")
+        }
+        val hStart = hijri(before, offsetDays)
+        for (yearOffset in 0 downTo -1) {
+            val target = runCatching {
+                hijriToGregorian(hStart.year + yearOffset, month, day, offsetDays)
+            }.getOrNull()
+            if (target != null && !target.isAfter(before)) return target
+        }
+        throw NoResultException(
+            "$day-$month does not occur in hijri years ${hStart.year} or ${hStart.year - 1} " +
+                "(the day may not exist in either year)",
+        )
+    }
+
+    /**
+     * Whole civil days since the fixed hijri [month]/[day] last fell — 0 when it
+     * falls on [before] itself. Mirror of [daysUntil]; the call behind "N days
+     * since Eid" counters.
+     * @throws NoResultException when the day does not occur within the search window
+     */
+    fun daysSince(month: Int, day: Int, before: LocalDate, offsetDays: Int = 0): Long =
+        java.time.temporal.ChronoUnit.DAYS.between(previousOccurrence(month, day, before, offsetDays), before)
+
     /** True when this hijri month is one of the four sacred months. */
     fun isSacredMonth(hijriMonth: Int): Boolean =
         hijriMonth == 1 || hijriMonth == 7 || hijriMonth == 11 || hijriMonth == 12

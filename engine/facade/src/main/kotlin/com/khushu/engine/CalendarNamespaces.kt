@@ -45,19 +45,11 @@ class DateApi internal constructor() {
 
     /** The configured primary calendar line for a civil date. */
     fun primary(civilDate: LocalDate, config: CalendarConfiguration): DateLine =
-        when (config.primary) {
-            CalendarConfiguration.Side.HIJRI -> DateLine.Hijri(HijriCalendar.hijri(civilDate, config.hijriOffsetDays))
-            CalendarConfiguration.Side.GREGORIAN -> DateLine.Gregorian(civilDate)
-        }
+        com.khushu.engine.calendar.DualDates.line(config.primary, civilDate, config)
 
     /** The configured secondary calendar line, or null when none is configured. */
     fun secondary(civilDate: LocalDate, config: CalendarConfiguration): DateLine? =
-        config.secondary?.let { side ->
-            when (side) {
-                CalendarConfiguration.Side.HIJRI -> DateLine.Hijri(HijriCalendar.hijri(civilDate, config.hijriOffsetDays))
-                CalendarConfiguration.Side.GREGORIAN -> DateLine.Gregorian(civilDate)
-            }
-        }
+        config.secondary?.let { side -> com.khushu.engine.calendar.DualDates.line(side, civilDate, config) }
 
     /** Both calendar lines at once (primary + optional secondary). */
     fun both(civilDate: LocalDate, config: CalendarConfiguration): DualDate =
@@ -71,22 +63,26 @@ class DateApi internal constructor() {
         HijriCalendar.hijriToGregorian(hijriYear, hijriMonth, hijriDay, config.hijriOffsetDays)
 }
 
-internal fun bothDates(civilDate: LocalDate, config: CalendarConfiguration): DualDate {
-    val primary = when (config.primary) {
-        CalendarConfiguration.Side.HIJRI -> DateLine.Hijri(HijriCalendar.hijri(civilDate, config.hijriOffsetDays))
-        CalendarConfiguration.Side.GREGORIAN -> DateLine.Gregorian(civilDate)
-    }
-    val secondary = config.secondary?.let { side ->
-        when (side) {
-            CalendarConfiguration.Side.HIJRI -> DateLine.Hijri(HijriCalendar.hijri(civilDate, config.hijriOffsetDays))
-            CalendarConfiguration.Side.GREGORIAN -> DateLine.Gregorian(civilDate)
-        }
-    }
-    return DualDate(primary, secondary)
-}
+internal fun bothDates(civilDate: LocalDate, config: CalendarConfiguration): DualDate =
+    com.khushu.engine.calendar.DualDates.of(civilDate, config)
 
 /** Calendar arithmetic and dual-calendar matrices over civil months/years. */
 class MonthApi internal constructor() {
+
+    /**
+     * Whole-month composite for calendar home screens: dual dates, Islamic
+     * events, optional fast rules, and per-evening moon facts — one
+     * computation pass over the civil month (see [MonthSummary]).
+     */
+    fun summary(
+        yearMonth: YearMonth,
+        location: Location,
+        zoneId: ZoneId,
+        config: CalendarConfiguration,
+        calendarParams: com.khushu.engine.calendar.CalendarParams =
+            com.khushu.engine.calendar.CalendarParams(hijriOffsetDays = config.hijriOffsetDays),
+    ): com.khushu.engine.calendar.MonthSummary =
+        com.khushu.engine.calendar.MonthSummaries.of(yearMonth, location, zoneId, config, calendarParams)
 
     /** Dual-calendar day map for one civil month (calendar-grid UIs). */
     fun monthMatrix(civilMonth: YearMonth, config: CalendarConfiguration): Map<LocalDate, DualDate> {
@@ -233,4 +229,21 @@ class FactsApi internal constructor() {
      */
     fun daysUntil(month: Int, day: Int, after: LocalDate, config: CalendarConfiguration): Long =
         HijriCalendar.daysUntil(month, day, after, config.hijriOffsetDays)
+
+    /**
+     * Most recent civil date on which the fixed hijri [month]/[day] fell, at
+     * or before [before] — mirror of [com.khushu.engine.calendar.HijriCalendar.nextOccurrence].
+     * @throws com.khushu.engine.core.error.NoResultException when the day does not occur within the search window
+     */
+    fun previousOccurrence(month: Int, day: Int, before: LocalDate, config: CalendarConfiguration): LocalDate =
+        HijriCalendar.previousOccurrence(month, day, before, config.hijriOffsetDays)
+
+    /**
+     * Whole civil days since the fixed hijri [month]/[day] last fell — 0 on
+     * the day itself. Mirror of [daysUntil]; the call behind "N days since
+     * Eid" counters.
+     * @throws com.khushu.engine.core.error.NoResultException when the day does not occur within the search window
+     */
+    fun daysSince(month: Int, day: Int, before: LocalDate, config: CalendarConfiguration): Long =
+        HijriCalendar.daysSince(month, day, before, config.hijriOffsetDays)
 }

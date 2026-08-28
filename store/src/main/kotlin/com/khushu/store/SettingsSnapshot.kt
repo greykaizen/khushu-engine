@@ -2,6 +2,7 @@ package com.khushu.store
 
 import com.khushu.engine.calendar.CalendarConfiguration
 import com.khushu.engine.calendar.CalendarParams
+import com.khushu.engine.calendar.CivilCalendarType
 import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Convention
 import com.khushu.engine.prayer.HighLatitudeRule
@@ -67,6 +68,8 @@ data class CalendarSettingsDto(
     val primarySide: CalendarConfiguration.Side = CalendarConfiguration.Side.GREGORIAN,
     /** Secondary calendar line; null hides it. At least one side must be HIJRI (engine-enforced). */
     val secondarySide: CalendarConfiguration.Side? = CalendarConfiguration.Side.HIJRI,
+    /** Civil system the GREGORIAN side renders (region-based civil calendars); unknown values coerce to the default. */
+    val civilCalendar: CivilCalendarType = CivilCalendarType.GREGORIAN,
 )
 
 /** Serializable mirror of [ZakatParams] — madhab rules and nisab valuation inputs. */
@@ -180,6 +183,7 @@ fun CalendarSettingsDto.toConfiguration(): CalendarConfiguration = CalendarConfi
     primary = primarySide,
     secondary = secondarySide,
     hijriOffsetDays = hijriOffsetDays,
+    civilCalendar = civilCalendar,
 )
 
 fun ZakatSettingsDto.toParams(): ZakatParams = ZakatParams(

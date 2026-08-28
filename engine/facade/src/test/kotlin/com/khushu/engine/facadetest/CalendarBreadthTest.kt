@@ -2,7 +2,12 @@ package com.khushu.engine.facadetest
 
 import com.khushu.engine.KhushuEngine
 import com.khushu.engine.calendar.CalendarConfiguration
+import com.khushu.engine.calendar.CivilCalendarType
+import com.khushu.engine.calendar.DateLine
+import com.khushu.engine.calendar.FastRule
+import com.khushu.engine.core.geo.Location
 import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -11,6 +16,8 @@ class CalendarBreadthTest {
 
     private val engine = KhushuEngine()
     private val config = CalendarConfiguration(primary = CalendarConfiguration.Side.HIJRI)
+    private val london = Location.of(51.5072, -0.1276)
+    private val zone = ZoneId.of("Europe/London")
 
     @Test
     fun upcomingEventsMatchesRangeScanAtDefaultAndNonZeroOffset() {
@@ -62,5 +69,77 @@ class CalendarBreadthTest {
         val tomorrow = engine.calendar.hijri(LocalDate.of(2026, 8, 29))
         assertTrue(today < tomorrow || today == tomorrow) // month roll-over only moves forward
         assertTrue(today <= tomorrow)
+    }
+
+    @Test
+    fun daysSinceIsZeroOnTheDayAndMirrorsPreviousOccurrence() {
+        val eid = engine.calendar.facts.eidAlAdha(1447, config)
+        assertEquals(0L, engine.calendar.facts.daysSince(12, 10, eid, config))
+        assertEquals(1L, engine.calendar.facts.daysSince(12, 10, eid.plusDays(1), config))
+
+        val before = LocalDate.of(2026, 5, 1)
+        val prev = engine.calendar.facts.previousOccurrence(12, 10, before, config)
+        assertEquals(
+            java.time.temporal.ChronoUnit.DAYS.between(prev, before),
+            engine.calendar.facts.daysSince(12, 10, before, config),
+        )
+        assertTrue(!prev.isAfter(before))
+        assertTrue(!engine.calendar.nextOccurrence(12, 10, before).isBefore(before))
+        // CalendarApi-level passthrough agrees with the facts namespace
+        assertEquals(prev, engine.calendar.previousOccurrence(12, 10, before, config.hijriOffsetDays))
+    }
+
+    @Test
+    fun regionalCivilCalendarRendersThroughDualDatesAndMatrices() {
+        val persian = CalendarConfiguration(
+            primary = CalendarConfiguration.Side.HIJRI,
+            secondary = CalendarConfiguration.Side.GREGORIAN,
+            civilCalendar = CivilCalendarType.PERSIAN,
+        )
+        val dual = engine.calendar.date.both(LocalDate.of(2026, 8, 28), persian)
+        val secondary = dual.secondary as DateLine.Regional
+        assertEquals(CivilCalendarType.PERSIAN, secondary.date.system)
+        assertEquals(Triple(1405, 6, 6), Triple(secondary.date.year, secondary.date.month, secondary.date.day))
+
+        val matrix = engine.calendar.month.monthMatrix(java.time.YearMonth.of(2026, 8), persian)
+        assertEquals(31, matrix.size)
+        assertTrue(matrix.values.all { (it.secondary as DateLine.Regional).date.system == CivilCalendarType.PERSIAN })
+
+        // Default civil system stays the Gregorian branch (source compatibility).
+        val gregorian = CalendarConfiguration(
+            primary = CalendarConfiguration.Side.HIJRI,
+            secondary = CalendarConfiguration.Side.GREGORIAN,
+        )
+        assertTrue(engine.calendar.date.both(LocalDate.of(2026, 8, 28), gregorian).secondary is DateLine.Gregorian)
+    }
+
+    @Test
+    fun civilNamespacePivotsRegionalToGregorianAndBack() {
+        for (system in CivilCalendarType.entries.filter { it != CivilCalendarType.JAPANESE }) {
+            val d = LocalDate.of(2026, 8, 28)
+            val r = engine.calendar.civil.toRegional(d, system)
+            assertEquals(d, engine.calendar.civil.fromRegional(system, r.year, r.month, r.day), "$system pivot")
+        }
+        assertEquals(12, engine.calendar.civil.monthNames(CivilCalendarType.PERSIAN).size)
+        assertEquals(13, engine.calendar.civil.monthNames(CivilCalendarType.ETHIOPIAN).size)
+    }
+
+    @Test
+    fun monthSummaryIsAOnePassComposite() {
+        // Muharram 1448 straddles June 2026: Tasu'a/Ashura fire there.
+        val ym = java.time.YearMonth.of(2026, 6)
+        val params = com.khushu.engine.calendar.CalendarParams(tasuaAshura = true)
+        val summary = engine.calendar.month.summary(ym, london, zone, config, params)
+
+        assertEquals(30, summary.days.size)
+        assertEquals(ym, summary.yearMonth)
+        assertTrue(summary.days.all { it.dual.primary is DateLine.Hijri })
+        // Tasu'a and Ashura each fire exactly once under the flag.
+        assertEquals(2, summary.days.count { it.fastRules == listOf(FastRule.TASUA_ASHURA) })
+        assertTrue(summary.days.flatMap { it.events }.any { it.title == "Day of Ashura" })
+        // Moon facts sampled for every day.
+        assertTrue(summary.days.all { it.moonIllumination in 0.0..1.0 })
+        // Civil dates advance one day at a time.
+        assertEquals(summary.days.map { it.date }, (1..30).map { ym.atDay(it) })
     }
 }

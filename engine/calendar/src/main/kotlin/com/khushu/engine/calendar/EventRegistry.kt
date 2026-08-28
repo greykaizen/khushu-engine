@@ -19,7 +19,14 @@ class EventRegistry(private val offsetDays: Int = 0) {
 
     val all: List<EventDefinition> get() = definitions.values.toList()
 
-    /** Register a pack in the engine's own schema. Returns count of newly added. */
+    /**
+     * Register a pack in the engine's own schema. Returns count of newly added.
+     *
+     * Registration is by definition id: registering an id that already exists
+     * (including built-in ids like `eid_al_fitr`) REPLACES that definition.
+     * Hosts can exploit this for zero-code localization: a translated pack
+     * that reuses the built-in ids swaps titles without touching engine code.
+     */
     fun registerPack(json: String): Int {
         val pack = EventPackParser.parse(json)
         var added = 0

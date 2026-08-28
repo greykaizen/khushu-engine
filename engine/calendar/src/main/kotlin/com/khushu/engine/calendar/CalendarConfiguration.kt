@@ -9,7 +9,34 @@ import com.khushu.engine.core.error.validate
 enum class CalendarSystem { UMM_AL_QURA }
 
 /** The Islamic side is always tabular in this engine; civil calendars are regional/civil only. */
-enum class CivilCalendarType { GREGORIAN }
+enum class CivilCalendarType {
+    /** Baseline proleptic Gregorian (ISO-8601). */
+    GREGORIAN,
+
+    /** Solar Hijri — official calendar of Iran, most widely used in Afghanistan. */
+    PERSIAN,
+
+    /** India's national Śaka calendar (Calendar Reform Committee, 1957). */
+    INDIAN_NATIONAL,
+
+    /** Bangladesh national calendar — the 2019-present revision. */
+    BANGLA_BANGLADESH,
+
+    /** Coptic (Alexandrian) calendar — used in Egypt. */
+    COPTIC,
+
+    /** Ethiopian (Geʽez) calendar — official state civil calendar of Ethiopia. */
+    ETHIOPIAN,
+
+    /** Japanese eras (Reiwa/Heisei/…) over Gregorian months and days. */
+    JAPANESE,
+
+    /** Republic-of-China calendar (year = CE − 1911). */
+    MINGUO,
+
+    /** Thai solar Buddhist calendar (year = CE + 543). */
+    THAI_BUDDHIST,
+}
 
 data class CalendarConfiguration(
     /** Exactly one side must be HIJRI (enforced). */
@@ -17,6 +44,13 @@ data class CalendarConfiguration(
     val secondary: Side? = null,
     val system: CalendarSystem = CalendarSystem.UMM_AL_QURA,
     val hijriOffsetDays: Int = 0,
+    /**
+     * Civil system rendered for every [Side.GREGORIAN] line. Default is the
+     * baseline Gregorian; pick a regional system (Persian, Śaka, Bangla, …)
+     * to render that civil calendar in dual-calendar UIs — see
+     * [RegionalCalendars]. The Hijri side is unaffected.
+     */
+    val civilCalendar: CivilCalendarType = CivilCalendarType.GREGORIAN,
 ) {
     enum class Side { HIJRI, GREGORIAN }
 
@@ -38,6 +72,14 @@ data class CalendarConfiguration(
 sealed interface DateLine {
     data class Hijri(val date: HijriDate) : DateLine
     data class Gregorian(val date: java.time.LocalDate) : DateLine
+
+    /**
+     * A non-Gregorian civil-calendar line (Persian, Śaka, Bangla, Coptic,
+     * Ethiopian, Japanese, Minguo, Thai Buddhist) — produced whenever the
+     * side is GREGORIAN and [CalendarConfiguration.civilCalendar] is not
+     * [CivilCalendarType.GREGORIAN].
+     */
+    data class Regional(val date: RegionalDate) : DateLine
 }
 
 /** Both sides resolved for one civil date. */

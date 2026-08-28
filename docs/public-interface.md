@@ -370,3 +370,67 @@ stays null; missing keys still default).
 - upcomingEvents equals the day-scan at offsets 0/+1/−1; count/ascending.
 - cache hit/overwrite/clear for all five calendar caches.
 - store sides round-trip + flag/side preservation + invalid-combo typed error.
+
+## v1.9 additions (2026-08) — regional civil calendars + month composite
+
+### previousOccurrence / daysSince (mirror of nextOccurrence / daysUntil)
+```
+calendar.previousOccurrence(month, day, before, offsetDays = 0): LocalDate  // module
+calendar.facts.previousOccurrence(month, day, before, config): LocalDate    // facade
+calendar.daysSince(month, day, before, offsetDays = 0): Long                // module
+calendar.facts.daysSince(month, day, before, config): Long                  // facade
+```
+Most-recent occurrence at-or-before `before`; 0 on the day itself. Powers
+"N days since Eid" counters. NoResultException outside the 2-year window.
+
+### Regional civil calendars (CivilCalendarType — 9 systems)
+```
+CalendarConfiguration(..., civilCalendar: CivilCalendarType = GREGORIAN)
+DateLine.Regional(date: RegionalDate(system, year, month, day, monthName,
+                                     eraLabel?, label))
+RegionalCalendars.toRegional(date, system) / fromRegional(system, y, m, d) /
+                    monthNames(system)          // calendar module object
+engine.calendar.civil.toRegional / fromRegional / monthNames   // facade
+```
+GREGORIAN · PERSIAN · INDIAN_NATIONAL · BANGLA_BANGLADESH · COPTIC ·
+ETHIOPIAN (engine-owned deterministic math, anchor-tested) · JAPANESE ·
+MINGUO · THAI_BUDDHIST (`java.time.chrono` adapters). Setting `civilCalendar`
+switches every GREGORIAN-side line in `date.*`, `monthMatrix`, and
+`month.summary` to `DateLine.Regional`; Hijri side unaffected. JAPANESE
+reverse conversion throws (era disambiguation unsupported).
+Region-based only: no liturgical/lunisolar systems.
+
+### month.summary — whole-month composite
+```
+calendar.month.summary(yearMonth, location, zoneId, config,
+                       calendarParams): MonthSummary
+  // MonthSummaryDay(date, dual, events, fastRules, moonIllumination,
+  //                 moonAboveHorizon) per civil day; one pass: fast days
+  //                 once per range, one lunar track, one event lookup/day
+CachedEngine.monthSummary(...)   // cached; key = (Location, YearMonth, ZoneId,
+                                 // CalendarConfiguration, CalendarParams)
+```
+
+### store — civil calendar side
+`CalendarSettingsDto` gains `civilCalendar: CivilCalendarType` (default
+GREGORIAN; unknown values coerce to the default). `updateCalendarConfiguration`
+persists it; `updateCalendar(params)` preserves it.
+
+### i18n note (EventRegistry)
+`registerPack` is by definition id — registering an id that already exists
+(including built-ins like `eid_al_fitr`) REPLACES that definition: a
+translated pack reusing built-in ids gives zero-code title localization.
+
+### docs
+- `docs/calendar.md` §Regional civil calendars — systems table + provenance.
+- `docs/sighting-mode-design.md` — DESIGN ONLY (house rule; review gate).
+
+### tests
+- Persian: 1354–1419 official Nowruz table + leap marks, year lengths,
+  Esfand 29/30, round-trip 1990–2050.
+- Śaka: adoption anchor 1957 + month-start table + leap Chaitra; Bangla:
+  2019-revision anchors + Falgun 29/30 leap binding; both round-trip
+  1990–2090. Coptic/Ethiopian: anchors + 4-year leap cycle + round-trip
+  1950–2080. Japanese era boundary; Minguo/Thai offsets.
+- daysSince zero-on-day + previousOccurrence facade/module parity.
+- month.summary one-pass composite (Tasu'a/Ashura flag, moon bounds, dates).

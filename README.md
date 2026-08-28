@@ -21,7 +21,7 @@ Deterministic, dependency-light, unit-tested against golden matrices.
 |---|---|---|
 | `prayer` | `engine-prayer` | Prayer times, current/next prayer, navigation sequence, imsak/qiyam windows. 18 conventions, 4 madhabs, high-latitude rules, polar-day safe. Golden matrix: 6,184 cases |
 | `astronomy` | `engine-astronomy` | Sun/moon position (az/alt/RA/dec), daily sky tracks, moon phase + bright-limb tilt, rise/set, hilal visibility, eclipses. Golden matrix: 576 cases |
-| `calendar` | `engine-calendar` | Hijri ⇄ Gregorian conversion, Islamic events, optional fast-day rules |
+| `calendar` | `engine-calendar` | Hijri ⇄ Gregorian conversion, Islamic events, optional fast-day rules, region-based civil calendars (Persian, Śaka, Bangla, Coptic, Ethiopian, Japanese, Minguo, Thai Buddhist) |
 | `qibla` | `engine-qibla` | Great-circle bearing + distance to the Kaaba |
 | `zakat` | `engine-zakat` | Mal zakat (nisab/rate/madhab rules), fitrana, ushr, livestock schedules |
 | `mushaf` | `engine-mushaf` | Glyph-atlas layout math: page fitting, line shrink, RTL glyph placement (content-free; atlas specs enter by value) |

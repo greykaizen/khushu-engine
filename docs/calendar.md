@@ -43,9 +43,33 @@ CalendarConfiguration(primary = HIJRI, secondary = GREGORIAN)   // ✓
 CalendarConfiguration(primary = GREGORIAN)                      // throws
 ```
 
-The civil side uses `java.time` only — regional/civil, no other religion's
-calendar ships. `CalendarSystem` is a strategy enum so future systems won't
-rewrite the API.
+The civil side renders region-based civil calendars only — the calendars
+people live by day-to-day (Gregorian, Persian, Śaka, Bangla, Coptic,
+Ethiopian, Japanese, Minguo, Thai Buddhist); no liturgical/religious systems
+(Hebrew, Hindu panchang, Church calendars as such). `CalendarSystem` is a
+strategy enum so future Islamic systems won't rewrite the API.
+
+## Regional civil calendars
+
+`CalendarConfiguration.civilCalendar: CivilCalendarType` picks the civil
+system every `Side.GREGORIAN` line renders; the Hijri side is always Umm
+al-Qura and unaffected. Rendering flows through one seam — `DualDates` —
+shared by `calendar.date.*`, `monthMatrix`, and `month.summary`, so a
+regional choice appears everywhere consistently.
+
+| System | Implementation | Provenance (anchor tests carry the citation) |
+|---|---|---|
+| `GREGORIAN` | identity (`java.time.LocalDate`) | ISO-8601 |
+| `PERSIAN` | engine-owned jalaali-js / Borkowski 33-year-cycle algorithm | official 1354–1419 SH correspondence table (Wikipedia, Solar Hijri), incl. leap marks; range −61..3177 SH |
+| `INDIAN_NATIONAL` | engine-owned fixed month-start table | Calendar Reform Committee 1957 (1 Chaitra 1879 SE = 22 Mar 1957); leap ⇔ Śaka+78 Gregorian-leap |
+| `BANGLA_BANGLADESH` | engine-owned 2019-present revision table | Boishakh 1 = 14 Apr; 6×31 + 5×30 + Falgun 29/30 (30 when the year spans 29 Feb) |
+| `COPTIC` / `ETHIOPIAN` | engine-owned Alexandrian arithmetic (12×30 + little month 5/6; leap ≡ 3 mod 4, Julian-style) | new-year anchors pinned to published dates (Neyrouz/Enkutatash Sep 11/12) |
+| `JAPANESE` / `MINGUO` / `THAI_BUDDHIST` | exact `java.time.chrono` adapters | JDK era tables |
+
+Conversions are exact in both directions except `JAPANESE` reverse
+(year-of-era is ambiguous across eras — throws by design). Round-trip and
+anchor tests pin every system; out-of-range Persian years throw the typed
+`InvalidParameterException`.
 
 ## Event registry
 

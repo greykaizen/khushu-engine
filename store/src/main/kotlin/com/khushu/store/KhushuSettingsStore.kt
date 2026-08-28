@@ -73,13 +73,22 @@ class KhushuSettingsStore(private val dataStore: DataStore<SettingsSnapshot>) {
     suspend fun updatePrayer(config: PrayerConfiguration): SettingsSnapshot =
         update { it.copy(prayer = config.toDto()) }
 
-    /** Updates fast flags + offset; display sides ([SettingsSnapshot.calendar] sides) are preserved. */
+    /** Updates fast flags + offset; display settings (sides + civil calendar) are preserved. */
     suspend fun updateCalendar(params: CalendarParams): SettingsSnapshot =
-        update { it.copy(calendar = params.toDto().copy(primarySide = it.calendar.primarySide, secondarySide = it.calendar.secondarySide)) }
+        update {
+            it.copy(
+                calendar = params.toDto().copy(
+                    primarySide = it.calendar.primarySide,
+                    secondarySide = it.calendar.secondarySide,
+                    civilCalendar = it.calendar.civilCalendar,
+                ),
+            )
+        }
 
     /**
-     * Updates dual-calendar display sides + hijri offset from an engine
-     * [CalendarConfiguration]; optional-fast flags are preserved.
+     * Updates dual-calendar display settings (sides, civil calendar, hijri
+     * offset) from an engine [CalendarConfiguration]; optional-fast flags are
+     * preserved.
      */
     suspend fun updateCalendarConfiguration(config: CalendarConfiguration): SettingsSnapshot =
         update {
@@ -88,6 +97,7 @@ class KhushuSettingsStore(private val dataStore: DataStore<SettingsSnapshot>) {
                     primarySide = config.primary,
                     secondarySide = config.secondary,
                     hijriOffsetDays = config.hijriOffsetDays,
+                    civilCalendar = config.civilCalendar,
                 ),
             )
         }

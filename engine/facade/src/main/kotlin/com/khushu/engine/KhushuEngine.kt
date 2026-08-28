@@ -358,6 +358,14 @@ class KhushuEngine {
         fun nextOccurrence(month: Int, day: Int, after: LocalDate, offsetDays: Int = 0): LocalDate =
             HijriCalendar.nextOccurrence(month, day, after, offsetDays)
 
+        /**
+         * Most recent civil date on which the fixed hijri [month]/[day] fell,
+         * at or before [before] — mirror of [nextOccurrence].
+         * @throws com.khushu.engine.core.error.NoResultException when the day does not occur within the search window
+         */
+        fun previousOccurrence(month: Int, day: Int, before: LocalDate, offsetDays: Int = 0): LocalDate =
+            HijriCalendar.previousOccurrence(month, day, before, offsetDays)
+
         /** True when the 1-indexed hijri month is one of the four sacred months. */
         fun isSacredMonth(hijriMonth: Int): Boolean = HijriCalendar.isSacredMonth(hijriMonth)
 
@@ -386,6 +394,33 @@ class KhushuEngine {
         val observance = ObservanceApi()
         /** Astronomy-informed lunar month rendering (moon facts at each evening). */
         val lunar = LunarApi()
+        /** Region-based civil calendars (Persian, Śaka, Bangla, Coptic, …) — pivot regional↔Gregorian↔Hijri. */
+        val civil = CivilCalendarApi()
+
+        /**
+         * Region-based civil calendars people live by day-to-day. Rendering in
+         * dual-calendar UIs is automatic: set
+         * [CalendarConfiguration.civilCalendar] and every GREGORIAN side line
+         * becomes the chosen system ([DateLine.Regional]). The Hijri side is
+         * always Umm al-Qura and unaffected.
+         */
+        class CivilCalendarApi internal constructor() {
+            /** Render a civil date in [system]. */
+            fun toRegional(date: LocalDate, system: com.khushu.engine.calendar.CivilCalendarType): com.khushu.engine.calendar.RegionalDate =
+                com.khushu.engine.calendar.RegionalCalendars.toRegional(date, system)
+
+            /**
+             * Reverse conversion: civil date of a regional date.
+             * @throws com.khushu.engine.core.error.InvalidParameterException structurally invalid components,
+             *   a day that does not exist in that year, or JAPANESE (era disambiguation unsupported)
+             */
+            fun fromRegional(system: com.khushu.engine.calendar.CivilCalendarType, year: Int, month: Int, day: Int): LocalDate =
+                com.khushu.engine.calendar.RegionalCalendars.fromRegional(system, year, month, day)
+
+            /** Month names for [system] (1-indexed). */
+            fun monthNames(system: com.khushu.engine.calendar.CivilCalendarType): List<String> =
+                com.khushu.engine.calendar.RegionalCalendars.monthNames(system)
+        }
 
         inner class ObservanceApi internal constructor() {
             /** Occurrences with explicitly selected observed-date overrides applied. */
