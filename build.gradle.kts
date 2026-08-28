@@ -16,7 +16,7 @@ subprojects {
 
     val module = path.removePrefix(":").replace(":", "-")
     afterEvaluate {
-        if (!path.startsWith(":engine:")) {
+        if (!path.startsWith(":engine:") && path != ":store") {
             extensions.configure<PublishingExtension> { publications.clear() }
             return@afterEvaluate
         }
@@ -27,7 +27,7 @@ subprojects {
                     from(components["java"])
                     groupId = "com.khushu"
                     artifactId = module
-                    version = "1.6.0"
+                    version = "1.7.0"
                     pom {
                         name.set("Khushu Engine — ${project.name}")
                         description.set(

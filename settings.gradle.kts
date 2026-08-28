@@ -3,6 +3,7 @@ rootProject.name = "khushu-engine"
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
+        google() // androidx.datastore (store module)
         maven { url = uri("https://jitpack.io") } // io.github.cosinekitty:astronomy
     }
 }
@@ -16,5 +17,6 @@ include(
     ":engine:zakat",
     ":engine:mushaf",
     ":engine:facade",
+    ":store",
     ":tools:cli",
 )

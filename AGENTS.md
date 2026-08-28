@@ -64,6 +64,9 @@ khushu-engine/
 │   ├── qibla        ← great-circle bearing to the Kaaba
 │   ├── zakat        ← nisab/rate rules (mal + fitrana)
 │   └── mushaf       ← glyph-atlas layout math: word/line/page fitting, RTL placement
+├── store/           ← host-facing settings persistence (DataStore + kotlinx JSON).
+│                      Companion glue, NOT computational engine: the §8 purity
+│                      lock (zero persistence deps) applies to engine/* only.
 ├── tools/cli        ← human spot-check harness. NOT part of the public API.
 └── docs/            ← this file, divergences.md, api snapshots
 ```
@@ -284,6 +287,7 @@ The API is the product; internals are replaceable.
 | mushaf | ✅ locked | glyph-atlas layout math ported from donor QuranApp rasterizer/measurer; `Mushaf` capability (fit/measure/layout); golden + property tests green; atlas SPEC DATA lives in khushu-data-api (`inventory/atlas/`), engine stays content-free |
 | facade | ✅ locked | thin delegation namespaces (`engine.astronomy.sun.*` etc.), zero logic; KDoc on all public members; `DayApi.summary` composite + `CachedEngine` LRU decorator |
 | cli | ✅ locked | all spec §7 commands incl. `verify` (both golden suites PASS); not part of public API |
+| store | ✅ locked | companion persistence (v1.7.0): `SettingsSnapshot` DTOs covering every tunable, `SettingsCodec` (versioned JSON + migration seam), `KhushuSettingsStore` DataStore binding; outside engine purity lock; observance logs stay host-owned — README §Observance logs / §Disk caching guidance |
 | goldens | ✅ dumped | prayer 6184 cases (adhan2 0.0.7, incl. date-line site); astronomy 576 cases (donor AR path); regenerable in-repo via tools/golden-dumper |
 
 Legend: ⬜ planned · 🟨 in progress · ✅ locked (all verification green)

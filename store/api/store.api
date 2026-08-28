@@ -1,0 +1,285 @@
+public final class com/khushu/store/CalendarSettingsDto {
+	public static final field Companion Lcom/khushu/store/CalendarSettingsDto$Companion;
+	public fun <init> ()V
+	public fun <init> (IZZZZZZ)V
+	public synthetic fun <init> (IZZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun copy (IZZZZZZ)Lcom/khushu/store/CalendarSettingsDto;
+	public static synthetic fun copy$default (Lcom/khushu/store/CalendarSettingsDto;IZZZZZZILjava/lang/Object;)Lcom/khushu/store/CalendarSettingsDto;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDhulHijjahFirstNine ()Z
+	public final fun getHijriOffsetDays ()I
+	public final fun getMondaysThursdays ()Z
+	public final fun getShaban ()Z
+	public final fun getShawwalSix ()Z
+	public final fun getTasuaAshura ()Z
+	public final fun getWhiteDays ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/khushu/store/CalendarSettingsDto$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/khushu/store/CalendarSettingsDto$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/khushu/store/CalendarSettingsDto;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/khushu/store/CalendarSettingsDto;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/CalendarSettingsDto$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/KhushuSettingsSerializer : androidx/datastore/core/Serializer {
+	public fun <init> ()V
+	public fun <init> (Lcom/khushu/store/SettingsCodec;)V
+	public synthetic fun <init> (Lcom/khushu/store/SettingsCodec;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDefaultValue ()Lcom/khushu/store/SettingsSnapshot;
+	public synthetic fun getDefaultValue ()Ljava/lang/Object;
+	public fun readFrom (Ljava/io/InputStream;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun writeTo (Lcom/khushu/store/SettingsSnapshot;Ljava/io/OutputStream;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public synthetic fun writeTo (Ljava/lang/Object;Ljava/io/OutputStream;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/khushu/store/KhushuSettingsStore {
+	public fun <init> (Landroidx/datastore/core/DataStore;)V
+	public final fun getCalendarParams ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getPrayerConfiguration ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getSettings ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getZakatParams ()Lkotlinx/coroutines/flow/Flow;
+	public final fun resetSettings (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun update (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateCalendar (Lcom/khushu/engine/calendar/CalendarParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateLocation (Lcom/khushu/engine/core/geo/Location;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updatePrayer (Lcom/khushu/engine/prayer/PrayerConfiguration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateZakat (Lcom/khushu/engine/zakat/ZakatParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/khushu/store/KhushuSettingsStores {
+	public static final field INSTANCE Lcom/khushu/store/KhushuSettingsStores;
+	public final fun file (Ljava/io/File;Lcom/khushu/store/SettingsCodec;)Lcom/khushu/store/KhushuSettingsStore;
+	public static synthetic fun file$default (Lcom/khushu/store/KhushuSettingsStores;Ljava/io/File;Lcom/khushu/store/SettingsCodec;ILjava/lang/Object;)Lcom/khushu/store/KhushuSettingsStore;
+}
+
+public final class com/khushu/store/LocationDto {
+	public static final field Companion Lcom/khushu/store/LocationDto$Companion;
+	public fun <init> (DDD)V
+	public synthetic fun <init> (DDDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun copy (DDD)Lcom/khushu/store/LocationDto;
+	public static synthetic fun copy$default (Lcom/khushu/store/LocationDto;DDDILjava/lang/Object;)Lcom/khushu/store/LocationDto;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAltitudeMeters ()D
+	public final fun getLatitudeDegrees ()D
+	public final fun getLongitudeDegrees ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/khushu/store/LocationDto$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/khushu/store/LocationDto$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/khushu/store/LocationDto;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/khushu/store/LocationDto;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/LocationDto$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/PrayerOffsetsDto {
+	public static final field Companion Lcom/khushu/store/PrayerOffsetsDto$Companion;
+	public fun <init> ()V
+	public fun <init> (IIIIIII)V
+	public synthetic fun <init> (IIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()I
+	public final fun copy (IIIIIII)Lcom/khushu/store/PrayerOffsetsDto;
+	public static synthetic fun copy$default (Lcom/khushu/store/PrayerOffsetsDto;IIIIIIIILjava/lang/Object;)Lcom/khushu/store/PrayerOffsetsDto;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAsr ()I
+	public final fun getDhuhr ()I
+	public final fun getFajr ()I
+	public final fun getIsha ()I
+	public final fun getMaghrib ()I
+	public final fun getSunrise ()I
+	public final fun getSunset ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/khushu/store/PrayerOffsetsDto$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/khushu/store/PrayerOffsetsDto$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/khushu/store/PrayerOffsetsDto;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/khushu/store/PrayerOffsetsDto;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/PrayerOffsetsDto$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/PrayerSettingsDto {
+	public static final field Companion Lcom/khushu/store/PrayerSettingsDto$Companion;
+	public fun <init> ()V
+	public fun <init> (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/store/PrayerOffsetsDto;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;)V
+	public synthetic fun <init> (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/store/PrayerOffsetsDto;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/prayer/Madhab;
+	public final fun component2 ()Lcom/khushu/engine/prayer/Convention;
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()I
+	public final fun component6 ()Lcom/khushu/engine/prayer/HighLatitudeRule;
+	public final fun component7 ()Lcom/khushu/store/PrayerOffsetsDto;
+	public final fun component8 ()Lcom/khushu/engine/prayer/Shafaq;
+	public final fun component9 ()Lcom/khushu/engine/prayer/RoundingPolicy;
+	public final fun copy (Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/store/PrayerOffsetsDto;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;)Lcom/khushu/store/PrayerSettingsDto;
+	public static synthetic fun copy$default (Lcom/khushu/store/PrayerSettingsDto;Lcom/khushu/engine/prayer/Madhab;Lcom/khushu/engine/prayer/Convention;DDILcom/khushu/engine/prayer/HighLatitudeRule;Lcom/khushu/store/PrayerOffsetsDto;Lcom/khushu/engine/prayer/Shafaq;Lcom/khushu/engine/prayer/RoundingPolicy;ILjava/lang/Object;)Lcom/khushu/store/PrayerSettingsDto;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConvention ()Lcom/khushu/engine/prayer/Convention;
+	public final fun getFajrAngle ()D
+	public final fun getHighLatitudeRule ()Lcom/khushu/engine/prayer/HighLatitudeRule;
+	public final fun getIshaAngle ()D
+	public final fun getIshaIntervalMinutes ()I
+	public final fun getMadhab ()Lcom/khushu/engine/prayer/Madhab;
+	public final fun getOffsets ()Lcom/khushu/store/PrayerOffsetsDto;
+	public final fun getRounding ()Lcom/khushu/engine/prayer/RoundingPolicy;
+	public final fun getShafaq ()Lcom/khushu/engine/prayer/Shafaq;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/khushu/store/PrayerSettingsDto$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/khushu/store/PrayerSettingsDto$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/khushu/store/PrayerSettingsDto;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/khushu/store/PrayerSettingsDto;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/PrayerSettingsDto$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/SettingsCodec {
+	public fun <init> ()V
+	public final fun decode ([B)Lcom/khushu/store/SettingsSnapshot;
+	public final fun encode (Lcom/khushu/store/SettingsSnapshot;)[B
+	public final fun getJson ()Lkotlinx/serialization/json/Json;
+}
+
+public final class com/khushu/store/SettingsSnapshot {
+	public static final field Companion Lcom/khushu/store/SettingsSnapshot$Companion;
+	public fun <init> ()V
+	public fun <init> (Lcom/khushu/store/PrayerSettingsDto;Lcom/khushu/store/CalendarSettingsDto;Lcom/khushu/store/ZakatSettingsDto;Lcom/khushu/store/LocationDto;I)V
+	public synthetic fun <init> (Lcom/khushu/store/PrayerSettingsDto;Lcom/khushu/store/CalendarSettingsDto;Lcom/khushu/store/ZakatSettingsDto;Lcom/khushu/store/LocationDto;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/store/PrayerSettingsDto;
+	public final fun component2 ()Lcom/khushu/store/CalendarSettingsDto;
+	public final fun component3 ()Lcom/khushu/store/ZakatSettingsDto;
+	public final fun component4 ()Lcom/khushu/store/LocationDto;
+	public final fun component5 ()I
+	public final fun copy (Lcom/khushu/store/PrayerSettingsDto;Lcom/khushu/store/CalendarSettingsDto;Lcom/khushu/store/ZakatSettingsDto;Lcom/khushu/store/LocationDto;I)Lcom/khushu/store/SettingsSnapshot;
+	public static synthetic fun copy$default (Lcom/khushu/store/SettingsSnapshot;Lcom/khushu/store/PrayerSettingsDto;Lcom/khushu/store/CalendarSettingsDto;Lcom/khushu/store/ZakatSettingsDto;Lcom/khushu/store/LocationDto;IILjava/lang/Object;)Lcom/khushu/store/SettingsSnapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCalendar ()Lcom/khushu/store/CalendarSettingsDto;
+	public final fun getLocation ()Lcom/khushu/store/LocationDto;
+	public final fun getPrayer ()Lcom/khushu/store/PrayerSettingsDto;
+	public final fun getSchemaVersion ()I
+	public final fun getZakat ()Lcom/khushu/store/ZakatSettingsDto;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/khushu/store/SettingsSnapshot$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/khushu/store/SettingsSnapshot$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/khushu/store/SettingsSnapshot;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/khushu/store/SettingsSnapshot;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/SettingsSnapshot$Companion {
+	public final fun of (Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;Lcom/khushu/engine/zakat/ZakatParams;Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/store/SettingsSnapshot;
+	public static synthetic fun of$default (Lcom/khushu/store/SettingsSnapshot$Companion;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;Lcom/khushu/engine/zakat/ZakatParams;Lcom/khushu/engine/core/geo/Location;ILjava/lang/Object;)Lcom/khushu/store/SettingsSnapshot;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/SettingsSnapshotKt {
+	public static final field SETTINGS_SCHEMA_VERSION I
+	public static final fun toConfiguration (Lcom/khushu/store/PrayerSettingsDto;)Lcom/khushu/engine/prayer/PrayerConfiguration;
+	public static final fun toDto (Lcom/khushu/engine/calendar/CalendarParams;)Lcom/khushu/store/CalendarSettingsDto;
+	public static final fun toDto (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/store/LocationDto;
+	public static final fun toDto (Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/store/PrayerSettingsDto;
+	public static final fun toDto (Lcom/khushu/engine/prayer/PrayerOffsets;)Lcom/khushu/store/PrayerOffsetsDto;
+	public static final fun toDto (Lcom/khushu/engine/zakat/ZakatParams;)Lcom/khushu/store/ZakatSettingsDto;
+	public static final fun toEngine (Lcom/khushu/store/PrayerOffsetsDto;)Lcom/khushu/engine/prayer/PrayerOffsets;
+	public static final fun toLocation (Lcom/khushu/store/LocationDto;)Lcom/khushu/engine/core/geo/Location;
+	public static final fun toParams (Lcom/khushu/store/CalendarSettingsDto;)Lcom/khushu/engine/calendar/CalendarParams;
+	public static final fun toParams (Lcom/khushu/store/ZakatSettingsDto;)Lcom/khushu/engine/zakat/ZakatParams;
+}
+
+public final class com/khushu/store/ZakatSettingsDto {
+	public static final field Companion Lcom/khushu/store/ZakatSettingsDto$Companion;
+	public fun <init> ()V
+	public fun <init> (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;Z)V
+	public synthetic fun <init> (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/zakat/ZakatMadhab;
+	public final fun component2 ()Lcom/khushu/engine/zakat/NisabSource;
+	public final fun component3 ()Lcom/khushu/engine/zakat/NisabWeightConvention;
+	public final fun component4 ()Z
+	public final fun copy (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;Z)Lcom/khushu/store/ZakatSettingsDto;
+	public static synthetic fun copy$default (Lcom/khushu/store/ZakatSettingsDto;Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZILjava/lang/Object;)Lcom/khushu/store/ZakatSettingsDto;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHawlComplete ()Z
+	public final fun getMadhab ()Lcom/khushu/engine/zakat/ZakatMadhab;
+	public final fun getNisabSource ()Lcom/khushu/engine/zakat/NisabSource;
+	public final fun getWeightConvention ()Lcom/khushu/engine/zakat/NisabWeightConvention;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/khushu/store/ZakatSettingsDto$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/khushu/store/ZakatSettingsDto$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/khushu/store/ZakatSettingsDto;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/khushu/store/ZakatSettingsDto;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/khushu/store/ZakatSettingsDto$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+

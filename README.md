@@ -41,7 +41,7 @@ repositories {
 
 dependencies {
     // The facade pulls every module transitively — one line is enough.
-    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.6.0")
+    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.7.0")
 }
 ```
 
@@ -54,7 +54,7 @@ cd khushu-engine && ./gradlew publishToMavenLocal
 
 ```kotlin
 repositories { mavenLocal(); mavenCentral(); maven { url = uri("https://jitpack.io") } }
-dependencies { implementation("com.khushu:engine-facade:1.6.0") }
+dependencies { implementation("com.khushu:engine-facade:1.7.0") }
 ```
 
 ### Composite build (developing the engine alongside your app)
@@ -64,7 +64,7 @@ dependencies { implementation("com.khushu:engine-facade:1.6.0") }
 includeBuild("/path/to/khushu-engine")
 ```
 
-then depend on `com.khushu:engine-facade:1.6.0` — Gradle substitutes the
+then depend on `com.khushu:engine-facade:1.7.0` — Gradle substitutes the
 local project.
 
 ## Usage
@@ -109,11 +109,89 @@ the lookup, recompute, and overwrite the stored entry (settings import,
 time-travel debugging — never hot paths); `clearCaches(domain)` drops one
 domain's caches (`CachedEngine.DOMAINS`), `clearCaches()` drops everything.
 
+## Host settings persistence (`store` module)
+
+The engine itself is persistence-free: every call takes explicit settings.
+The opt-in `store` companion artifact — host glue that lives **outside** the
+computational engine (the purity lock applies to `engine/*` only) — gives
+every host the same versioned, crash-safe settings store instead of each
+re-implementing persistence. Built on Jetpack DataStore + kotlinx-serialization
+JSON; pure JVM compatible, so it works on Android and plain JVM hosts alike.
+
+```kotlin
+implementation("com.github.greykaizen.khushu-engine:store:1.7.0")   // JitPack
+// or mavenLocal: implementation("com.khushu:store:1.7.0")
+```
+
+```kotlin
+// Android host (Compose)
+val store = remember {
+    KhushuSettingsStores.file(File(context.filesDir, "khushu_settings.json"))
+}
+val snapshot by store.settings.collectAsState(initial = SettingsSnapshot())
+
+// Feed persisted settings into any engine call
+val times = engine.prayer.times(location, date, snapshot.prayer.toConfiguration())
+val hijri = engine.calendar.hijri(date, snapshot.calendar.toParams().hijriOffsetDays)
+
+// Save from a settings screen — atomic, survives process death, re-emits via Flow
+scope.launch { store.updatePrayer(newConfig) }
+```
+
+- `SettingsSnapshot` covers **every tunable**, grouped per domain: `prayer`
+  (madhab, convention, angles, isha interval, high-latitude rule, all seven
+  offsets, shafaq, rounding), `calendar` (hijri offset, every optional-fast
+  flag), `zakat` (madhab, nisab source, weight convention, hawl) plus
+  `location`. Typed helpers: `updatePrayer/updateCalendar/updateZakat/
+  updateLocation/resetSettings`; engine-ready flows `prayerConfiguration`,
+  `calendarParams`, `zakatParams`.
+- `schemaVersion` + lenient decoding: unknown keys ignored, missing fields
+  default, unknown enum values coerce — files written by newer releases load
+  on older code and vice versa; migration branches land in `SettingsCodec`.
+- Corrupt files throw `CorruptionException` instead of silently resetting —
+  a silent fallback would change religiously-relevant settings unnoticed.
+- Invalid persisted values surface as the engine's typed
+  `InvalidParameterException` when converting back (`toConfiguration()` etc.).
+- `SettingsCodec` is DataStore-free — alternative bindings (plain files,
+  SQLDelight, iOS NSUserDefaults) can reuse the same wire format later.
+
+### Observance logs (host-owned)
+
+Prayer checkmarks/completions are the *user's* religious data, so they live
+in the host by design (privacy + the engine stays persistence-free):
+
+1. Persist `Prayer.PrayerLogRecord(date, kind, completed)` rows in the host's
+   own storage (Room, DataStore-Preferences, SQLite — host's choice).
+2. Feed them in per query, statelessly:
+   ```kotlin
+   val stats = engine.prayer.stats.streak(records, excusedRanges = hostRanges)
+   ```
+
+`excusedRanges` (travel/illness/menses…) is host state too — the engine never
+decides who is excused; it computes statistics over the ranges it is given.
+
+### Disk caching guidance
+
+`CachedEngine` is in-memory by design — prayer/astronomy math is fast and
+deterministic, so a disk-backed cache rarely earns its keep:
+
+- **Default**: in-memory `CachedEngine` LRU. Lives for the session, zero
+  staleness maintenance.
+- **After the user changes settings**: call affected reads with
+  `forceRecompute = true`, or `clearCaches(domain)` once
+  (`CachedEngine.DOMAINS`) — facts are keyed *including configuration*, so
+  nothing stale can leak into new settings.
+- **If a cold-start warm cache ever becomes a measured need** (profile
+  first): persist `DaySummary` / `PrayerTimesResult` JSON yourself keyed by
+  the fact's stable semantic key — `(location, date, zone, params)` — and
+  re-verify with `forceRecompute` after settings imports. Keep such a layer
+  in the host or a companion artifact, never in `engine/*`.
+
 ## Facade vs individual modules
 
 Every module above is published as its **own artifact** and can be consumed
 directly — e.g. a qibla-only tool needs just
-`com.github.greykaizen.khushu-engine:engine-qibla:1.6.0` (it drags in only
+`com.github.greykaizen.khushu-engine:engine-qibla:1.7.0` (it drags in only
 what it uses). The **facade is the recommended entry point** for
 full-featured apps: one dependency, capability namespaces, and room to grow
 without build-file churn.

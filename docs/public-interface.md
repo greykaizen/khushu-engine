@@ -258,3 +258,56 @@ Null results are cached too: a polar-day null computed once is not recomputed.
   and stored (subsequent reads return the overwritten entry).
 - clearCaches scoping + unknown-domain rejection.
 - occasions category filter coexistence + order-insensitive cache key.
+
+## v1.7 additions (2026-08) — `store` companion module
+
+New artifact `com.khushu:store` (JitPack:
+`com.github.greykaizen.khushu-engine:store`). Host-facing settings
+persistence, intentionally OUTSIDE `engine/*` — the zero-persistence purity
+lock still applies to every engine module. Deps: DataStore core (JVM variant,
+Android-compatible) + kotlinx-serialization-json + coroutines.
+
+```
+SettingsSnapshot(schemaVersion, prayer, calendar, zakat, location)
+  // DTO mirrors with engine defaults: PrayerSettingsDto, CalendarSettingsDto,
+  // ZakatSettingsDto, LocationDto, PrayerOffsetsDto — every tunable covered.
+  // Engine enums (Madhab, Convention, …) serialized by name; snapshot-level
+  // SettingsSnapshot.of(prayer, calendar, zakat, location) builds from engine types.
+
+DTO ↔ engine mappers (each to-engine conversion runs engine init validation):
+  PrayerSettingsDto.toConfiguration() / PrayerConfiguration.toDto()
+  CalendarSettingsDto.toParams()      / CalendarParams.toDto()
+  ZakatSettingsDto.toParams()         / ZakatParams.toDto()
+  LocationDto.toLocation()            / Location.toDto()
+
+SettingsCodec — pure JSON codec + schemaVersion migration seam (no DataStore
+  dep); lenient decode: unknown keys ignored, missing fields default,
+  unknown enums coerce to field default (forward/backward compatible).
+
+KhushuSettingsSerializer : Serializer<SettingsSnapshot>
+  // DataStore bridge; empty file → defaults; corrupt bytes → CorruptionException
+  // (never silent reset — defaults would silently change madhab/convention).
+
+KhushuSettingsStore(dataStore: DataStore<SettingsSnapshot>)
+  settings: Flow<SettingsSnapshot>
+  prayerConfiguration / calendarParams / zakatParams: Flow<engine types>
+  suspend update {} · updatePrayer · updateCalendar · updateZakat ·
+  updateLocation · resetSettings (keeps location)
+
+KhushuSettingsStores.file(file, codec = SettingsCodec())
+  // one-liner factory; one DataStore per file (DataStore contract).
+```
+
+### tests
+- Round-trip of every tweak; DTO↔engine mapper round-trips.
+- Empty/{} decode → defaults; unknown keys + unknown enum leniency.
+- Corrupt bytes → SerializationException (codec) / CorruptionException (serializer, DataStore read).
+- File-backed store: update → bytes on disk decode back identical; reset keeps location.
+
+### docs
+- README §Host settings persistence — Android/Compose wiring, every tunable,
+  migration rules, corruption behavior.
+- README §Observance logs (host-owned) — PrayerLogRecord persistence split;
+  host feeds logs + excusedRanges into stats.streak.
+- README §Disk caching guidance — in-memory default, forceRecompute after
+  settings changes, semantic-key recipe if a measured need ever appears.
