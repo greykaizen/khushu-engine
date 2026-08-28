@@ -1,13 +1,16 @@
 package com.khushu.engine
 
 import com.khushu.engine.astronomy.Astronomy
+import com.khushu.engine.astronomy.AltitudeConventions
 import com.khushu.engine.astronomy.HilalReport
 import com.khushu.engine.astronomy.LunarPosition
 import com.khushu.engine.astronomy.MoonState
 import com.khushu.engine.astronomy.MonthlyMoonTrack
 import com.khushu.engine.astronomy.RiseSet
+import com.khushu.engine.astronomy.SolarDayPhases
 import com.khushu.engine.astronomy.SolarEvents
 import com.khushu.engine.astronomy.SolarPosition
+import com.khushu.engine.astronomy.SunTrack
 import com.khushu.engine.calendar.CalendarConfiguration
 import com.khushu.engine.calendar.EventRegistry
 import com.khushu.engine.calendar.HijriCalendar
@@ -148,6 +151,21 @@ class KhushuEngine {
 
             fun events(location: Location, date: LocalDate, zoneId: ZoneId): SolarEvents =
                 Astronomy.sun.events(location, date, zoneId)
+
+            fun phases(location: Location, date: LocalDate, zoneId: ZoneId): SolarDayPhases =
+                Astronomy.sun.phases(location, date, zoneId)
+
+            fun nightLength(location: Location, date: LocalDate, zoneId: ZoneId): java.time.Duration? =
+                Astronomy.sun.nightLength(location, date, zoneId)
+
+            fun conventions(): AltitudeConventions = Astronomy.sun.conventions()
+
+            fun track(
+                location: Location,
+                yearMonth: YearMonth,
+                zoneId: ZoneId,
+                includePath: Boolean = false,
+            ): SunTrack = Astronomy.sun.track(location, yearMonth, zoneId, includePath)
         }
 
         class MoonApi internal constructor() {

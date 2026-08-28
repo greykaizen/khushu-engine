@@ -101,19 +101,45 @@ class DayApi internal constructor() {
  * Opt-in memoization decorator around any [KhushuEngine]. Deterministic
  * capabilities only, keyed by their own semantic keys (AGENTS.md §6):
  *   prayer times → (Location, LocalDate, PrayerConfiguration)
+ *   day summary  → (Location, LocalDate, ZoneId, PrayerConfiguration, CalendarParams)
  *   sun position → (Location, Instant)
+ *   sun rise/set/events/phases → (Location, LocalDate, ZoneId)
  *   moon state   → (Location, Instant)
+ *   moon rise/set → (Location, LocalDate, ZoneId)
  *   hijri        → (LocalDate, offsetDays)
+ *   qibla        → (Location)
  * Configuration that affects results is part of every key — caching can never
- * hide a dependency.
+ * hide a dependency. All caches are bounded LRU (GPS jitter must not grow
+ * memory without bound in long-lived hosts).
  */
-class CachedEngine(val delegate: KhushuEngine = KhushuEngine()) {
+class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capacity: Int = DEFAULT_CAPACITY) {
 
-    private val prayerCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.prayer.PrayerTimesResult>()
-    private val prayerMonthCache = java.util.concurrent.ConcurrentHashMap<String, List<com.khushu.engine.prayer.PrayerTimesResult>>()
-    private val sunCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.astronomy.SolarPosition>()
-    private val moonStateCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.astronomy.MoonState>()
-    private val hijriCache = java.util.concurrent.ConcurrentHashMap<String, com.khushu.engine.calendar.HijriDate>()
+    companion object {
+        const val DEFAULT_CAPACITY = 256
+    }
+
+    private class Lru<V>(private val cap: Int) {
+        private val map = object : LinkedHashMap<String, V>(16, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, V>?) = size > cap
+        }
+        fun getOrPut(key: String, compute: () -> V): V = synchronized(map) {
+            map[key] ?: compute().also { map[key] = it }
+        }
+        fun clear() = synchronized(map) { map.clear() }
+        fun size() = synchronized(map) { map.size }
+    }
+
+    private val prayerCache = Lru<com.khushu.engine.prayer.PrayerTimesResult>(capacity)
+    private val prayerMonthCache = Lru<List<com.khushu.engine.prayer.PrayerTimesResult>>(capacity)
+    private val sunCache = Lru<com.khushu.engine.astronomy.SolarPosition>(capacity)
+    private val sunRiseSetCache = Lru<com.khushu.engine.astronomy.RiseSet>(capacity)
+    private val sunEventsCache = Lru<com.khushu.engine.astronomy.SolarEvents>(capacity)
+    private val sunPhasesCache = Lru<com.khushu.engine.astronomy.SolarDayPhases>(capacity)
+    private val moonStateCache = Lru<com.khushu.engine.astronomy.MoonState>(capacity)
+    private val moonRiseSetCache = Lru<com.khushu.engine.astronomy.RiseSet>(capacity)
+    private val hijriCache = Lru<com.khushu.engine.calendar.HijriDate>(capacity)
+    private val daySummaryCache = Lru<DaySummary>(capacity)
+    private val qiblaCache = Lru<com.khushu.engine.qibla.QiblaBearing>(capacity)
 
     private fun Location.key() = "%.9f|%.9f|%.3f".format(
         latitude.degrees, longitude.degrees, altitudeMeters.meters,
@@ -137,9 +163,40 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine()) {
             delegate.prayer.month(location, yearMonth, params)
         }
 
+    /**
+     * The full "today screen" composite, memoized — hosts hitting the summary
+     * plus individual features for the same day pay each computation once.
+     */
+    fun daySummary(
+        location: Location,
+        date: LocalDate,
+        zoneId: ZoneId,
+        prayerParams: PrayerConfiguration = PrayerConfiguration(),
+        calendarParams: com.khushu.engine.calendar.CalendarParams = com.khushu.engine.calendar.CalendarParams(),
+    ): DaySummary = daySummaryCache.getOrPut(
+        "${location.key()}|$date|$zoneId|${prayerParams.hashCode()}|${calendarParams.hashCode()}",
+    ) {
+        delegate.day.summary(location, date, zoneId, prayerParams, calendarParams)
+    }
+
     fun sunPosition(location: Location, instant: Instant) =
         sunCache.getOrPut("${location.key()}|${instant.toEpochMilli()}") {
             delegate.astronomy.sun.position(location, instant)
+        }
+
+    fun sunRiseSet(location: Location, date: LocalDate, zoneId: ZoneId) =
+        sunRiseSetCache.getOrPut("${location.key()}|$date|$zoneId") {
+            delegate.astronomy.sun.riseSet(location, date, zoneId)
+        }
+
+    fun sunEvents(location: Location, date: LocalDate, zoneId: ZoneId) =
+        sunEventsCache.getOrPut("${location.key()}|$date|$zoneId") {
+            delegate.astronomy.sun.events(location, date, zoneId)
+        }
+
+    fun sunPhases(location: Location, date: LocalDate, zoneId: ZoneId) =
+        sunPhasesCache.getOrPut("${location.key()}|$date|$zoneId") {
+            delegate.astronomy.sun.phases(location, date, zoneId)
         }
 
     fun moonState(location: Location, instant: Instant) =
@@ -147,10 +204,28 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine()) {
             delegate.astronomy.moon.state(location, instant)
         }
 
+    fun moonRiseSet(location: Location, date: LocalDate, zoneId: ZoneId) =
+        moonRiseSetCache.getOrPut("${location.key()}|$date|$zoneId") {
+            delegate.astronomy.moon.riseSet(location, date, zoneId)
+        }
+
     fun hijri(date: LocalDate, offsetDays: Int = 0) =
         hijriCache.getOrPut("$date|$offsetDays") { delegate.calendar.hijri(date, offsetDays) }
 
+    fun qibla(location: Location) =
+        qiblaCache.getOrPut(location.key()) { delegate.qibla.bearing(location) }
+
     fun clearCaches() {
-        prayerCache.clear(); prayerMonthCache.clear(); sunCache.clear(); moonStateCache.clear(); hijriCache.clear()
+        prayerCache.clear(); prayerMonthCache.clear(); sunCache.clear()
+        sunRiseSetCache.clear(); sunEventsCache.clear(); sunPhasesCache.clear()
+        moonStateCache.clear(); moonRiseSetCache.clear(); hijriCache.clear()
+        daySummaryCache.clear(); qiblaCache.clear()
+    }
+
+    /** Visible for tests: number of memoized entries in a named cache. */
+    internal fun cacheSize(name: String): Int = when (name) {
+        "sunRiseSet" -> sunRiseSetCache.size()
+        "daySummary" -> daySummaryCache.size()
+        else -> error("unknown cache: $name")
     }
 }

@@ -1,17 +1,29 @@
 public final class com/khushu/engine/CachedEngine {
+	public static final field Companion Lcom/khushu/engine/CachedEngine$Companion;
+	public static final field DEFAULT_CAPACITY I
 	public fun <init> ()V
-	public fun <init> (Lcom/khushu/engine/KhushuEngine;)V
-	public synthetic fun <init> (Lcom/khushu/engine/KhushuEngine;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/khushu/engine/KhushuEngine;I)V
+	public synthetic fun <init> (Lcom/khushu/engine/KhushuEngine;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun clearCaches ()V
+	public final fun daySummary (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;)Lcom/khushu/engine/DaySummary;
+	public static synthetic fun daySummary$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/prayer/PrayerConfiguration;Lcom/khushu/engine/calendar/CalendarParams;ILjava/lang/Object;)Lcom/khushu/engine/DaySummary;
 	public final fun getDelegate ()Lcom/khushu/engine/KhushuEngine;
 	public final fun hijri (Ljava/time/LocalDate;I)Lcom/khushu/engine/calendar/HijriDate;
 	public static synthetic fun hijri$default (Lcom/khushu/engine/CachedEngine;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/calendar/HijriDate;
+	public final fun moonRiseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
 	public final fun moonState (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/MoonState;
 	public final fun prayerMonth (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun prayerMonth$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 	public final fun prayerTimes (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/PrayerTimesResult;
 	public static synthetic fun prayerTimes$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
+	public final fun qibla (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
+	public final fun sunEvents (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun sunPhases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarDayPhases;
 	public final fun sunPosition (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
+	public final fun sunRiseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
+}
+
+public final class com/khushu/engine/CachedEngine$Companion {
 }
 
 public final class com/khushu/engine/DateApi {
@@ -123,10 +135,15 @@ public final class com/khushu/engine/KhushuEngine$AstronomyApi$MoonApi {
 }
 
 public final class com/khushu/engine/KhushuEngine$AstronomyApi$SunApi {
+	public final fun conventions ()Lcom/khushu/engine/astronomy/AltitudeConventions;
 	public final fun dayLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
 	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun nightLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
+	public final fun phases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarDayPhases;
 	public final fun position (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
 	public final fun riseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
+	public final fun track (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SunTrack;
+	public static synthetic fun track$default (Lcom/khushu/engine/KhushuEngine$AstronomyApi$SunApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SunTrack;
 }
 
 public final class com/khushu/engine/KhushuEngine$CalendarApi {
