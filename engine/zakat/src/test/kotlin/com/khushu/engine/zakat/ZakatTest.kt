@@ -123,6 +123,82 @@ class ZakatTest {
     }
 
     @Test
+    fun bothMetalThresholdsAreReturnedAlongsideSelected() {
+        val assets = ZakatAssets(cash = 10_000.0, goldPricePerGram = goldPrice, silverPricePerGram = silverPrice)
+        val silver = Zakat.mal(assets, ZakatParams(nisabSource = NisabSource.SILVER))
+        assertEquals(595.0 * silverPrice, silver.nisabThreshold, 0.01)
+        assertEquals(silver.nisabThreshold, silver.silverNisabThreshold)
+        assertEquals(85.0 * goldPrice, silver.goldNisabThreshold!!, 0.01)
+
+        val gold = Zakat.mal(assets, ZakatParams(nisabSource = NisabSource.GOLD))
+        assertEquals(85.0 * goldPrice, gold.nisabThreshold, 0.01)
+        assertEquals(gold.nisabThreshold, gold.goldNisabThreshold)
+    }
+
+    @Test
+    fun missingMetalPriceIsNullThresholdNotFalseZero() {
+        // No gold price provided → gold threshold is null, not a misleading 0.
+        val r = Zakat.mal(
+            ZakatAssets(cash = 10_000.0, silverPricePerGram = silverPrice),
+            ZakatParams(nisabSource = NisabSource.SILVER),
+        )
+        assertEquals(null, r.goldNisabThreshold)
+        assertEquals(595.0 * silverPrice, r.silverNisabThreshold!!, 0.01)
+    }
+
+    @Test
+    fun madhabRuleNotesExplainExemptions() {
+        val shafii = Zakat.mal(
+            ZakatAssets(cash = 10_000.0, wornGoldGrams = 100.0, goldPricePerGram = goldPrice, silverPricePerGram = silverPrice),
+            ZakatParams(madhab = ZakatMadhab.SHAFII),
+        )
+        assertTrue(shafii.notes.any { it.contains("worn jewelry", ignoreCase = true) })
+
+        val hanafi = Zakat.mal(
+            ZakatAssets(cash = 10_000.0, wornGoldGrams = 100.0, goldPricePerGram = goldPrice, silverPricePerGram = silverPrice),
+            ZakatParams(madhab = ZakatMadhab.HANAFI),
+        )
+        assertTrue(hanafi.notes.none { it.contains("worn jewelry", ignoreCase = true) })
+
+        val shafiiDebt = Zakat.mal(
+            ZakatAssets(cash = 10_000.0, liabilities = 1_000.0, silverPricePerGram = silverPrice),
+            ZakatParams(madhab = ZakatMadhab.SHAFII),
+        )
+        assertTrue(shafiiDebt.notes.any { it.contains("liabilities", ignoreCase = true) })
+    }
+
+    @Test
+    fun incompleteHawlProducesANote() {
+        val r = Zakat.mal(
+            ZakatAssets(cash = 50_000.0, silverPricePerGram = silverPrice),
+            ZakatParams(hawlComplete = false),
+        )
+        assertTrue(r.nisabReached)
+        assertEquals(0.0, r.zakatDue)
+        assertTrue(r.notes.any { it.contains("hawl", ignoreCase = true) })
+    }
+
+    @Test
+    fun breakdownCarriesStableAssetKeys() {
+        val r = Zakat.mal(
+            ZakatAssets(cash = 3_000.0, goldGrams = 20.0, goldPricePerGram = goldPrice, silverPricePerGram = silverPrice),
+            ZakatParams(),
+        )
+        assertTrue(AssetKey.CASH in r.breakdown.map { it.key })
+        assertTrue(AssetKey.GOLD in r.breakdown.map { it.key })
+        // Every contribution's label is a non-empty display string.
+        assertTrue(r.breakdown.all { it.label.isNotBlank() })
+    }
+
+    @Test
+    fun fitranaExposesTotalKilograms() {
+        val majority = Zakat.fitrana(dependents = 4, pricePerKg = 2.0, madhab = ZakatMadhab.SHAFII)
+        assertEquals(4 * 2.175, majority.totalKg, 0.001)
+        val hanafi = Zakat.fitrana(dependents = 3, pricePerKg = 2.0, madhab = ZakatMadhab.HANAFI)
+        assertEquals(9.0, hanafi.totalKg, 0.001)
+    }
+
+    @Test
     fun invalidInputsRejected() {
         assertFailsWith<IllegalArgumentException> { Zakat.mal(ZakatAssets(cash = -1.0)) }
         assertFailsWith<IllegalArgumentException> { Zakat.mal(ZakatAssets(silverPricePerGram = silverPrice), ZakatParams(nisabSource = NisabSource.GOLD)) } // no gold price

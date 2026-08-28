@@ -59,4 +59,51 @@ class QiblaTest {
         val near = Qibla.bearing(Location.of(21.0, 39.8)).greatCircleDistanceKm.value
         assertTrue(near < far / 100.0)
     }
+
+    @Test
+    fun auditExposesProvenance() {
+        val audit = Qibla.audit()
+        assertTrue(audit.kaabaConstantsOrigin.contains("21.4225"))
+        assertTrue(audit.distanceModel.isNotBlank())
+        assertTrue(audit.bearingFormula.isNotBlank())
+        assertTrue(audit.warnings.isEmpty())
+    }
+
+    @Test
+    fun relativeSunAngleIsSignedNormalizedAndMatchesManualComputation() {
+        val loc = Location.of(51.5072, -0.1276)
+        val instant = java.time.LocalDate.of(2026, 6, 21).atTime(12, 0)
+            .atZone(java.time.ZoneId.of("Europe/London")).toInstant()
+        val relation = Qibla.relativeSunAngle(loc, instant)
+        assertTrue(relation.signedAngleToQiblaDeg in -180.0..180.0)
+        val bearing = Qibla.bearing(loc).bearingDegFromNorth.value
+        var diff = (relation.sunAzimuthDeg - bearing) % 360.0
+        if (diff > 180.0) diff -= 360.0
+        if (diff < -180.0) diff += 360.0
+        assertEquals(diff, relation.signedAngleToQiblaDeg, 1e-9)
+        assertEquals(relation.alignedWithinTolerance, abs(diff) <= 2.0)
+    }
+
+    @Test
+    fun shadowVerificationEventsAlignWithRelativeSunAngle() {
+        // Cohesion bridge: when the sun stands over the Kaaba, its azimuth at
+        // any daylight location equals that location's qibla bearing exactly.
+        val loc = Location.of(51.5072, -0.1276) // London: both zenith passages fall in daylight
+        val events = Qibla.shadowVerification(2026, loc)
+        assertTrue(events.size >= 4) // two toward + two away passages per year
+
+        val visibleToward = events.filter {
+            it.method == ShadowMethod.FACE_TOWARD_SUN && it.visibleAtLocation
+        }
+        assertTrue(visibleToward.isNotEmpty(), "London daylight must include a Kaaba zenith passage")
+        val qibla = Qibla.bearing(loc).bearingDegFromNorth.value
+        for (e in visibleToward) {
+            val relation = Qibla.relativeSunAngle(loc, e.instant)
+            assertTrue(
+                relation.alignedWithinTolerance,
+                "sun must stand on the qibla at a Kaaba zenith passage, got ${relation.signedAngleToQiblaDeg}",
+            )
+            assertEquals(qibla, e.shadowBearingDeg.value, 0.1)
+        }
+    }
 }

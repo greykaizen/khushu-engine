@@ -147,6 +147,40 @@ class CacheCoverageTest {
     }
 
     @Test
+    fun qiblaShadowVerificationIsMemoizedAndClearedWithQiblaDomain() {
+        val cached = CachedEngine(engine)
+        val first = cached.qiblaShadowVerification(2026, london)
+        assertEquals(engine.qibla.shadowVerification(2026, london), first)
+        assertSame(first, cached.qiblaShadowVerification(2026, london))
+        // year is part of the key
+        cached.qiblaShadowVerification(2027, london)
+        assertEquals(2, cached.cacheSize("qiblaShadow"))
+
+        val fresh = cached.qiblaShadowVerification(2026, london, forceRecompute = true)
+        assertEquals(first, fresh, "recompute must be value-identical (deterministic)")
+        assertNotSame(first, fresh, "recompute must produce a new instance")
+
+        cached.clearCaches("qibla")
+        assertEquals(0, cached.cacheSize("qiblaShadow"))
+    }
+
+    @Test
+    fun cachedShadowEventsAlignWithRelativeSunAngleForVisiblePassages() {
+        // Cohesion across the facade: a cached Kaaba-zenith passage that is
+        // visible at the location must coincide with the qibla bearing.
+        val cached = CachedEngine(engine)
+        val events = cached.qiblaShadowVerification(2026, london)
+        val visibleToward = events.filter {
+            it.method == com.khushu.engine.qibla.ShadowMethod.FACE_TOWARD_SUN && it.visibleAtLocation
+        }
+        assertTrue(visibleToward.isNotEmpty(), "London daylight must include a zenith passage")
+        for (e in visibleToward) {
+            val relation = engine.qibla.relativeSunAngle(london, e.instant)
+            assertTrue(relation.alignedWithinTolerance)
+        }
+    }
+
+    @Test
     fun calendarDomainCachesHitOverwriteAndClearTogether() {
         val cached = CachedEngine(engine)
         val calendarConfig = com.khushu.engine.calendar.CalendarConfiguration(

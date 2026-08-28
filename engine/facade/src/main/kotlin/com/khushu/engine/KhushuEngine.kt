@@ -476,25 +476,18 @@ class KhushuEngine {
             location: Location,
             instant: Instant,
             toleranceDeg: Double = 2.0,
-        ): SunQiblaRelation {
-            val bearing = Qibla.bearing(location).bearingDegFromNorth.value
-            val pos = Astronomy.sun.position(location, instant)
-            var diff = (pos.azimuthDeg - bearing) % 360.0
-            if (diff > 180.0) diff -= 360.0
-            if (diff < -180.0) diff += 360.0
-            return SunQiblaRelation(
-                sunAzimuthDeg = pos.azimuthDeg,
-                sunAltitudeDeg = pos.altitudeDeg,
-                signedAngleToQiblaDeg = diff,
-                alignedWithinTolerance = kotlin.math.abs(diff) <= toleranceDeg,
-            )
-        }
+        ): SunQiblaRelation = Qibla.relativeSunAngle(location, instant, toleranceDeg)
+
+        /** Provenance of the qibla geometry (Kaaba constants, distance model, bearing formula). */
+        fun audit(): com.khushu.engine.qibla.QiblaAudit = Qibla.audit()
     }
 
     class ZakatApi internal constructor() {
         /**
          * Zakat al-mal over [assets]: nisab valuation (gold or silver per
          * [ZakatParams.nisabSource]), 2.5% rate, madhab rules, full breakdown.
+         * Result carries both metal nisab thresholds (gold + silver) and the
+         * madhab-rule [ZakatResult.notes] applied to this assessment.
          * @throws com.khushu.engine.core.error.InvalidParameterException when a value is negative/NaN or the nisab metal price is missing
          */
         fun mal(assets: ZakatAssets, params: ZakatParams = ZakatParams()): ZakatResult =
@@ -506,11 +499,23 @@ class KhushuEngine {
 
         /**
          * Full hawl period for wealth owned since [ownershipStart]: hijri
-         * anniversary with explicit snap provenance. Composed with the calendar
-         * capability — the zakat module stays independent of calendar.
+         * anniversary with explicit snap provenance.
          */
         fun hawlPeriod(ownershipStart: LocalDate, offsetDays: Int = 0): com.khushu.engine.zakat.ZakatRules.HawlPeriod =
             com.khushu.engine.zakat.ZakatRules.hawlPeriod(ownershipStart, offsetDays)
+
+        /**
+         * Progress/countdown facts for the lunar ownership year as of [today] —
+         * days remaining, 0..1 progress, completion flag. Date-only; pair with
+         * [mal] for the amount.
+         * @throws com.khushu.engine.core.error.InvalidParameterException when [today] precedes [ownershipStart]
+         */
+        fun hawlFacts(
+            ownershipStart: LocalDate,
+            today: LocalDate,
+            offsetDays: Int = 0,
+        ): com.khushu.engine.zakat.ZakatRules.HawlFacts =
+            com.khushu.engine.zakat.ZakatRules.hawlFacts(ownershipStart, today, offsetDays)
 
         /** Full nisab/band schedule for a livestock species. */
         fun livestockSchedule(kind: com.khushu.engine.zakat.ZakatRules.Species) =

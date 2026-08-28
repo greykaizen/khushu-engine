@@ -1,6 +1,7 @@
 package com.khushu.engine.zakat
 
 import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.NoResultException
 import com.khushu.engine.core.error.validate
 import java.time.LocalDate
 import kotlin.math.floor
@@ -23,8 +24,9 @@ object ZakatRules {
      * (month/day) one year later, snapping back up to 2 days when the target
      * month is shorter. Snap is EXPLICIT in the returned [HawlPeriod].
      *
-     * Hijri conversion is injected by the CALLER (facade wires it to the
-     * calendar capability) — this module stays independent of calendar.
+     * Uses the calendar module's hijri conversion directly (sanctioned
+     * dependency direction: zakat → calendar, AGENTS §3).
+     * @throws com.khushu.engine.core.error.NoResultException when the anniversary cannot be resolved
      */
     fun hawlPeriod(
         ownershipStart: LocalDate,
@@ -45,7 +47,30 @@ object ZakatRules {
                 )
             }
         }
-        throw IllegalStateException("hawl anniversary not resolvable for $ownershipStart")
+        throw NoResultException("hawl anniversary not resolvable for $ownershipStart")
+    }
+
+    /**
+     * Date-only hawl facts for progress/countdown UIs: how far the lunar year
+     * of ownership has advanced as of [today]. No asset assessment — pair with
+     * [Zakat.mal] for the amount.
+     * @throws InvalidParameterException when [today] precedes [ownershipStart]
+     */
+    fun hawlFacts(ownershipStart: LocalDate, today: LocalDate, offsetDays: Int = 0): HawlFacts {
+        validate(!today.isBefore(ownershipStart)) {
+            InvalidParameterException("today", "$today", "must not precede ownershipStart ($ownershipStart)")
+        }
+        val period = hawlPeriod(ownershipStart, offsetDays)
+        val total = java.time.temporal.ChronoUnit.DAYS.between(period.starts, period.anniversary)
+        val complete = !today.isBefore(period.anniversary)
+        val elapsed = java.time.temporal.ChronoUnit.DAYS.between(period.starts, today).coerceIn(0, total)
+        return HawlFacts(
+            period = period,
+            daysSinceStart = elapsed,
+            daysRemaining = if (complete) 0 else java.time.temporal.ChronoUnit.DAYS.between(today, period.anniversary),
+            progress = if (complete) 1.0 else elapsed.toDouble() / total,
+            complete = complete,
+        )
     }
 
     data class HawlPeriod(
@@ -56,6 +81,18 @@ object ZakatRules {
         val hijriYearCompleted: Int,
         /** How many days the anniversary was snapped back (0 = exact). */
         val snappedDays: Int,
+    )
+
+    /** Progress of the lunar ownership year as of a civil date — countdown/progress UI facts. */
+    data class HawlFacts(
+        val period: HawlPeriod,
+        val daysSinceStart: Long,
+        /** Days until the anniversary; 0 once it has passed. */
+        val daysRemaining: Long,
+        /** Fraction of the hawl elapsed, 0.0..1.0 (1.0 once complete). */
+        val progress: Double,
+        /** True once [period]'s anniversary is at or behind the assessed date. */
+        val complete: Boolean,
     )
 
     private fun findCivilDate(

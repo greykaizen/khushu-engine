@@ -124,6 +124,7 @@ class DayApi internal constructor() {
  *   month summary       → (Location, YearMonth, ZoneId, CalendarConfiguration, CalendarParams)
  *   lunar month view    → (Location, YearMonth(hijri), ZoneId, CalendarConfiguration)
  *   qibla               → (Location)
+ *   qibla shadow verify → (Year, Location)
  * Configuration that affects results is part of every key — caching can never
  * hide a dependency. All caches are bounded LRU (GPS jitter must not grow
  * memory without bound in long-lived hosts).
@@ -184,6 +185,7 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
         Lru<List<com.khushu.engine.calendar.LunarCalendarView.LunarDayFact>>(capacity)
     private val daySummaryCache = Lru<DaySummary>(capacity)
     private val qiblaCache = Lru<com.khushu.engine.qibla.QiblaBearing>(capacity)
+    private val qiblaShadowCache = Lru<List<com.khushu.engine.qibla.QiblaShadowEvent>>(capacity)
 
     private fun Location.key() = "%.9f|%.9f|%.3f".format(
         latitude.degrees, longitude.degrees, altitudeMeters.meters,
@@ -450,6 +452,19 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
     fun qibla(location: Location, forceRecompute: Boolean = false) =
         qiblaCache.getOrPut(location.key(), forceRecompute) { delegate.qibla.bearing(location) }
 
+    /**
+     * Shadow-qibla verification windows for [year] at [location], memoized —
+     * astronomy facts for a (year, location) never change.
+     */
+    fun qiblaShadowVerification(
+        year: Int,
+        location: Location,
+        forceRecompute: Boolean = false,
+    ): List<com.khushu.engine.qibla.QiblaShadowEvent> =
+        qiblaShadowCache.getOrPut("$year|${location.key()}", forceRecompute) {
+            delegate.qibla.shadowVerification(year, location)
+        }
+
     /** Clear every cache. */
     fun clearCaches() {
         DOMAINS.forEach { clearCaches(it) }
@@ -477,7 +492,7 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
                 fastDaysCache.clear(); monthMatrixCache.clear(); monthSummaryCache.clear()
                 lunarMonthViewCache.clear()
             }
-            "qibla" -> qiblaCache.clear()
+            "qibla" -> { qiblaCache.clear(); qiblaShadowCache.clear() }
             "daySummary" -> daySummaryCache.clear()
             else -> throw InvalidParameterException("domain", domain, "unknown cache domain; expected one of $DOMAINS")
         }
@@ -495,11 +510,13 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
         "monthMatrix" -> monthMatrixCache.size()
         "monthSummary" -> monthSummaryCache.size()
         "lunarMonthView" -> lunarMonthViewCache.size()
+        "qiblaShadow" -> qiblaShadowCache.size()
         else -> throw InvalidParameterException(
             "cacheName",
             name,
             "unknown cache; expected one of: sunRiseSet, daySummary, prayerTimes, hijri, " +
-                "calendarEvents, calendarEventsInRange, fastDays, monthMatrix, monthSummary, lunarMonthView",
+                "calendarEvents, calendarEventsInRange, fastDays, monthMatrix, monthSummary, " +
+                "lunarMonthView, qiblaShadow",
         )
     }
 }

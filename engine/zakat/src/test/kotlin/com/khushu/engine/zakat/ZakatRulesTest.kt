@@ -3,6 +3,7 @@ package com.khushu.engine.zakat
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -21,6 +22,38 @@ class ZakatRulesTest {
         assertEquals(9, h.month)
         assertEquals(1, h.day)
         assertEquals(0, period.snappedDays)
+    }
+
+    @Test
+    fun hawlFactsTrackProgressToCompletion() {
+        val start = LocalDate.of(2026, 1, 1)
+        val atStart = ZakatRules.hawlFacts(start, start)
+        assertEquals(0L, atStart.daysSinceStart)
+        assertEquals(0.0, atStart.progress)
+        assertEquals(false, atStart.complete)
+        assertTrue(atStart.daysRemaining in 350..360, "a lunar year is ~354-355 days")
+
+        val atEnd = ZakatRules.hawlFacts(start, atStart.period.anniversary)
+        assertEquals(1.0, atEnd.progress)
+        assertEquals(0L, atEnd.daysRemaining)
+        assertEquals(true, atEnd.complete)
+
+        val mid = ZakatRules.hawlFacts(start, start.plusDays(177))
+        assertTrue(mid.progress > 0.4 && mid.progress < 0.6)
+        // elapsed + remaining partitions the whole ownership year
+        assertEquals(atStart.daysRemaining, mid.daysSinceStart + mid.daysRemaining)
+
+        val after = ZakatRules.hawlFacts(start, atStart.period.anniversary.plusDays(10))
+        assertEquals(1.0, after.progress)
+        assertEquals(0L, after.daysRemaining)
+    }
+
+    @Test
+    fun hawlFactsRejectDatesBeforeOwnership() {
+        val start = LocalDate.of(2026, 1, 1)
+        assertFailsWith<com.khushu.engine.core.error.InvalidParameterException> {
+            ZakatRules.hawlFacts(start, start.minusDays(1))
+        }
     }
 
     @Test

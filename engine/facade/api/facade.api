@@ -47,6 +47,8 @@ public final class com/khushu/engine/CachedEngine {
 	public static synthetic fun prayerTimes$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ZILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
 	public final fun qibla (Lcom/khushu/engine/core/geo/Location;Z)Lcom/khushu/engine/qibla/QiblaBearing;
 	public static synthetic fun qibla$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;ZILjava/lang/Object;)Lcom/khushu/engine/qibla/QiblaBearing;
+	public final fun qiblaShadowVerification (ILcom/khushu/engine/core/geo/Location;Z)Ljava/util/List;
+	public static synthetic fun qiblaShadowVerification$default (Lcom/khushu/engine/CachedEngine;ILcom/khushu/engine/core/geo/Location;ZILjava/lang/Object;)Ljava/util/List;
 	public final fun sunEvents (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SolarEvents;
 	public static synthetic fun sunEvents$default (Lcom/khushu/engine/CachedEngine;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarEvents;
 	public final fun sunPhases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SolarDayPhases;
@@ -293,6 +295,7 @@ public final class com/khushu/engine/KhushuEngine$PrayerApi$WindowsApi {
 }
 
 public final class com/khushu/engine/KhushuEngine$QiblaApi {
+	public final fun audit ()Lcom/khushu/engine/qibla/QiblaAudit;
 	public final fun bearing (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
 	public final fun bearingBetween (Lcom/khushu/engine/core/geo/Location;Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/BearingAndDistance;
 	public final fun relativeSunAngle (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;D)Lcom/khushu/engine/qibla/SunQiblaRelation;
@@ -302,6 +305,8 @@ public final class com/khushu/engine/KhushuEngine$QiblaApi {
 
 public final class com/khushu/engine/KhushuEngine$ZakatApi {
 	public final fun fitrana (IDLcom/khushu/engine/zakat/ZakatMadhab;)Lcom/khushu/engine/zakat/FitranaResult;
+	public final fun hawlFacts (Ljava/time/LocalDate;Ljava/time/LocalDate;I)Lcom/khushu/engine/zakat/ZakatRules$HawlFacts;
+	public static synthetic fun hawlFacts$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Ljava/time/LocalDate;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlFacts;
 	public final fun hawlPeriod (Ljava/time/LocalDate;I)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
 	public static synthetic fun hawlPeriod$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
 	public final fun livestockDue (Lcom/khushu/engine/zakat/ZakatRules$Species;I)Lcom/khushu/engine/zakat/ZakatRules$LivestockDue;

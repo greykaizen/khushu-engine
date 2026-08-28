@@ -29,77 +29,88 @@ object Zakat {
         val goldValue = assets.goldGrams * assets.goldPricePerGram
         val silverValue = assets.silverGrams * assets.silverPricePerGram
 
+        // Full precision internally; only the payable (and currency-display
+        // figures) are rounded — never intermediate sums (v1.3 principle).
         val breakdown = mutableListOf<AssetContribution>()
-        fun add(label: String, amount: Double) {
-            if (amount != 0.0) breakdown += AssetContribution(label, round(amount))
+        val notes = mutableListOf<String>()
+        fun add(key: AssetKey, label: String, amount: Double) {
+            if (amount != 0.0) breakdown += AssetContribution(key, label, round(amount))
         }
 
-        add("cash", assets.cash)
-        add("investments", assets.investments)
-        add("receivables (strong debts)", assets.receivables)
-        add("inventory", assets.inventoryValue)
-        add("gold", goldValue)
-        add("silver", silverValue)
+        add(AssetKey.CASH, "cash", assets.cash)
+        add(AssetKey.INVESTMENTS, "investments", assets.investments)
+        add(AssetKey.RECEIVABLES, "receivables (strong debts)", assets.receivables)
+        add(AssetKey.INVENTORY, "inventory", assets.inventoryValue)
+        add(AssetKey.GOLD, "gold", goldValue)
+        add(AssetKey.SILVER, "silver", silverValue)
 
         var net = assets.cash + assets.investments + assets.receivables +
             assets.inventoryValue + goldValue + silverValue
 
-        val wornGoldValue = assets.wornGoldGrams * assets.goldPricePerGram
-        val wornSilverValue = assets.wornSilverGrams * assets.silverPricePerGram
-        if (wornJewelryZakatable && (wornGoldValue + wornSilverValue) > 0.0) {
-            val worn = wornGoldValue + wornSilverValue
-            add("worn jewelry (zakatable per madhab)", worn)
-            net += worn
-        } else {
-            add("worn jewelry (exempt per madhab)", 0.0)
+        val wornValue = assets.wornGoldGrams * assets.goldPricePerGram +
+            assets.wornSilverGrams * assets.silverPricePerGram
+        if (wornJewelryZakatable && wornValue > 0.0) {
+            add(AssetKey.WORN_JEWELRY, "worn jewelry", wornValue)
+            net += wornValue
+        } else if (assets.wornGoldGrams + assets.wornSilverGrams > 0.0) {
+            notes += "worn jewelry exempt: zakatable only in the Hanafi madhab"
         }
 
         if (liabilitiesDeductible && assets.liabilities > 0.0) {
-            add("liabilities (deducted)", -round(assets.liabilities))
+            add(AssetKey.LIABILITIES, "liabilities (deducted)", -assets.liabilities)
             net -= assets.liabilities
-        } else {
-            add("liabilities (not deducted per madhab)", 0.0)
+        } else if (assets.liabilities > 0.0) {
+            notes += "liabilities not deducted: Shafi'i position"
         }
-        net = round(net)
 
         val convention = params.weightConvention
-        val nisabWeight = when (params.nisabSource) {
-            NisabSource.GOLD -> convention.goldGrams
-            NisabSource.SILVER -> convention.silverGrams
-        }
-        val priceOfNisabMetal = when (params.nisabSource) {
-            NisabSource.GOLD -> assets.goldPricePerGram
-            NisabSource.SILVER -> assets.silverPricePerGram
-        }
-        validate(priceOfNisabMetal > 0.0) {
-            InvalidParameterException(
-                when (params.nisabSource) {
-                    NisabSource.GOLD -> "goldPricePerGram"
-                    NisabSource.SILVER -> "silverPricePerGram"
-                },
-                "$priceOfNisabMetal",
-                "nisab source is ${params.nisabSource} but its market price was not provided",
-            )
-        }
-        val threshold = round(nisabWeight * priceOfNisabMetal)
-        val reached = net >= threshold && net > 0.0
+        val goldThreshold =
+            if (assets.goldPricePerGram > 0.0) round(convention.goldGrams * assets.goldPricePerGram) else null
+        val silverThreshold =
+            if (assets.silverPricePerGram > 0.0) round(convention.silverGrams * assets.silverPricePerGram) else null
+        val threshold = when (params.nisabSource) {
+            NisabSource.GOLD -> goldThreshold
+            NisabSource.SILVER -> silverThreshold
+        } ?: throw InvalidParameterException(
+            when (params.nisabSource) {
+                NisabSource.GOLD -> "goldPricePerGram"
+                else -> "silverPricePerGram"
+            },
+            "0.0",
+            "nisab source is ${params.nisabSource} but its market price was not provided",
+        )
+        // Single rounding of the computed total (currency presentation); the
+        // comparison runs on rounded figures so the nisab boundary is stable.
+        val netWealth = round(net)
+        val reached = netWealth >= threshold && netWealth > 0.0
 
-        val due = if (reached && params.hawlComplete) round(net * RATE) else 0.0
+        val due = if (reached && params.hawlComplete) round(netWealth * RATE) else 0.0
+        if (reached && !params.hawlComplete) {
+            notes += "no zakat due: hawl (lunar year of ownership) incomplete"
+        }
 
         return ZakatResult(
-            netWealth = net,
+            netWealth = netWealth,
             nisabThreshold = threshold,
             nisabReached = reached,
             hawlComplete = params.hawlComplete,
             rate = RATE,
             zakatDue = due,
             breakdown = breakdown.toList(),
+            goldNisabThreshold = goldThreshold,
+            silverNisabThreshold = silverThreshold,
+            notes = notes.toList(),
         )
     }
 
     /**
      * Fitrana (zakat al-fitr). Majority convention: 2.175 kg saʿ per person;
      * Hanafi convention: 3.0 kg.
+     *
+     * The default [madhab] is deliberately [ZakatMadhab.HANAFI] — the 3.0 kg
+     * figure is the most widely published fitrana quantity — even though
+     * prayer defaults elsewhere are Shafi'i; pass the madhab explicitly when
+     * the two should agree.
      */
     fun fitrana(
         dependents: Int,
@@ -120,8 +131,11 @@ object Zakat {
             pricePerKg = pricePerKg,
             perPersonAmount = perPerson,
             totalForHousehold = round(perPerson * dependents),
+            totalKg = round3(saKg * dependents),
         )
     }
 
     private fun round(v: Double): Double = (v * 100).roundToLong() / 100.0
+
+    private fun round3(v: Double): Double = (v * 1000).roundToLong() / 1000.0
 }

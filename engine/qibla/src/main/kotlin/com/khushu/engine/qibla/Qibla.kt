@@ -102,4 +102,27 @@ object Qibla {
             greatCircleDistanceKm = generic.distanceKm,
         )
     }
+
+    /**
+     * Signed angle between the sun's azimuth and the local qibla bearing at
+     * [instant], normalized to [−180, 180]; plus whether the sun stands within
+     * [toleranceDeg] of the qibla direction. Pure geometry over astronomy
+     * facts — the live-compass primitive.
+     */
+    fun relativeSunAngle(location: Location, instant: java.time.Instant, toleranceDeg: Double = 2.0): SunQiblaRelation {
+        val bearingValue = bearing(location).bearingDegFromNorth.value
+        val pos = Astronomy.sun.position(location, instant)
+        var diff = (pos.azimuthDeg - bearingValue) % 360.0
+        if (diff > 180.0) diff -= 360.0
+        if (diff < -180.0) diff += 360.0
+        return SunQiblaRelation(
+            sunAzimuthDeg = pos.azimuthDeg,
+            sunAltitudeDeg = pos.altitudeDeg,
+            signedAngleToQiblaDeg = diff,
+            alignedWithinTolerance = kotlin.math.abs(diff) <= toleranceDeg,
+        )
+    }
+
+    /** Provenance of the qibla geometry — mirrors the astronomy house pattern. */
+    fun audit(): QiblaAudit = QiblaAudit()
 }

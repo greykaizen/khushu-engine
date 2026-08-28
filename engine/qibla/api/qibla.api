@@ -15,8 +15,11 @@ public final class com/khushu/engine/qibla/Qibla {
 	public static final field INSTANCE Lcom/khushu/engine/qibla/Qibla;
 	public static final field KAABA_LATITUDE_DEG D
 	public static final field KAABA_LONGITUDE_DEG D
+	public final fun audit ()Lcom/khushu/engine/qibla/QiblaAudit;
 	public final fun bearing (Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/QiblaBearing;
 	public final fun bearingBetween (Lcom/khushu/engine/core/geo/Location;Lcom/khushu/engine/core/geo/Location;)Lcom/khushu/engine/qibla/BearingAndDistance;
+	public final fun relativeSunAngle (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;D)Lcom/khushu/engine/qibla/SunQiblaRelation;
+	public static synthetic fun relativeSunAngle$default (Lcom/khushu/engine/qibla/Qibla;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;DILjava/lang/Object;)Lcom/khushu/engine/qibla/SunQiblaRelation;
 	public final fun shadowVerification (ILcom/khushu/engine/core/geo/Location;)Ljava/util/List;
 }
 

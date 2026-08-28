@@ -434,3 +434,57 @@ translated pack reusing built-in ids gives zero-code title localization.
   1950–2080. Japanese era boundary; Minguo/Thai offsets.
 - daysSince zero-on-day + previousOccurrence facade/module parity.
 - month.summary one-pass composite (Tasu'a/Ashura flag, moon bounds, dates).
+
+## v1.10 additions (2026-08) — zakat/qibla coherence
+
+### zakat — dual thresholds, notes, hawl facts, i18n keys
+```
+ZakatResult gains:
+  goldNisabThreshold: Double?   // both metal thresholds always returned
+  silverNisabThreshold: Double? // null = that metal's price was not provided
+  notes: List<String>           // madhab-rule facts applied to this assessment
+                                // (e.g. "worn jewelry exempt: Hanafi only",
+                                //  "liabilities not deducted: Shafi'i position",
+                                //  "no zakat due: hawl incomplete")
+AssetContribution(key: AssetKey, label: String, amount: Double)
+  // AssetKey{CASH,INVESTMENTS,RECEIVABLES,INVENTORY,GOLD,SILVER,
+  //          WORN_JEWELRY,LIABILITIES} — stable i18n keys; label is the
+  //          English display default.
+FitranaResult.totalKg           // saKg × dependents (household food quantity)
+
+ZakatRules.hawlFacts(ownershipStart, today, offsetDays = 0): HawlFacts
+ZakatRules$HawlFacts(period, daysSinceStart, daysRemaining, progress, complete)
+  // countdown/progress for the lunar ownership year; date-only —
+  // pair with Zakat.mal for the amount. InvalidParameterException when
+  // today < ownershipStart. hawlPeriod's unresolvable case now throws
+  // typed NoResultException (was bare IllegalStateException).
+```
+`Zakat.mal` rounds each currency figure once (single rounding of the total);
+intermediate sums stay full-precision. fitrana default madhab stays HANAFI
+(most-published 3.0 kg figure) — documented on `Zakat.fitrana`.
+
+### qibla — module-level sun relation, audit, shadow cache
+```
+Qibla.relativeSunAngle(location, instant, toleranceDeg = 2.0): SunQiblaRelation
+  // MOVED from the facade into the qibla module (facade delegates; facade
+  // zero-logic rule restored). Signed sun-azimuth→qibla angle [−180,180].
+Qibla.audit(): QiblaAudit       // provenance (Kaaba constants, distance model,
+                                // bearing formula) — mirrors astronomy.audit()
+CachedEngine.qiblaShadowVerification(year, location, forceRecompute = false)
+  // key = (Year, Location); cleared by clearCaches("qibla").
+```
+
+### facade passthroughs
+```
+engine.zakat.hawlFacts(ownershipStart, today, offsetDays = 0)
+engine.qibla.audit()            // engine.qibla.relativeSunAngle unchanged
+```
+
+### tests
+- Zakat: dual thresholds, null-when-unpriced, madhab-rule notes, hawl note,
+  AssetKey presence, fitrana totalKg, breakdown sum.
+- ZakatRules: hawlFacts progress/partition/completion + invalid-date rejection.
+- Qibla: audit provenance; relativeSunAngle signed/normalized; cohesion —
+  every visible Kaaba-zenith passage aligns with the qibla bearing.
+- Facade: qiblaShadowVerification memoize/overwrite/clear + cache-key year;
+  zakat/qibla facade↔module parity.
