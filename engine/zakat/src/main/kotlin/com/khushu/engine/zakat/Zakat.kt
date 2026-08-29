@@ -11,8 +11,13 @@ import kotlin.math.roundToLong
  * Fiqh rules:
  * - rate: 2.5% (1/40) on net zakatable wealth
  * - nisab: metal weight × current market price of that metal
- * - worn jewelry: zakatable only in the Hanafi madhab; exempt otherwise
- * - liabilities: deducted from wealth in every madhab except Shafi'i
+ * - worn jewelry: zakatable only in the Hanafi madhab; exempt otherwise;
+ *   valued at realizable (buyback) price when a quote is provided (v1.11)
+ * - liabilities: deducted per [DebtTreatment] policy; Hanafi default is
+ *   immediate-only (Daruliftaa #8395 / Radd al-Muhtar 2/260–261), Shafiʿi
+ *   deducts nothing — overrides cite their source in result notes (v1.11)
+ * - shares: TRADING = full market value, LONG_TERM = zakatable-asset
+ *   portion per AAOIFI Std 35, with conservative fallback + note (v1.11)
  */
 object Zakat {
 
@@ -24,7 +29,10 @@ object Zakat {
 
     fun mal(assets: ZakatAssets, params: ZakatParams = ZakatParams()): ZakatResult {
         val wornJewelryZakatable = params.madhab == ZakatMadhab.HANAFI
-        val liabilitiesDeductible = params.madhab != ZakatMadhab.SHAFII
+        val debtTreatment =
+            params.debtTreatment ?: ZakatMadhabDefaults.debtTreatment(params.madhab)
+        val jewelryBasis =
+            params.jewelryValuationBasis ?: ZakatMadhabDefaults.jewelryValuationBasis(params.madhab)
 
         val goldValue = assets.goldGrams * assets.goldPricePerGram
         val silverValue = assets.silverGrams * assets.silverPricePerGram
@@ -47,20 +55,78 @@ object Zakat {
         var net = assets.cash + assets.investments + assets.receivables +
             assets.inventoryValue + goldValue + silverValue
 
-        val wornValue = assets.wornGoldGrams * assets.goldPricePerGram +
-            assets.wornSilverGrams * assets.silverPricePerGram
+        // ── Share holdings (v1.11): intent-driven basis ────────────────────
+        var tradingTotal = 0.0
+        var longTermTotal = 0.0
+        for (h in assets.shareHoldings) {
+            when (h.intent) {
+                ShareIntent.TRADING -> tradingTotal += h.marketValue
+                ShareIntent.LONG_TERM -> {
+                    val f = h.zakatablePortionFraction
+                    if (f != null) {
+                        longTermTotal += h.marketValue * f
+                        if (h.basisSource == ZakatableBasisSource.ESTIMATED) {
+                            notes += "share holding assessed on estimated zakatable fraction ($f): AAOIFI Std 35 permits estimation"
+                        }
+                    } else {
+                        longTermTotal += h.marketValue
+                        notes +=
+                            "long-term holding without zakatable fraction: conservative full-value fallback applied (AAOIFI Std 35)"
+                    }
+                }
+            }
+        }
+        add(AssetKey.EQUITY_TRADING, "shares (trading)", tradingTotal)
+        add(AssetKey.EQUITY_LONG_TERM, "shares (long-term, zakatable portion)", longTermTotal)
+        net += tradingTotal + longTermTotal
+
+        // ── Worn jewelry: madhab exemption + valuation basis ───────────────
+        val wornGoldPrice = assets.wornGoldPricePerGram ?: assets.goldPricePerGram
+        val wornSilverPrice = assets.wornSilverPricePerGram ?: assets.silverPricePerGram
+        val wornValue = assets.wornGoldGrams * wornGoldPrice +
+            assets.wornSilverGrams * wornSilverPrice
         if (wornJewelryZakatable && wornValue > 0.0) {
             add(AssetKey.WORN_JEWELRY, "worn jewelry", wornValue)
             net += wornValue
+            if (jewelryBasis == JewelryValuationBasis.REALIZABLE_VALUE &&
+                (assets.wornGoldPricePerGram == null && assets.wornSilverPricePerGram == null) &&
+                (assets.wornGoldGrams + assets.wornSilverGrams > 0.0)
+            ) {
+                notes += "jewelry valued at market price: realizable-value basis selected but no buyback quote provided (SeekersGuidance/Radd al-Muhtar)"
+            }
         } else if (assets.wornGoldGrams + assets.wornSilverGrams > 0.0) {
             notes += "worn jewelry exempt: zakatable only in the Hanafi madhab"
         }
 
-        if (liabilitiesDeductible && assets.liabilities > 0.0) {
-            add(AssetKey.LIABILITIES, "liabilities (deducted)", -assets.liabilities)
-            net -= assets.liabilities
-        } else if (assets.liabilities > 0.0) {
-            notes += "liabilities not deducted: Shafi'i position"
+        // ── Receivables: medium/weak excluded with classification notes ────
+        if (assets.mediumReceivables > 0.0) {
+            notes += "medium receivables excluded (non-trade property proceeds): Hanafi classification — inclusion timing requires scholar review"
+        }
+        if (assets.weakReceivables > 0.0) {
+            notes += "weak receivables excluded (mahr/inheritance claims): typically not zakatable until collected"
+        }
+
+        // ── Liabilities: policy-driven deduction ───────────────────────────
+        val totalLiabilities = assets.liabilities
+        val deduction = when (debtTreatment) {
+            DebtTreatment.NONE -> 0.0
+            DebtTreatment.IMMEDIATE_ONLY ->
+                assets.immediateLiabilities ?: totalLiabilities
+            DebtTreatment.ALL_DEBTS, DebtTreatment.HIDDEN_WEALTH_ONLY -> totalLiabilities
+        }
+        if (debtTreatment == DebtTreatment.HIDDEN_WEALTH_ONLY) {
+            notes += "Maliki debt scope: all wealth assessed in mal() is hidden wealth; livestock/crops (visible) are assessed separately via ZakatRules and unaffected by debt"
+        }
+        if (deduction > 0.0) {
+            add(AssetKey.LIABILITIES, "liabilities (deducted)", -deduction)
+            net -= deduction
+        } else if (totalLiabilities > 0.0 && debtTreatment == DebtTreatment.NONE) {
+            notes += "liabilities not deducted: Shafiʿi position (al-Nawawi)"
+        } else if (totalLiabilities > 0.0) {
+            notes += "liabilities not deducted: immediate-due portion is zero"
+        }
+        if (params.debtTreatment != null && params.debtTreatment != ZakatMadhabDefaults.debtTreatment(params.madhab)) {
+            notes += "debt policy override: ${params.debtTreatment} (default for ${params.madhab} is ${ZakatMadhabDefaults.debtTreatment(params.madhab)})"
         }
 
         val convention = params.weightConvention
@@ -116,6 +182,7 @@ object Zakat {
         dependents: Int,
         pricePerKg: Double,
         madhab: ZakatMadhab = ZakatMadhab.HANAFI,
+        mode: FitrPaymentMode = FitrPaymentMode.FOOD,
     ): FitranaResult {
         validate(dependents > 0) {
             InvalidParameterException("dependents", "$dependents", "must be positive")
@@ -125,6 +192,13 @@ object Zakat {
         }
         val saKg = if (madhab == ZakatMadhab.HANAFI) SA_KG_HANAFI else SA_KG_MAJORITY
         val perPerson = round(saKg * pricePerKg)
+        val notes = mutableListOf<String>()
+        when (mode) {
+            FitrPaymentMode.FOOD -> notes +=
+                "food form: majority position (al-Nawawi, al-Majmuʿ 6/113) requires staple food"
+            FitrPaymentMode.CASH_EQUIVALENT -> notes +=
+                "cash equivalent: Hanafi position (Abu Hanifa, Abu Yusuf; also reported from al-Hasan al-Basri and ʿUmar ibn ʿAbd al-ʿAziz) — other schools require food except for necessity-based exceptions"
+        }
         return FitranaResult(
             saKg = saKg,
             dependents = dependents,
@@ -132,6 +206,8 @@ object Zakat {
             perPersonAmount = perPerson,
             totalForHousehold = round(perPerson * dependents),
             totalKg = round3(saKg * dependents),
+            mode = mode,
+            notes = notes,
         )
     }
 

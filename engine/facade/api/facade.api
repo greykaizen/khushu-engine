@@ -304,7 +304,8 @@ public final class com/khushu/engine/KhushuEngine$QiblaApi {
 }
 
 public final class com/khushu/engine/KhushuEngine$ZakatApi {
-	public final fun fitrana (IDLcom/khushu/engine/zakat/ZakatMadhab;)Lcom/khushu/engine/zakat/FitranaResult;
+	public final fun fitrana (IDLcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/FitrPaymentMode;)Lcom/khushu/engine/zakat/FitranaResult;
+	public static synthetic fun fitrana$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;IDLcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/FitrPaymentMode;ILjava/lang/Object;)Lcom/khushu/engine/zakat/FitranaResult;
 	public final fun hawlFacts (Ljava/time/LocalDate;Ljava/time/LocalDate;I)Lcom/khushu/engine/zakat/ZakatRules$HawlFacts;
 	public static synthetic fun hawlFacts$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Ljava/time/LocalDate;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatRules$HawlFacts;
 	public final fun hawlPeriod (Ljava/time/LocalDate;I)Lcom/khushu/engine/zakat/ZakatRules$HawlPeriod;
@@ -316,7 +317,10 @@ public final class com/khushu/engine/KhushuEngine$ZakatApi {
 	public static synthetic fun mal$default (Lcom/khushu/engine/KhushuEngine$ZakatApi;Lcom/khushu/engine/zakat/ZakatAssets;Lcom/khushu/engine/zakat/ZakatParams;ILjava/lang/Object;)Lcom/khushu/engine/zakat/ZakatResult;
 	public final fun rikazDue (D)D
 	public final fun ushrDue (DLcom/khushu/engine/zakat/ZakatRules$Irrigation;)D
+	public final fun ushrDue (DLcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;D)D
+	public final fun ushrNisabReached (DLcom/khushu/engine/zakat/ZakatRules$UshrNisabPolicy;)Z
 	public final fun ushrRate (Lcom/khushu/engine/zakat/ZakatRules$Irrigation;)D
+	public final fun ushrRate (Lcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;D)D
 }
 
 public final class com/khushu/engine/MonthApi {

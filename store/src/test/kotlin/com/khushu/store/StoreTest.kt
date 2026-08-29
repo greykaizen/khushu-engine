@@ -201,4 +201,46 @@ class StoreTest {
             decoded.calendar.toConfiguration()
         }
     }
+
+    // ── v1.11: zakat policy fields ─────────────────────────────────────────
+
+    @Test
+    fun zakatPolicyOverridesRoundTripThroughJson() {
+        val snapshot = SettingsSnapshot(
+            zakat = ZakatSettingsDto(
+                madhab = ZakatMadhab.HANAFI,
+                debtTreatment = com.khushu.engine.zakat.DebtTreatment.ALL_DEBTS,
+                jewelryValuationBasis = com.khushu.engine.zakat.JewelryValuationBasis.REALIZABLE_VALUE,
+                fitrPaymentMode = com.khushu.engine.zakat.FitrPaymentMode.CASH_EQUIVALENT,
+                mixedIrrigationRule = com.khushu.engine.zakat.ZakatRules.MixedIrrigationRule.PROPORTIONAL,
+                ushrNisabPolicy = com.khushu.engine.zakat.ZakatRules.UshrNisabPolicy.NO_NISAB,
+            ),
+        )
+        val decoded = codec.decode(codec.encode(snapshot))
+        assertEquals(snapshot.zakat, decoded.zakat)
+        // Engine params carry the overrides through the mapper.
+        val params = decoded.zakat.toParams()
+        assertEquals(com.khushu.engine.zakat.DebtTreatment.ALL_DEBTS, params.debtTreatment)
+        assertEquals(
+            com.khushu.engine.zakat.JewelryValuationBasis.REALIZABLE_VALUE,
+            params.jewelryValuationBasis,
+        )
+    }
+
+    @Test
+    fun v110ZakatFileDecodesWithV111Defaults() {
+        // A file written by v1.10 (no v1.11 keys) decodes with the additive defaults.
+        val v110Json = """{"zakat":{"madhab":"HANAFI","nisabSource":"SILVER","weightConvention":"COMMON","hawlComplete":true}}"""
+        val decoded = codec.decode(v110Json.encodeToByteArray())
+        assertEquals(null, decoded.zakat.debtTreatment)
+        assertEquals(com.khushu.engine.zakat.FitrPaymentMode.FOOD, decoded.zakat.fitrPaymentMode)
+        assertEquals(
+            com.khushu.engine.zakat.ZakatRules.MixedIrrigationRule.PREDOMINANT,
+            decoded.zakat.mixedIrrigationRule,
+        )
+        assertEquals(
+            com.khushu.engine.zakat.ZakatRules.UshrNisabPolicy.FIVE_WASAQ,
+            decoded.zakat.ushrNisabPolicy,
+        )
+    }
 }

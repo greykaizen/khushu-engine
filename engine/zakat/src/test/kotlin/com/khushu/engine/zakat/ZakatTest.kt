@@ -204,4 +204,201 @@ class ZakatTest {
         assertFailsWith<IllegalArgumentException> { Zakat.mal(ZakatAssets(silverPricePerGram = silverPrice), ZakatParams(nisabSource = NisabSource.GOLD)) } // no gold price
         assertFailsWith<IllegalArgumentException> { Zakat.fitrana(dependents = 0, pricePerKg = 1.0) }
     }
+
+    // ── v1.11: debt policy matrix ──────────────────────────────────────────
+
+    @Test
+    fun hanafiDefaultDeductsImmediateOnlyWhenSplitProvided() {
+        val assets = ZakatAssets(
+            cash = 50_000.0, liabilities = 20_000.0, immediateLiabilities = 5_000.0,
+            silverPricePerGram = silverPrice,
+        )
+        val r = Zakat.mal(assets, ZakatParams(madhab = ZakatMadhab.HANAFI))
+        // 50_000 − 5_000 immediate portion only (Daruliftaa #8395).
+        assertEquals(45_000.0, r.netWealth, 0.01)
+    }
+
+    @Test
+    fun hanafiNullSplitKeepsV110FullDeduction() {
+        // immediateLiabilities == null → the whole liability is immediate
+        // → v1.10 numeric behavior preserved exactly.
+        val legacy = ZakatAssets(cash = 50_000.0, liabilities = 20_000.0, silverPricePerGram = silverPrice)
+        val r = Zakat.mal(legacy, ZakatParams(madhab = ZakatMadhab.HANAFI))
+        assertEquals(30_000.0, r.netWealth, 0.01)
+    }
+
+    @Test
+    fun allDebtsOverrideDeductsEverything() {
+        val assets = ZakatAssets(
+            cash = 50_000.0, liabilities = 20_000.0, immediateLiabilities = 5_000.0,
+            silverPricePerGram = silverPrice,
+        )
+        val r = Zakat.mal(assets, ZakatParams(madhab = ZakatMadhab.HANAFI, debtTreatment = DebtTreatment.ALL_DEBTS))
+        assertEquals(30_000.0, r.netWealth, 0.01)
+        assertTrue(r.notes.any { it.contains("debt policy override") })
+    }
+
+    @Test
+    fun shafiiNeverDeductsEvenWithSplit() {
+        val assets = ZakatAssets(
+            cash = 50_000.0, liabilities = 20_000.0, immediateLiabilities = 5_000.0,
+            silverPricePerGram = silverPrice,
+        )
+        val r = Zakat.mal(assets, ZakatParams(madhab = ZakatMadhab.SHAFII))
+        assertEquals(50_000.0, r.netWealth, 0.01)
+        assertTrue(r.notes.any { it.contains("Shafi") })
+    }
+
+    @Test
+    fun malikiDeductsAsHiddenWealthWithScopeNote() {
+        val assets = ZakatAssets(cash = 50_000.0, liabilities = 20_000.0, silverPricePerGram = silverPrice)
+        val r = Zakat.mal(assets, ZakatParams(madhab = ZakatMadhab.MALIKI))
+        assertEquals(30_000.0, r.netWealth, 0.01)
+        assertTrue(r.notes.any { it.contains("hidden wealth") })
+    }
+
+    @Test
+    fun immediateOnlyWithZeroImmediateDeductsNothing() {
+        val assets = ZakatAssets(
+            cash = 50_000.0, liabilities = 20_000.0, immediateLiabilities = 0.0,
+            silverPricePerGram = silverPrice,
+        )
+        val r = Zakat.mal(assets, ZakatParams(madhab = ZakatMadhab.HANAFI))
+        assertEquals(50_000.0, r.netWealth, 0.01)
+        assertTrue(r.notes.any { it.contains("immediate-due portion is zero") })
+    }
+
+    // ── v1.11: receivable tiers ─────────────────────────────────────────────
+
+    @Test
+    fun mediumAndWeakReceivablesAreExcludedWithNotes() {
+        val r = Zakat.mal(
+            ZakatAssets(
+                cash = 10_000.0, receivables = 1_000.0,
+                mediumReceivables = 800.0, weakReceivables = 500.0,
+                silverPricePerGram = silverPrice,
+            ),
+        )
+        // Only the strong receivable is inside; medium/weak excluded.
+        assertEquals(11_000.0, r.netWealth, 0.01)
+        assertTrue(r.notes.any { it.contains("medium receivables excluded") })
+        assertTrue(r.notes.any { it.contains("weak receivables excluded") })
+    }
+
+    // ── v1.11: share holdings ───────────────────────────────────────────────
+
+    @Test
+    fun tradingSharesAssessedAtFullMarketValue() {
+        val assets = ZakatAssets(
+            cash = 10_000.0, silverPricePerGram = silverPrice,
+            shareHoldings = listOf(ShareHolding(shares = 100, marketValue = 30_000.0, intent = ShareIntent.TRADING)),
+        )
+        val r = Zakat.mal(assets)
+        assertEquals(40_000.0, r.netWealth, 0.01)
+        assertTrue(r.breakdown.any { it.key == AssetKey.EQUITY_TRADING && it.amount == 30_000.0 })
+    }
+
+    @Test
+    fun longTermSharesAssessedOnZakatableFraction() {
+        val assets = ZakatAssets(
+            cash = 10_000.0, silverPricePerGram = silverPrice,
+            shareHoldings = listOf(
+                ShareHolding(
+                    shares = 100, marketValue = 30_000.0, intent = ShareIntent.LONG_TERM,
+                    zakatablePortionFraction = 0.30, basisSource = ZakatableBasisSource.EXACT,
+                ),
+            ),
+        )
+        val r = Zakat.mal(assets)
+        assertEquals(10_000.0 + 30_000.0 * 0.30, r.netWealth, 0.01)
+    }
+
+    @Test
+    fun longTermSharesWithoutFractionFallBackConservatively() {
+        val assets = ZakatAssets(
+            cash = 10_000.0, silverPricePerGram = silverPrice,
+            shareHoldings = listOf(
+                ShareHolding(shares = 100, marketValue = 30_000.0, intent = ShareIntent.LONG_TERM),
+            ),
+        )
+        val r = Zakat.mal(assets)
+        assertEquals(40_000.0, r.netWealth, 0.01)
+        assertTrue(r.notes.any { it.contains("conservative full-value fallback") })
+    }
+
+    @Test
+    fun estimatedFractionIsCitedInNotes() {
+        val assets = ZakatAssets(
+            cash = 10_000.0, silverPricePerGram = silverPrice,
+            shareHoldings = listOf(
+                ShareHolding(
+                    shares = 100, marketValue = 30_000.0, intent = ShareIntent.LONG_TERM,
+                    zakatablePortionFraction = 0.25, basisSource = ZakatableBasisSource.ESTIMATED,
+                ),
+            ),
+        )
+        val r = Zakat.mal(assets)
+        assertTrue(r.notes.any { it.contains("estimated zakatable fraction") })
+    }
+
+    // ── v1.11: jewelry realizable-value basis ───────────────────────────────
+
+    @Test
+    fun wornJewelryUsesBuybackQuoteWhenProvided() {
+        val assets = ZakatAssets(
+            cash = 10_000.0, wornGoldGrams = 100.0,
+            goldPricePerGram = goldPrice, wornGoldPricePerGram = goldPrice * 0.85,
+            silverPricePerGram = silverPrice,
+        )
+        val r = Zakat.mal(assets, ZakatParams(madhab = ZakatMadhab.HANAFI))
+        // Realizable value (buyback) — NOT the market price, NOT the nisab threshold basis.
+        assertEquals(10_000.0 + 100.0 * goldPrice * 0.85, r.netWealth, 0.01)
+        assertEquals(85.0 * goldPrice, r.goldNisabThreshold!!, 0.01)
+    }
+
+    @Test
+    fun realizableBasisWithoutQuoteWarns() {
+        val r = Zakat.mal(
+            ZakatAssets(cash = 10_000.0, wornGoldGrams = 100.0, goldPricePerGram = goldPrice, silverPricePerGram = silverPrice),
+            ZakatParams(madhab = ZakatMadhab.HANAFI, jewelryValuationBasis = JewelryValuationBasis.REALIZABLE_VALUE),
+        )
+        assertTrue(r.notes.any { it.contains("no buyback quote provided") })
+        // Falls back to market price but says so.
+        assertEquals(10_000.0 + 100.0 * goldPrice, r.netWealth, 0.01)
+    }
+
+    // ── v1.11: fitr mode ────────────────────────────────────────────────────
+
+    @Test
+    fun fitrModesProduceSameNumbersButDistinctNotes() {
+        val food = Zakat.fitrana(4, 2.0, ZakatMadhab.HANAFI, FitrPaymentMode.FOOD)
+        val cash = Zakat.fitrana(4, 2.0, ZakatMadhab.HANAFI, FitrPaymentMode.CASH_EQUIVALENT)
+        assertEquals(food.totalForHousehold, cash.totalForHousehold, 0.001)
+        assertEquals(food.totalKg, cash.totalKg, 0.001)
+        assertTrue(food.notes.any { it.contains("majority position") })
+        assertTrue(cash.notes.any { it.contains("cash equivalent") && it.contains("Hanafi") })
+    }
+
+    @Test
+    fun invalidShareInputsRejected() {
+        assertFailsWith<IllegalArgumentException> {
+            ShareHolding(shares = -1, marketValue = 100.0, intent = ShareIntent.TRADING)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            ShareHolding(shares = 1, marketValue = -5.0, intent = ShareIntent.TRADING)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            ShareHolding(shares = 1, marketValue = 100.0, intent = ShareIntent.LONG_TERM, zakatablePortionFraction = 1.5)
+        }
+    }
+
+    @Test
+    fun immediateLiabilitiesValidation() {
+        assertFailsWith<IllegalArgumentException> {
+            ZakatAssets(cash = 1_000.0, liabilities = 100.0, immediateLiabilities = 200.0)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            ZakatAssets(cash = 1_000.0, liabilities = 100.0, immediateLiabilities = -1.0)
+        }
+    }
 }

@@ -259,18 +259,28 @@ public final class com/khushu/store/SettingsSnapshotKt {
 public final class com/khushu/store/ZakatSettingsDto {
 	public static final field Companion Lcom/khushu/store/ZakatSettingsDto$Companion;
 	public fun <init> ()V
-	public fun <init> (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;Z)V
-	public synthetic fun <init> (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZLcom/khushu/engine/zakat/DebtTreatment;Lcom/khushu/engine/zakat/JewelryValuationBasis;Lcom/khushu/engine/zakat/FitrPaymentMode;Lcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;Lcom/khushu/engine/zakat/ZakatRules$UshrNisabPolicy;)V
+	public synthetic fun <init> (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZLcom/khushu/engine/zakat/DebtTreatment;Lcom/khushu/engine/zakat/JewelryValuationBasis;Lcom/khushu/engine/zakat/FitrPaymentMode;Lcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;Lcom/khushu/engine/zakat/ZakatRules$UshrNisabPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/khushu/engine/zakat/ZakatMadhab;
 	public final fun component2 ()Lcom/khushu/engine/zakat/NisabSource;
 	public final fun component3 ()Lcom/khushu/engine/zakat/NisabWeightConvention;
 	public final fun component4 ()Z
-	public final fun copy (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;Z)Lcom/khushu/store/ZakatSettingsDto;
-	public static synthetic fun copy$default (Lcom/khushu/store/ZakatSettingsDto;Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZILjava/lang/Object;)Lcom/khushu/store/ZakatSettingsDto;
+	public final fun component5 ()Lcom/khushu/engine/zakat/DebtTreatment;
+	public final fun component6 ()Lcom/khushu/engine/zakat/JewelryValuationBasis;
+	public final fun component7 ()Lcom/khushu/engine/zakat/FitrPaymentMode;
+	public final fun component8 ()Lcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;
+	public final fun component9 ()Lcom/khushu/engine/zakat/ZakatRules$UshrNisabPolicy;
+	public final fun copy (Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZLcom/khushu/engine/zakat/DebtTreatment;Lcom/khushu/engine/zakat/JewelryValuationBasis;Lcom/khushu/engine/zakat/FitrPaymentMode;Lcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;Lcom/khushu/engine/zakat/ZakatRules$UshrNisabPolicy;)Lcom/khushu/store/ZakatSettingsDto;
+	public static synthetic fun copy$default (Lcom/khushu/store/ZakatSettingsDto;Lcom/khushu/engine/zakat/ZakatMadhab;Lcom/khushu/engine/zakat/NisabSource;Lcom/khushu/engine/zakat/NisabWeightConvention;ZLcom/khushu/engine/zakat/DebtTreatment;Lcom/khushu/engine/zakat/JewelryValuationBasis;Lcom/khushu/engine/zakat/FitrPaymentMode;Lcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;Lcom/khushu/engine/zakat/ZakatRules$UshrNisabPolicy;ILjava/lang/Object;)Lcom/khushu/store/ZakatSettingsDto;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDebtTreatment ()Lcom/khushu/engine/zakat/DebtTreatment;
+	public final fun getFitrPaymentMode ()Lcom/khushu/engine/zakat/FitrPaymentMode;
 	public final fun getHawlComplete ()Z
+	public final fun getJewelryValuationBasis ()Lcom/khushu/engine/zakat/JewelryValuationBasis;
 	public final fun getMadhab ()Lcom/khushu/engine/zakat/ZakatMadhab;
+	public final fun getMixedIrrigationRule ()Lcom/khushu/engine/zakat/ZakatRules$MixedIrrigationRule;
 	public final fun getNisabSource ()Lcom/khushu/engine/zakat/NisabSource;
+	public final fun getUshrNisabPolicy ()Lcom/khushu/engine/zakat/ZakatRules$UshrNisabPolicy;
 	public final fun getWeightConvention ()Lcom/khushu/engine/zakat/NisabWeightConvention;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

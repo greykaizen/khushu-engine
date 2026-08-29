@@ -488,3 +488,95 @@ engine.qibla.audit()            // engine.qibla.relativeSunAngle unchanged
   every visible Kaaba-zenith passage aligns with the qibla bearing.
 - Facade: qiblaShadowVerification memoize/overwrite/clear + cache-key year;
   zakat/qibla facade↔module parity.
+
+## v1.11 additions (2026-08) — zakat deferred-queue topics
+
+Design: `docs/v1.11-zakat-design.md` (second source pass + independent
+cross-check; D1–D9). Everything is ADDITIVE; v1.10 callers get byte-identical
+numbers (the debt split defaults to "all liabilities immediate").
+
+### zakat — debt policy, receivable tiers, shares, jewelry basis
+```
+DebtTreatment { IMMEDIATE_ONLY, ALL_DEBTS, HIDDEN_WEALTH_ONLY, NONE }
+  // ZakatParams.debtTreatment: DebtTreatment? = null → madhab default:
+  //   HANAFI/HANBALI → IMMEDIATE_ONLY (Daruliftaa #8395, Radd al-Muhtar
+  //   2/260–261 preferred position), MALIKI → HIDDEN_WEALTH_ONLY,
+  //   SHAFII → NONE (al-Nawawi). Non-default overrides emit a citation note.
+ZakatAssets.immediateLiabilities: Double? = null
+  // null = entire liability is immediate (v1.10 behavior); explicit split
+  // activates IMMEDIATE_ONLY. Validated 0 ≤ immediate ≤ liabilities.
+ZakatAssets.mediumReceivables / weakReceivables: Double = 0.0
+  // Hanafi tripartite classification: medium (non-trade property proceeds)
+  // and weak (mahr/inheritance) receivables are EXCLUDED with notes;
+  // retro-assessment on collection stays a RequiresScholarReview note.
+ShareHolding(shares, marketValue, intent: ShareIntent{TRADING,LONG_TERM},
+             zakatablePortionFraction: Double? = null,
+             basisSource: ZakatableBasisSource{EXACT,ESTIMATED,CONSERVATIVE_FULL})
+ZakatAssets.shareHoldings: List<ShareHolding> = emptyList()
+  // TRADING → full market value; LONG_TERM → value × fraction; missing
+  // fraction → conservative full-value fallback + warning note (AAOIFI
+  // Std 35 estimation allowance; ESTIMATED fractions are cited in notes).
+ZakatAssets.wornGoldPricePerGram / wornSilverPricePerGram: Double? = null
+  // realizable (jeweler buyback) price for worn jewelry — null = market
+  // price (v1.10 behavior). Nisab thresholds stay market-based.
+JewelryValuationBasis { REALIZABLE_VALUE, MARKET_RETAIL }
+  // ZakatParams.jewelryValuationBasis: null → madhab default (HANAFI →
+  // REALIZABLE_VALUE). Selecting REALIZABLE_VALUE without a quote emits a
+  // "no buyback quote provided" note and falls back to market price.
+AssetKey += EQUITY_TRADING, EQUITY_LONG_TERM, RECEIVABLES_MEDIUM, RECEIVABLES_WEAK
+ZakatMadhabDefaults.debtTreatment(madhab) / .jewelryValuationBasis(madhab)
+```
+
+### zakat — ushr mixed irrigation + nisab policies
+```
+ZakatRules.MixedIrrigationRule { PREDOMINANT, PROPORTIONAL }
+ZakatRules.ushrRate(rule, artificialShare) / ushrDue(harvestValue, rule, artificialShare)
+  // artificialShare ∈ (0, 1) strictly. PREDOMINANT = classical Hanafi rule
+  // (al-Mawsili, al-Ikhtiyar): >0.5 → 5%, <0.5 → 10%, ==0.5 throws
+  // (no predominant method — pick PROPORTIONAL explicitly). PROPORTIONAL =
+  // 0.10 − 0.05·ratio (7.5% at half) — labeled MODERN convention, not the
+  // classical position. Plain Irrigation overloads unchanged.
+ZakatRules.UshrNisabPolicy { NO_NISAB, FIVE_WASAQ }
+ZakatRules.ushrNisabReached(harvestKg, policy)
+ZakatRules.FIVE_WASAQ_KG = 653.0
+  // modern measured conversion of 5 awsuq = 300 saʿ — documented
+  // provenance, not a revealed constant.
+```
+
+### zakat — fitr payment form
+```
+FitrPaymentMode { FOOD, CASH_EQUIVALENT }
+Zakat.fitrana(dependents, pricePerKg, madhab, mode = FOOD)
+FitranaResult.mode + .notes
+  // identical numbers either way; mode drives provenance notes (majority
+  // food position / Hanafi cash-equivalent position + reported precedents).
+```
+
+### store
+```
+ZakatSettingsDto += debtTreatment, jewelryValuationBasis, fitrPaymentMode,
+                    mixedIrrigationRule, ushrNisabPolicy   // all defaulted
+```
+Schema version UNCHANGED (1): v1.10 files decode with the v1.11 defaults;
+v1.11 files decode on v1.10 (unknown keys ignored).
+
+### facade passthroughs
+```
+engine.zakat.ushrRate(rule, artificialShare)
+engine.zakat.ushrDue(harvestValue, rule, artificialShare)
+engine.zakat.ushrNisabReached(harvestKg, policy)
+engine.zakat.fitrana(..., mode = FOOD)   // existing mal/fitrana unchanged
+```
+
+### tests
+- Debt: 4-madhab default matrix + IMMEDIATE_ONLY/ALL_DEBTS/NONE overrides +
+  v1.10 numeric back-compat (null split = full deduction).
+- Receivables: medium/weak exclusion + classification notes.
+- Shares: trading full-value, long-term fraction, conservative fallback,
+  ESTIMATED citation, invalid-input rejection.
+- Jewelry: buyback quote valuation + market-based nisab separation,
+  quote-missing warning.
+- Ushr: predominance (>0.5/<0.5/==0.5-throws), proportional interpolation
+  incl. 7.5% at half, bounds validation, both nisab policies at 653 kg.
+- Fitr: FOOD/CASH_EQUIVALENT same numbers, distinct notes.
+- Store: v1.11 field round-trip; v1.10-file forward-compat with defaults.

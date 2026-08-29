@@ -287,6 +287,90 @@ object ZakatRules {
         return harvestValue * ushrRate(irrigation)
     }
 
+    // ── Mixed irrigation (v1.11, docs/v1.11-zakat-design.md D5) ────────────────
+
+    /** How a mixed-irrigated harvest's rate is resolved. */
+    enum class MixedIrrigationRule {
+        /**
+         * Classical Hanafi rule: whichever method predominates controls
+         * (al-Mawsili, al-Ikhtiyar — "one considers that which predominates
+         * between the two"). An exactly-equal split has no predominant method.
+         */
+        PREDOMINANT,
+        /**
+         * Rate interpolated by artificial-share: 0.10 − 0.05 × ratio (7.5% at
+         * half). A MODERN calculator convention (see myzakatcalc), kept as an
+         * explicitly labeled alternative — not the classical Hanafi position.
+         */
+        PROPORTIONAL,
+    }
+
+    /**
+     * Agricultural nisab policy (docs/v1.11-zakat-design.md D6). Majority
+     * (Shafiʿi/Maliki/Hanbali + Abu Yusuf & Muhammad): five wasaq. Abu
+     * Hanifa: no threshold — ushr is due on any harvest.
+     */
+    enum class UshrNisabPolicy { NO_NISAB, FIVE_WASAQ }
+
+    /**
+     * Five-wasaq threshold as a modern measured conversion: 5 awsuq = 300 saʿ
+     * ≈ 653 kg of staple grain (commonly cited approximation — zakatfinance.com
+     * and contemporary calculators). NOT a revealed constant; hosts assessing
+     * non-grain produce should re-derive per-crop measures with their mufti.
+     */
+    const val FIVE_WASAQ_KG = 653.0
+
+    /**
+     * Rate for a harvest irrigated both naturally and artificially.
+     *
+     * PREDOMINANT: [artificialShare] > 0.5 → 5%, < 0.5 → 10%; exactly 0.5
+     * throws — no method predominates and the engine refuses to guess
+     * (the caller should pick the PROPORTIONAL alternative explicitly).
+     *
+     * @throws InvalidParameterException when [artificialShare] is not strictly
+     * within (0, 1), or equals exactly 0.5 under PREDOMINANT.
+     */
+    fun ushrRate(rule: MixedIrrigationRule, artificialShare: Double): Double {
+        validate(artificialShare > 0.0 && artificialShare < 1.0 && artificialShare.isFinite()) {
+            InvalidParameterException(
+                "artificialShare", "$artificialShare", "must be strictly within (0, 1); use plain Irrigation for single-method fields",
+            )
+        }
+        return when (rule) {
+            MixedIrrigationRule.PREDOMINANT -> when {
+                artificialShare > 0.5 -> 0.05
+                artificialShare < 0.5 -> 0.10
+                else -> throw InvalidParameterException(
+                    "artificialShare", "$artificialShare",
+                    "exactly half: no predominant method (al-Ikhtiyar); select PROPORTIONAL explicitly for the 7.5% convention",
+                )
+            }
+            MixedIrrigationRule.PROPORTIONAL -> 0.10 - 0.05 * artificialShare
+        }
+    }
+
+    /** Ushr on a mixed-irrigation harvest; see [ushrRate]. */
+    fun ushrDue(harvestValue: Double, rule: MixedIrrigationRule, artificialShare: Double): Double {
+        validate(harvestValue >= 0.0) {
+            InvalidParameterException("harvestValue", "$harvestValue", "must be >= 0")
+        }
+        return harvestValue * ushrRate(rule, artificialShare)
+    }
+
+    /**
+     * Nisab gate for ushr: false when the policy is NO_NISAB (Abu Hanifa —
+     * due on any harvest), else the harvest weight must reach 5 wasaq.
+     */
+    fun ushrNisabReached(harvestKg: Double, policy: UshrNisabPolicy): Boolean {
+        validate(harvestKg >= 0.0) {
+            InvalidParameterException("harvestKg", "$harvestKg", "must be >= 0")
+        }
+        return when (policy) {
+            UshrNisabPolicy.NO_NISAB -> true
+            UshrNisabPolicy.FIVE_WASAQ -> harvestKg >= FIVE_WASAQ_KG
+        }
+    }
+
     // ── Rikaz ────────────────────────────────────────────────────────────────
 
     const val RIKAZ_RATE = 0.20

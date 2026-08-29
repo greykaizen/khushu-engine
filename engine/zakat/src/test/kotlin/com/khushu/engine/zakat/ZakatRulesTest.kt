@@ -141,6 +141,58 @@ class ZakatRulesTest {
         assertEquals(10.0, ZakatRules.ushrDue(100.0, ZakatRules.Irrigation.NATURAL), 0.001)
     }
 
+    // ── v1.11: mixed irrigation (al-Ikhtiyar predominance vs modern proportional) ──
+
+    @Test
+    fun predominantRuleFollowsTheDominantMethod() {
+        // Mostly natural → 10%; mostly artificial → 5% (al-Ikhtiyar).
+        assertEquals(0.10, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PREDOMINANT, 0.4))
+        assertEquals(0.10, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PREDOMINANT, 0.49))
+        assertEquals(0.05, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PREDOMINANT, 0.6))
+        assertEquals(0.05, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PREDOMINANT, 0.51))
+    }
+
+    @Test
+    fun predominantRuleRefusesAnExactlyEqualSplit() {
+        // No predominant method at 0.5 — honest refusal, not a guessed 7.5%.
+        assertFailsWith<IllegalArgumentException> {
+            ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PREDOMINANT, 0.5)
+        }
+    }
+
+    @Test
+    fun proportionalRuleInterpolatesAndHitsSevenPointFiveAtHalf() {
+        assertEquals(0.075, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, 0.5), 1e-9)
+        assertEquals(0.10, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, 0.0 + 1e-9), 1e-9)
+        assertEquals(0.05, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, 1.0 - 1e-9), 1e-9)
+        assertEquals(0.08, ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, 0.4), 1e-9)
+        assertEquals(750.0, ZakatRules.ushrDue(10_000.0, ZakatRules.MixedIrrigationRule.PROPORTIONAL, 0.5), 0.001)
+    }
+
+    @Test
+    fun mixedIrrigationBoundsAreValidated() {
+        assertFailsWith<IllegalArgumentException> { ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, 0.0) }
+        assertFailsWith<IllegalArgumentException> { ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, 1.0) }
+        assertFailsWith<IllegalArgumentException> { ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, -0.1) }
+        assertFailsWith<IllegalArgumentException> { ZakatRules.ushrRate(ZakatRules.MixedIrrigationRule.PROPORTIONAL, 1.1) }
+    }
+
+    // ── v1.11: ushr nisab policies ─────────────────────────────────────────
+
+    @Test
+    fun fiveWasaqPolicyGatesAtDocumentedConversion() {
+        assertTrue(ZakatRules.ushrNisabReached(653.0, ZakatRules.UshrNisabPolicy.FIVE_WASAQ))
+        assertTrue(ZakatRules.ushrNisabReached(1_000.0, ZakatRules.UshrNisabPolicy.FIVE_WASAQ))
+        assertTrue(!ZakatRules.ushrNisabReached(652.9, ZakatRules.UshrNisabPolicy.FIVE_WASAQ))
+        assertEquals(653.0, ZakatRules.FIVE_WASAQ_KG)
+    }
+
+    @Test
+    fun noNisabPolicyDueOnAnyHarvest() {
+        assertTrue(ZakatRules.ushrNisabReached(0.5, ZakatRules.UshrNisabPolicy.NO_NISAB))
+        assertTrue(ZakatRules.ushrNisabReached(1.0, ZakatRules.UshrNisabPolicy.NO_NISAB))
+    }
+
     @Test
     fun rikazIsFlatTwentyPercent() {
         assertEquals(200.0, ZakatRules.rikazDue(1_000.0), 0.001)

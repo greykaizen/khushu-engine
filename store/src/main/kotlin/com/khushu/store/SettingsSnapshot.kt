@@ -11,10 +11,14 @@ import com.khushu.engine.prayer.PrayerConfiguration
 import com.khushu.engine.prayer.PrayerOffsets
 import com.khushu.engine.prayer.RoundingPolicy
 import com.khushu.engine.prayer.Shafaq
+import com.khushu.engine.zakat.DebtTreatment
+import com.khushu.engine.zakat.FitrPaymentMode
+import com.khushu.engine.zakat.JewelryValuationBasis
 import com.khushu.engine.zakat.NisabSource
 import com.khushu.engine.zakat.NisabWeightConvention
 import com.khushu.engine.zakat.ZakatMadhab
 import com.khushu.engine.zakat.ZakatParams
+import com.khushu.engine.zakat.ZakatRules
 import kotlinx.serialization.Serializable
 
 /** Schema version of [SettingsSnapshot]; bumped only on breaking field changes. */
@@ -79,6 +83,16 @@ data class ZakatSettingsDto(
     val nisabSource: NisabSource = NisabSource.SILVER,
     val weightConvention: NisabWeightConvention = NisabWeightConvention.COMMON,
     val hawlComplete: Boolean = true,
+    /** Debt-deduction policy; null = madhab default (v1.11). */
+    val debtTreatment: DebtTreatment? = null,
+    /** Worn-jewelry valuation basis; null = madhab default (v1.11). */
+    val jewelryValuationBasis: JewelryValuationBasis? = null,
+    /** Fitr form the household discharges in (v1.11). */
+    val fitrPaymentMode: FitrPaymentMode = FitrPaymentMode.FOOD,
+    /** Mixed-irrigation rate rule (v1.11). */
+    val mixedIrrigationRule: ZakatRules.MixedIrrigationRule = ZakatRules.MixedIrrigationRule.PREDOMINANT,
+    /** Agricultural nisab policy (v1.11). */
+    val ushrNisabPolicy: ZakatRules.UshrNisabPolicy = ZakatRules.UshrNisabPolicy.FIVE_WASAQ,
 )
 
 /** Serializable mirror of the engine's typed [Location]. */
@@ -191,6 +205,8 @@ fun ZakatSettingsDto.toParams(): ZakatParams = ZakatParams(
     nisabSource = nisabSource,
     weightConvention = weightConvention,
     hawlComplete = hawlComplete,
+    debtTreatment = debtTreatment,
+    jewelryValuationBasis = jewelryValuationBasis,
 )
 
 fun ZakatParams.toDto(): ZakatSettingsDto = ZakatSettingsDto(
@@ -198,6 +214,8 @@ fun ZakatParams.toDto(): ZakatSettingsDto = ZakatSettingsDto(
     nisabSource = nisabSource,
     weightConvention = weightConvention,
     hawlComplete = hawlComplete,
+    debtTreatment = debtTreatment,
+    jewelryValuationBasis = jewelryValuationBasis,
 )
 
 fun LocationDto.toLocation(): Location =

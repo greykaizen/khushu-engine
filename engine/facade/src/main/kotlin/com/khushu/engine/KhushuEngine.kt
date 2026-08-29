@@ -493,9 +493,17 @@ class KhushuEngine {
         fun mal(assets: ZakatAssets, params: ZakatParams = ZakatParams()): ZakatResult =
             Zakat.mal(assets, params)
 
-        /** Zakat al-fitr per household: saʿ-based kg convention × staple price. */
-        fun fitrana(dependents: Int, pricePerKg: Double, madhab: ZakatMadhab): FitranaResult =
-            Zakat.fitrana(dependents, pricePerKg, madhab)
+        /**
+         * Zakat al-fitr per household: saʿ-based kg convention × staple price.
+         * [mode] selects the discharge form (FOOD = majority position;
+         * CASH_EQUIVALENT = Hanafi position) and drives provenance notes.
+         */
+        fun fitrana(
+            dependents: Int,
+            pricePerKg: Double,
+            madhab: ZakatMadhab,
+            mode: com.khushu.engine.zakat.FitrPaymentMode = com.khushu.engine.zakat.FitrPaymentMode.FOOD,
+        ): FitranaResult = Zakat.fitrana(dependents, pricePerKg, madhab, mode)
 
         /**
          * Full hawl period for wealth owned since [ownershipStart]: hijri
@@ -536,6 +544,36 @@ class KhushuEngine {
         /** Ushr rate by irrigation: NATURAL (rain-fed) 10%, ARTIFICIAL 5%. */
         fun ushrRate(irrigation: com.khushu.engine.zakat.ZakatRules.Irrigation): Double =
             com.khushu.engine.zakat.ZakatRules.ushrRate(irrigation)
+
+        /**
+         * Ushr rate for a MIXED-irrigation harvest (v1.11): [rule] resolves
+         * the rate from [artificialShare] ∈ (0, 1). PREDOMINANT is the
+         * classical Hanafi rule (al-Ikhtiyar) and refuses an exactly-equal
+         * split; PROPORTIONAL is the labeled modern 7.5%-at-half convention.
+         * @throws com.khushu.engine.core.error.InvalidParameterException for shares outside (0,1) or exactly 0.5 under PREDOMINANT
+         */
+        fun ushrRate(
+            rule: com.khushu.engine.zakat.ZakatRules.MixedIrrigationRule,
+            artificialShare: Double,
+        ): Double = com.khushu.engine.zakat.ZakatRules.ushrRate(rule, artificialShare)
+
+        /** Ushr due on a mixed-irrigation harvest; see [ushrRate]. */
+        fun ushrDue(
+            harvestValue: Double,
+            rule: com.khushu.engine.zakat.ZakatRules.MixedIrrigationRule,
+            artificialShare: Double,
+        ): Double = com.khushu.engine.zakat.ZakatRules.ushrDue(harvestValue, rule, artificialShare)
+
+        /**
+         * Whether the harvest clears the agricultural nisab under [policy]:
+         * NO_NISAB (Abu Hanifa — any harvest) or FIVE_WASAQ (majority —
+         * ~[com.khushu.engine.zakat.ZakatRules.FIVE_WASAQ_KG] kg, a modern
+         * measured conversion, not a revealed constant).
+         */
+        fun ushrNisabReached(
+            harvestKg: Double,
+            policy: com.khushu.engine.zakat.ZakatRules.UshrNisabPolicy,
+        ): Boolean = com.khushu.engine.zakat.ZakatRules.ushrNisabReached(harvestKg, policy)
 
         /** Zakat due on buried treasure (rikaz): 20%. */
         fun rikazDue(treasureValue: Double): Double =
