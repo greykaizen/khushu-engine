@@ -325,7 +325,7 @@ domain is how this regrows the bloat we're escaping.
 |---|---|---|
 | Host-app transplant (Osprey AR) | ⬜ deferred by user decision | `docs/ar-transplant.md` is the seam contract when resumed |
 | Qada/excused-range helpers | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/qada-design.md` citations, then code |
-| Zakat expansion (debt/shares/agri/jewelry/fitr) | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/v1.3-zakat-design.md` citations, then code |
+| Zakat expansion (debt/shares/agri/jewelry/fitr) | 🟨 design locked in `docs/v1.11-zakat-design.md` (second source pass + independent cross-check 2026-08-29; D1–D9 defaults approved) | implementation in flight (v1.11.0) |
 | Observed/moonsighting calendar mode | 🟨 design drafted 2026-08-28 | knowledgeable-reader review of `docs/sighting-mode-design.md`, then code |
 | `NightDivisionMethod` wiring (sunset→fajr vs maghrib→fajr night division) | ⬜ enum kept, intentionally unwired (v1.5.0) | a host needing it + fiqh-source verification for both divisions |
 | Typed `Kilometers`-at-boundary retypes (`travelFacts`, `passagesOver` raw Doubles) | ⬜ breaking → 2.0.0 | host-integration milestone |
