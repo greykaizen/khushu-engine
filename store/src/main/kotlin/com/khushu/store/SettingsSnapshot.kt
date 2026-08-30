@@ -74,6 +74,14 @@ data class CalendarSettingsDto(
     val secondarySide: CalendarConfiguration.Side? = CalendarConfiguration.Side.HIJRI,
     /** Civil system the GREGORIAN side renders (region-based civil calendars); unknown values coerce to the default. */
     val civilCalendar: CivilCalendarType = CivilCalendarType.GREGORIAN,
+    /**
+     * User's global correction for the sighted (moonsighted) calendar mode —
+     * verbatim mirror of [com.khushu.engine.calendar.SightedCalendar.SightedCalendarParams.localOffsetDays]
+     * (−2..+2, applied after anchor derivation; the "everything went south"
+     * escape hatch). Hosts surface it as "Moon sighting offset" alongside the
+     * distinct tabular [hijriOffsetDays]. 0 = unset (tabular-identical).
+     */
+    val localOffsetDays: Int = 0,
 )
 
 /** Serializable mirror of [ZakatParams] — madhab rules and nisab valuation inputs. */
@@ -187,6 +195,23 @@ fun CalendarParams.toDto(): CalendarSettingsDto = CalendarSettingsDto(
     dhulHijjahFirstNine = dhulHijjahFirstNine,
     tasuaAshura = tasuaAshura,
 )
+
+/**
+ * Rebuild the sighted-calendar [com.khushu.engine.calendar.SightedCalendar.SightedCalendarParams]
+ * (announcement list + this DTO's [CalendarSettingsDto.localOffsetDays] and
+ * [CalendarSettingsDto.hijriOffsetDays] as the tabular fallback). Throws the
+ * engine's typed InvalidParameterException when the persisted offset is out
+ * of −2..+2 — same validation as the engine's own constructor, surfaced at
+ * conversion time rather than as a silently-wrong derivation.
+ */
+fun CalendarSettingsDto.toSightedParams(
+    announcements: List<com.khushu.engine.calendar.SightedCalendar.AnnouncedMonthStart>,
+): com.khushu.engine.calendar.SightedCalendar.SightedCalendarParams =
+    com.khushu.engine.calendar.SightedCalendar.SightedCalendarParams(
+        announcements = announcements,
+        localOffsetDays = localOffsetDays,
+        tabularOffsetDays = hijriOffsetDays,
+    )
 
 /**
  * Rebuild the engine's [CalendarConfiguration] (dual-calendar display +

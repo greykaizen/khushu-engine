@@ -202,6 +202,43 @@ class StoreTest {
         }
     }
 
+    // ── v1.15: sighted-calendar localOffsetDays mirror ────────────────────
+
+    @Test
+    fun localOffsetDaysRoundTripsAndBuildsSightedParams() {
+        val s = SettingsSnapshot().copy(
+            calendar = SettingsSnapshot().calendar.copy(
+                hijriOffsetDays = 1,
+                localOffsetDays = -1,
+            ),
+        )
+        assertEquals(s, codec.decode(codec.encode(s)))
+
+        // no announcements → empty sighted params carrying both offsets
+        val p = s.calendar.toSightedParams(announcements = emptyList())
+        assertEquals(-1, p.localOffsetDays)
+        assertEquals(1, p.tabularOffsetDays)
+        assertTrue(p.announcements.isEmpty())
+    }
+
+    @Test
+    fun v114CalendarFileDecodesWithLocalOffsetDefaultZero() {
+        // a file written before the field existed decodes with the additive default
+        val v114Json =
+            """{"calendar":{"hijriOffsetDays":0,"mondaysThursdays":false,"whiteDays":false,"shawwalSix":false,"shaban":false,"dhulHijjahFirstNine":false,"tasuaAshura":false,"primarySide":"GREGORIAN","secondarySide":"HIJRI","civilCalendar":"GREGORIAN"}}"""
+        val decoded = codec.decode(v114Json.encodeToByteArray())
+        assertEquals(0, decoded.calendar.localOffsetDays)
+    }
+
+    @Test
+    fun outOfRangeLocalOffsetDaysFailsWithTypeEngineErrorAtConversion() {
+        // codec coercion can't synthesize −3 from JSON ints, so construct directly
+        val bad = SettingsSnapshot().calendar.copy(localOffsetDays = -3)
+        assertFailsWith<com.khushu.engine.core.error.InvalidParameterException> {
+            bad.toSightedParams(announcements = emptyList())
+        }
+    }
+
     // ── v1.11: zakat policy fields ─────────────────────────────────────────
 
     @Test
