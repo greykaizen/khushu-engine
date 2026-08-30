@@ -229,6 +229,9 @@ class KhushuEngine {
         val moon = MoonApi()
         val hilal = HilalApi()
 
+        /** Equinoxes and solstices for a year (cosinekitty Seasons passthrough). */
+        fun seasons(year: Int): com.khushu.engine.astronomy.Seasons = Astronomy.seasons(year)
+
         class SunApi internal constructor() {
             /** Topocentric solar position (azimuth/altitude/declination/right ascension, degrees) at one instant. */
             fun position(location: Location, instant: Instant): SolarPosition =
@@ -256,6 +259,9 @@ class KhushuEngine {
 
             /** The altitude conventions (degrees) used by [events]/[phases]. */
             fun conventions(): AltitudeConventions = Astronomy.sun.conventions()
+
+            /** Provenance of the astronomy module's models (ephemeris, refraction, aberration). */
+            fun audit(): com.khushu.engine.astronomy.AstroAudit = Astronomy.sun.audit()
 
             /** One-pass monthly solar track (rise/set + optional sampled sky path) for AR/sky UIs. */
             fun track(

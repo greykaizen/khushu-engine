@@ -24,7 +24,6 @@ import io.github.cosinekitty.astronomy.searchRiseSet
 internal object Ephemeris {
 
     const val AU_KM = 149_597_870.7
-    const val SYNODIC_MONTH_DAYS = 29.530588853
 
     data class HorizontalPosition(
         val azimuthDeg: Double,

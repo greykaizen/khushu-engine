@@ -211,6 +211,29 @@ references, never gospel (AGENTS.md §2).
   (three donor sun-position codes) — reconcile during astronomy port;
   `AstroEphemerisEngine`/cosinekitty presumed authoritative.
 
+### D21. Qibla antipode longitude normalization bug (found by v1.13 validation)
+- **Donor→v1.10 engine**: `shadowVerification` computed the Kaaba's antipode
+  as `IEEEremainder(lon + 180, 360) − 180`, producing **−320.17°** for the
+  Kaaba (outside longitude range). The wrapped call path tolerated the
+  out-of-range longitude silently — the events were still computed from
+  trig functions that are periodic, masking the defect.
+- **v1.13 engine**: antipode is `IEEEremainder(lon + 180, 360)` (already
+  normalized to [−180, 180]). The fix was *forced* by the new
+  `SubsolarAlignment.passagesOver` input validation (typed
+  InvalidParameterException on out-of-range longitudes) — the validation
+  caught a real latent bug in a locked module on its first full test run.
+
+### D22. Hilal moon-age fabrication removed (D7 enforcement)
+- **Donor→v1.12 engine**: `HilalEngine` fell back to `conjunction =
+  sunset − 24h` when the conjunction search failed, fabricating
+  `moonAgeHours = 24` — contradicting D7 ("uncomputable events stay
+  explicit") and the MoonState no-fabrication contract.
+- **v1.13 engine**: unresolvable conjunctions throw typed
+  `NoResultException`. With a 31-day search window over a 29.53-day
+  synodic cycle this is a can't-happen guard; the non-null `Int` field
+  keeps the published API additive (nullable retyping parked for 2.0.0
+  with the other breaking cleanups).
+
 ## Regenerating goldens
 Both dumpers are committed under `tools/golden-dumper/` as standalone Gradle
 projects that replicate the donor's exact call path and dependency set

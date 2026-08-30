@@ -41,7 +41,7 @@ repositories {
 
 dependencies {
     // The facade pulls every module transitively — one line is enough.
-    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.12.0")
+    implementation("com.github.greykaizen.khushu-engine:engine-facade:1.13.0")
 }
 ```
 
@@ -54,7 +54,7 @@ cd khushu-engine && ./gradlew publishToMavenLocal
 
 ```kotlin
 repositories { mavenLocal(); mavenCentral(); maven { url = uri("https://jitpack.io") } }
-dependencies { implementation("com.khushu:engine-facade:1.12.0") }
+dependencies { implementation("com.khushu:engine-facade:1.13.0") }
 ```
 
 ### Composite build (developing the engine alongside your app)
@@ -64,7 +64,7 @@ dependencies { implementation("com.khushu:engine-facade:1.12.0") }
 includeBuild("/path/to/khushu-engine")
 ```
 
-then depend on `com.khushu:engine-facade:1.12.0` — Gradle substitutes the
+then depend on `com.khushu:engine-facade:1.13.0` — Gradle substitutes the
 local project.
 
 ## Usage
@@ -119,8 +119,8 @@ re-implementing persistence. Built on Jetpack DataStore + kotlinx-serialization
 JSON; pure JVM compatible, so it works on Android and plain JVM hosts alike.
 
 ```kotlin
-implementation("com.github.greykaizen.khushu-engine:store:1.12.0")   // JitPack
-// or mavenLocal: implementation("com.khushu:store:1.12.0")
+implementation("com.github.greykaizen.khushu-engine:store:1.13.0")   // JitPack
+// or mavenLocal: implementation("com.khushu:store:1.13.0")
 ```
 
 ```kotlin

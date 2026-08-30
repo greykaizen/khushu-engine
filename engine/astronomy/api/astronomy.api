@@ -516,6 +516,7 @@ public final class com/khushu/engine/astronomy/SolarPosition {
 
 public final class com/khushu/engine/astronomy/SubsolarAlignment {
 	public static final field INSTANCE Lcom/khushu/engine/astronomy/SubsolarAlignment;
+	public static final field MAX_SUNSUPPORTED_LAT_DEG D
 	public final fun passagesOver (DDID)Ljava/util/List;
 	public static synthetic fun passagesOver$default (Lcom/khushu/engine/astronomy/SubsolarAlignment;DDIDILjava/lang/Object;)Ljava/util/List;
 }

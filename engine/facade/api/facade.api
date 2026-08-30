@@ -157,6 +157,7 @@ public final class com/khushu/engine/KhushuEngine$AstronomyApi {
 	public final fun getHilal ()Lcom/khushu/engine/KhushuEngine$AstronomyApi$HilalApi;
 	public final fun getMoon ()Lcom/khushu/engine/KhushuEngine$AstronomyApi$MoonApi;
 	public final fun getSun ()Lcom/khushu/engine/KhushuEngine$AstronomyApi$SunApi;
+	public final fun seasons (I)Lcom/khushu/engine/astronomy/Seasons;
 }
 
 public final class com/khushu/engine/KhushuEngine$AstronomyApi$HilalApi {
@@ -181,6 +182,7 @@ public final class com/khushu/engine/KhushuEngine$AstronomyApi$MoonApi {
 }
 
 public final class com/khushu/engine/KhushuEngine$AstronomyApi$SunApi {
+	public final fun audit ()Lcom/khushu/engine/astronomy/AstroAudit;
 	public final fun conventions ()Lcom/khushu/engine/astronomy/AltitudeConventions;
 	public final fun dayLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
 	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;

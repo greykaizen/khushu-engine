@@ -605,3 +605,55 @@ Additive only: golden/property tests unchanged and green (7 new validation
 tests); API diff is data-class constructor shifts + defaults, source-compatible.
 `engine:core` dependency added for the shared error model (mushaf now uses
 the same InvalidParameterException as zakat/prayer/qibla).
+
+## v1.13 additions (2026-08) — astronomy + core cohesion round
+
+Module review findings fixed (audit: 10 findings; the last unreviewed
+engine module pair).
+
+### astronomy — boundary validation + error model
+```
+Epoch envelope: instants/years outside 1700-01-01…2200-01-01 are rejected
+  up front with InvalidParameterException (cosinekitty's validated range,
+  pinned by the engine) — applies to sun/moon position/state, nextPhase,
+  eclipses, distanceExtremes, seasons(1700..2199).
+moon.phaseName: NaN/∞ rejected — previously NaN silently classified as
+  "New Moon".
+moon.track(pathSamplesPerDay): validated > 1 REGARDLESS of includePath —
+  previously the same call threw or succeeded depending on an unrelated flag.
+moon.distanceExtremes: scan window capped at 50 years (resource guard);
+  out-of-envelope endpoints rejected.
+SubsolarAlignment.passagesOver: targetLat must be finite within ±23.44
+  (subsolar envelope — out-of-range targets deterministically yield
+  nothing, so they are rejected), targetLon within [-180,180],
+  toleranceDeg finite > 0, year 1700..2199.
+Upstream wrapping: cosinekitty failures surface as typed
+  UpstreamComputationException (calendar-module precedent) — raw library
+  exceptions no longer cross the capability boundary.
+sun.events: hardcoded altitude literals replaced by the pinned
+  AltitudeConventions table — events() and phases() can never drift.
+```
+
+### bug fixes surfaced by the new validation
+```
+Qibla.shadowVerification: Kaaba-antipode longitude was computed as
+  IEEEremainder(lon+180, 360) − 180 → −320.17° (out of range, latent
+  donor bug masked by periodic trig). Now IEEEremainder(lon+180, 360).
+  Divergence D21.
+HilalReport.moonAgeHours: conjunction-search failure no longer fabricates
+  sunset−24h as the conjunction (D7); unresolvable → typed
+  NoResultException. Divergence D22.
+```
+
+### facade
+```
+engine.astronomy.seasons(year)    // newly delegated (was capability-only)
+engine.astronomy.sun.audit()      // newly delegated (qibla.audit parity)
+```
+
+### tests
+- AstronomyValidationTest (9): envelope rejections, phaseName NaN,
+  nextPhase quarters, track sample-count flag-independence, extremes
+  window caps, seasons bounds, hilal nights, subsolar target validation
+  (incl. Kaaba + antipode pass), no-fabrication invariant.
+- Core validation was already exemplary (ErrorModelTest/LocationTest).

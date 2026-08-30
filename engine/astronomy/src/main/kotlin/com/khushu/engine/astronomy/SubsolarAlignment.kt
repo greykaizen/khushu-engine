@@ -1,5 +1,7 @@
 package com.khushu.engine.astronomy
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import com.khushu.engine.core.geo.Location
 import java.time.Instant
 import java.time.LocalDate
@@ -10,8 +12,17 @@ import java.time.ZoneOffset
  * subsolar point stands directly over geographic coordinates (targetLat,
  * targetLon) — i.e., the sun is at zenith there. Purely astronomical;
  * domains compose their own meanings on top.
+ *
+ * Input contract (v1.13): |targetLatDeg| ≤ 23.44 (Tropic envelope — the
+ * subsolar point never leaves it, so out-of-range targets deterministically
+ * yield an empty list and are rejected instead); targetLon ∈ [-180, 180];
+ * toleranceDeg finite and > 0; year within the ephemeris envelope. NaN
+ * inputs are rejected — never silently empty.
  */
 object SubsolarAlignment {
+
+    /** Tropics of Cancer/Capricorn — the subsolar latitude envelope. */
+    const val MAX_SUNSUPPORTED_LAT_DEG = 23.44
 
     data class ZenithPassage(val instant: Instant, val separationDeg: Double)
 
@@ -21,6 +32,18 @@ object SubsolarAlignment {
         year: Int,
         toleranceDeg: Double = 1.0,
     ): List<ZenithPassage> {
+        validate(targetLatDeg.isFinite() && targetLatDeg >= -MAX_SUNSUPPORTED_LAT_DEG && targetLatDeg <= MAX_SUNSUPPORTED_LAT_DEG) {
+            InvalidParameterException("targetLatDeg", "$targetLatDeg", "must be finite within ±23.44 (subsolar envelope)")
+        }
+        validate(targetLonDeg.isFinite() && targetLonDeg >= -180.0 && targetLonDeg <= 180.0) {
+            InvalidParameterException("targetLonDeg", "$targetLonDeg", "must be finite within [-180, 180]")
+        }
+        validate(toleranceDeg.isFinite() && toleranceDeg > 0.0) {
+            InvalidParameterException("toleranceDeg", "$toleranceDeg", "must be finite and > 0")
+        }
+        validate(year in 1700..2199) {
+            InvalidParameterException("year", "$year", "must be within 1700..2199 (cosinekitty envelope)")
+        }
         val kLatRad = Math.toRadians(targetLatDeg)
         val kLonRad = Math.toRadians(targetLonDeg)
         val kx = kotlin.math.cos(kLatRad) * kotlin.math.cos(kLonRad)

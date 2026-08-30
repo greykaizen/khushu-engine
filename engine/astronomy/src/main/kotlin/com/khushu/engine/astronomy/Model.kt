@@ -155,6 +155,8 @@ data class HilalReport(
     val moonsetEpochMs: Long?,
     val bestTimeEpochMs: Long,
     val lagMinutes: Int,
+    /** Hours since the most recent conjunction. Unresolvable conjunctions fail with
+     *  NoResultException instead of fabricating an age (D7; non-null keeps the v1.x API additive). */
     val moonAgeHours: Int,
     val arcvDeg: Double,
     val elongationDeg: Double,

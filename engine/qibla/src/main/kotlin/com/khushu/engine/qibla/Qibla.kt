@@ -59,9 +59,12 @@ object Qibla {
      */
     fun shadowVerification(year: Int, location: Location): List<QiblaShadowEvent> {
         val kaaba = SubsolarAlignment.passagesOver(KAABA_LATITUDE_DEG, KAABA_LONGITUDE_DEG, year)
-        // Antipode of the Kaaba.
+        // Antipode of the Kaaba: negate latitude, flip longitude ±180.
+        // (v1.13: IEEEremainder already normalizes to [-180, 180] — the old
+        // `… - 180.0` post-subtract produced -320° for the Kaaba and was
+        // caught by SubsolarAlignment's new range validation.)
         val antiLat = -KAABA_LATITUDE_DEG
-        val antiLon = Math.IEEEremainder(KAABA_LONGITUDE_DEG + 180.0, 360.0) - 180.0
+        val antiLon = Math.IEEEremainder(KAABA_LONGITUDE_DEG + 180.0, 360.0)
         val antipode = SubsolarAlignment.passagesOver(antiLat, antiLon, year)
 
         val out = mutableListOf<QiblaShadowEvent>()

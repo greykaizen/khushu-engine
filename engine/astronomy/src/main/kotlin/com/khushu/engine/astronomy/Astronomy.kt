@@ -6,6 +6,7 @@ import com.khushu.engine.astronomy.internal.MoonTrackSolver
 import com.khushu.engine.astronomy.internal.HilalEngine
 import com.khushu.engine.astronomy.internal.LunarOrientationMath
 import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.UpstreamComputationException
 import com.khushu.engine.core.error.validate
 import com.khushu.engine.core.geo.Location
 import io.github.cosinekitty.astronomy.Body
@@ -19,12 +20,47 @@ import java.time.ZoneId
  * (`astronomy.sun.position(...)`); calculators stay internal.
  *
  * All functions are deterministic over explicit arguments — no Clock, no globals.
+ *
+ * Error model (v1.13): cosinekitty is wrapped — upstream failures surface as
+ * typed [UpstreamComputationException] (calendar-module precedent), never as
+ * raw library exceptions. The supported epoch range is 1700-01-01T00:00Z …
+ * 2200-01-01T00:00Z (cosinekitty's validated envelope); instants outside it
+ * are rejected up front with [InvalidParameterException] instead of silently
+ * degrading.
  */
 object Astronomy {
 
+    /** Cosinekitty's supported envelope; we pin the same range explicitly. */
+    internal val EPOCH_MIN_MS: Long = -8520345600000L  // 1700-01-01T00:00:00Z
+    internal val EPOCH_MAX_MS: Long = 7258118400000L   // 2200-01-01T00:00:00Z
+
+    internal fun requireEpochMs(epochMs: Long, name: String) {
+        if (epochMs < EPOCH_MIN_MS || epochMs > EPOCH_MAX_MS) {
+            throw InvalidParameterException(
+                name,
+                java.time.Instant.ofEpochMilli(epochMs).toString(),
+                "outside the supported ephemeris range 1700-01-01…2200-01-01 (cosinekitty envelope)",
+            )
+        }
+    }
+
+    internal inline fun <T> upstream(operation: String, block: () -> T): T = try {
+        block()
+    } catch (e: com.khushu.engine.core.error.KhushuInputFailure) {
+        throw e
+    } catch (e: com.khushu.engine.core.error.KhushuComputationFailure) {
+        throw e
+    } catch (e: Exception) {
+        throw UpstreamComputationException("cosinekitty $operation failed: ${e.message}", e)
+    }
+
     object sun {
         fun position(location: Location, instant: Instant): SolarPosition {
-            val p = Ephemeris.horizontalPosition(Body.Sun, instant.toEpochMilli(), location)
+            val epochMs = instant.toEpochMilli()
+            requireEpochMs(epochMs, "instant")
+            val p = upstream("sun.position") {
+                Ephemeris.horizontalPosition(Body.Sun, epochMs, location)
+            }
             return SolarPosition(
                 azimuthDeg = p.azimuthDeg,
                 altitudeDeg = p.altitudeDeg,
@@ -109,10 +145,13 @@ object Astronomy {
         /**
          * Canonical solar day schedule: twilight tiers (astronomical/nautical/civil),
          * blue/golden hour anchors, sunrise, solar noon, sunset — chronological.
+         * Thresholds come from the pinned [AltitudeConventions] table — the same
+         * table [phases] uses, so the two APIs can never drift apart.
          */
         fun events(location: Location, date: LocalDate, zoneId: ZoneId): SolarEvents {
             val startMs = MoonTrackSolver.dayStartEpochMs(date, zoneId)
             val endMs = MoonTrackSolver.dayStartEpochMs(date.plusDays(1), zoneId)
+            val c = AltitudeConventions()
 
             fun crossing(degrees: Double, rising: Boolean): SolarEvent? =
                 Ephemeris.altitudeCrossingMs(Body.Sun, rising, startMs, degrees, location)
@@ -121,36 +160,43 @@ object Astronomy {
 
             val noon = Ephemeris.hourAngleTransitMs(Body.Sun, startMs, location)
             val events = buildList {
-                crossing(-18.0, true)?.let { add(it) }
-                crossing(-12.0, true)?.let { add(it) }
-                crossing(-6.0, true)?.let { add(it) }
-                crossing(-4.0, true)?.let { add(SolarEvent(SolarEventType.BLUE_HOUR_MORNING_START, it.epochMs)) }
-                crossing(6.0, true)?.let { add(SolarEvent(SolarEventType.GOLDEN_HOUR_MORNING_END, it.epochMs)) }
-                crossing(-0.833, true)?.let { add(SolarEvent(SolarEventType.SUNRISE, it.epochMs)) }
+                crossing(c.astronomicalTwilightDeg, true)?.let { add(it) }
+                crossing(c.nauticalTwilightDeg, true)?.let { add(it) }
+                crossing(c.civilTwilightDeg, true)?.let { add(it) }
+                crossing(c.blueHourUpperDeg, true)?.let { add(SolarEvent(SolarEventType.BLUE_HOUR_MORNING_START, it.epochMs)) }
+                crossing(c.goldenHourUpperDeg, true)?.let { add(SolarEvent(SolarEventType.GOLDEN_HOUR_MORNING_END, it.epochMs)) }
+                crossing(c.sunriseSunsetDeg, true)?.let { add(SolarEvent(SolarEventType.SUNRISE, it.epochMs)) }
                 if (noon < endMs) add(SolarEvent(SolarEventType.SOLAR_NOON, noon))
-                crossing(-0.833, false)?.let { add(SolarEvent(SolarEventType.SUNSET, it.epochMs)) }
-                crossing(6.0, false)?.let { add(SolarEvent(SolarEventType.GOLDEN_HOUR_EVENING_START, it.epochMs)) }
-                crossing(-4.0, false)?.let { add(SolarEvent(SolarEventType.BLUE_HOUR_EVENING_START, it.epochMs)) }
-                crossing(-6.0, false)?.let { add(it) }
-                crossing(-12.0, false)?.let { add(it) }
-                crossing(-18.0, false)?.let { add(it) }
+                crossing(c.sunriseSunsetDeg, false)?.let { add(SolarEvent(SolarEventType.SUNSET, it.epochMs)) }
+                crossing(c.goldenHourUpperDeg, false)?.let { add(SolarEvent(SolarEventType.GOLDEN_HOUR_EVENING_START, it.epochMs)) }
+                crossing(c.blueHourUpperDeg, false)?.let { add(SolarEvent(SolarEventType.BLUE_HOUR_EVENING_START, it.epochMs)) }
+                crossing(c.civilTwilightDeg, false)?.let { add(it) }
+                crossing(c.nauticalTwilightDeg, false)?.let { add(it) }
+                crossing(c.astronomicalTwilightDeg, false)?.let { add(it) }
             }.sortedBy { it.epochMs }
             return SolarEvents(date, events)
         }
 
-        private fun typeFor(degrees: Double, rising: Boolean): SolarEventType = when {
-            degrees == -18.0 && rising -> SolarEventType.ASTRONOMICAL_DAWN
-            degrees == -12.0 && rising -> SolarEventType.NAUTICAL_DAWN
-            degrees == -6.0 && rising -> SolarEventType.CIVIL_DAWN
-            degrees == -18.0 -> SolarEventType.ASTRONOMICAL_DUSK
-            degrees == -12.0 -> SolarEventType.NAUTICAL_DUSK
-            else -> SolarEventType.CIVIL_DUSK
+        private fun typeFor(degrees: Double, rising: Boolean): SolarEventType {
+            val c = AltitudeConventions()
+            return when {
+                degrees == c.astronomicalTwilightDeg && rising -> SolarEventType.ASTRONOMICAL_DAWN
+                degrees == c.nauticalTwilightDeg && rising -> SolarEventType.NAUTICAL_DAWN
+                degrees == c.civilTwilightDeg && rising -> SolarEventType.CIVIL_DAWN
+                degrees == c.astronomicalTwilightDeg -> SolarEventType.ASTRONOMICAL_DUSK
+                degrees == c.nauticalTwilightDeg -> SolarEventType.NAUTICAL_DUSK
+                else -> SolarEventType.CIVIL_DUSK
+            }
         }
     }
 
     object moon {
         fun position(location: Location, instant: Instant): LunarPosition {
-            val p = Ephemeris.horizontalPosition(Body.Moon, instant.toEpochMilli(), location)
+            val epochMs = instant.toEpochMilli()
+            requireEpochMs(epochMs, "instant")
+            val p = upstream("moon.position") {
+                Ephemeris.horizontalPosition(Body.Moon, epochMs, location)
+            }
             return LunarPosition(
                 azimuthDeg = p.azimuthDeg,
                 altitudeDeg = p.altitudeDeg,
@@ -162,8 +208,11 @@ object Astronomy {
 
         fun state(location: Location, instant: Instant): MoonState {
             val epochMs = instant.toEpochMilli()
-            val phaseAngle = Ephemeris.moonPhaseAngleDeg(epochMs)
-            val conjunctionMs = Ephemeris.nextMoonPhaseMs(0.0, epochMs - 30L * 86_400_000L, 31.0)
+            requireEpochMs(epochMs, "instant")
+            val phaseAngle = upstream("moon.state") { Ephemeris.moonPhaseAngleDeg(epochMs) }
+            val conjunctionMs = upstream("moon.state") {
+                Ephemeris.nextMoonPhaseMs(0.0, epochMs - 30L * 86_400_000L, 31.0)
+            }
             return MoonState(
                 phaseAngleDeg = phaseAngle,
                 illuminationFraction = Ephemeris.moonIlluminationFraction(epochMs),
@@ -182,8 +231,10 @@ object Astronomy {
             validate(targetPhaseDeg in listOf(0.0, 90.0, 180.0, 270.0)) {
                 InvalidParameterException("targetPhaseDeg", "$targetPhaseDeg", "must be one of 0/90/180/270")
             }
-            return Ephemeris.nextMoonPhaseMs(targetPhaseDeg, after.toEpochMilli())
-                ?.let { UpcomingMoonPhase(targetPhaseDeg, it) }
+            requireEpochMs(after.toEpochMilli(), "after")
+            return upstream("nextPhase") {
+                Ephemeris.nextMoonPhaseMs(targetPhaseDeg, after.toEpochMilli())
+            }?.let { UpcomingMoonPhase(targetPhaseDeg, it) }
         }
 
         fun nextNewMoon(after: Instant): UpcomingMoonPhase? = nextPhase(0.0, after)
@@ -211,6 +262,13 @@ object Astronomy {
             includePath: Boolean = false,
             pathSamplesPerDay: Int = 48,
         ): MonthlyMoonTrack {
+            validate(pathSamplesPerDay > 1) {
+                InvalidParameterException(
+                    "pathSamplesPerDay", "$pathSamplesPerDay",
+                    "must be > 1 — validated regardless of includePath so a call never " +
+                        "succeeds silently with one flag and throws with another",
+                )
+            }
             val (days, path) = MoonTrackSolver.solve(location, yearMonth, zoneId, includePath, pathSamplesPerDay)
             return MonthlyMoonTrack(days = days, pathPoints = path)
         }
@@ -219,22 +277,29 @@ object Astronomy {
          * Canonical phase-band table pinned by donor tests; shared by every consumer.
          * Band edges: each named band is INCLUSIVE of its lower bound and EXCLUSIVE
          * of its upper bound except where noted; angles outside 15°..<345° map to
-         * "New Moon" (i.e. New Moon owns [345,360)+[0,15)).
+         * "New Moon" (i.e. New Moon owns [345,360)+[0,15)). NaN/∞ are rejected —
+         * never silently classified.
          */
-        fun phaseName(phaseAngleDeg: Double): String = when {
-            phaseAngleDeg in 15.0..75.0 -> "Waxing Crescent"
-            phaseAngleDeg in 75.0..105.0 -> "First Quarter"
-            phaseAngleDeg in 105.0..165.0 -> "Waxing Gibbous"
-            phaseAngleDeg in 165.0..195.0 -> "Full Moon"
-            phaseAngleDeg in 195.0..255.0 -> "Waning Gibbous"
-            phaseAngleDeg in 255.0..285.0 -> "Third Quarter"
-            phaseAngleDeg in 285.0..345.0 -> "Waning Crescent"
-            else -> "New Moon"
+        fun phaseName(phaseAngleDeg: Double): String {
+            if (!phaseAngleDeg.isFinite()) {
+                throw InvalidParameterException("phaseAngleDeg", "$phaseAngleDeg", "must be finite")
+            }
+            return when {
+                phaseAngleDeg in 15.0..75.0 -> "Waxing Crescent"
+                phaseAngleDeg in 75.0..105.0 -> "First Quarter"
+                phaseAngleDeg in 105.0..165.0 -> "Waxing Gibbous"
+                phaseAngleDeg in 165.0..195.0 -> "Full Moon"
+                phaseAngleDeg in 195.0..255.0 -> "Waning Gibbous"
+                phaseAngleDeg in 255.0..285.0 -> "Third Quarter"
+                phaseAngleDeg in 285.0..345.0 -> "Waning Crescent"
+                else -> "New Moon"
+            }
         }
 
         /**
          * Geocentric lunar distance extremes (perigee/apogee) within the scanned
          * window [from, to]. Coarse daily sampling + parabolic refinement.
+         * @throws InvalidParameterException when the window exceeds 50 years (resource guard)
          */
         fun distanceExtremes(from: Instant, to: Instant): List<MoonDistanceExtreme> {
             val fromMs = from.toEpochMilli()
@@ -242,13 +307,22 @@ object Astronomy {
             validate(toMs > fromMs) {
                 InvalidParameterException("from/to", "$from..$to", "to must be after from (empty scan window)")
             }
+            requireEpochMs(fromMs, "from")
+            requireEpochMs(toMs, "to")
+            validate(toMs - fromMs <= 50L * 366 * 86_400_000L) {
+                InvalidParameterException(
+                    "from/to", "$from..$to",
+                    "scan window exceeds 50 years — request a smaller window (resource guard)",
+                )
+            }
             val auKm = Ephemeris.AU_KM
-            fun dist(tMs: Long): Double =
+            fun dist(tMs: Long): Double = upstream("geoVector") {
                 io.github.cosinekitty.astronomy.geoVector(
                     Body.Moon,
                     Ephemeris.time(tMs),
                     io.github.cosinekitty.astronomy.Aberration.Corrected,
-                ).length() * auKm
+                ).length()
+            } * auKm
 
             data class Sample(val t: Long, val d: Double)
             val stepMs = 6L * 3_600_000
@@ -304,8 +378,10 @@ object Astronomy {
 
         /** Next global solar eclipse at or after [after] (geocentric facts). */
         fun nextGlobalSolarEclipse(after: Instant): GlobalSolarEclipse? {
-            val info = io.github.cosinekitty.astronomy.searchGlobalSolarEclipse(Ephemeris.time(after.toEpochMilli()))
-                ?: return null
+            requireEpochMs(after.toEpochMilli(), "after")
+            val info = upstream("searchGlobalSolarEclipse") {
+                io.github.cosinekitty.astronomy.searchGlobalSolarEclipse(Ephemeris.time(after.toEpochMilli()))
+            } ?: return null
             return GlobalSolarEclipse(
                 kind = eclipseKind(info.kind),
                 peakEpochMs = info.peak.toMillisecondsSince1970(),
@@ -317,8 +393,10 @@ object Astronomy {
 
         /** Next lunar eclipse visible somewhere on Earth at or after [after]. */
         fun nextLunarEclipse(after: Instant): LunarEclipse? {
-            val info = io.github.cosinekitty.astronomy.searchLunarEclipse(Ephemeris.time(after.toEpochMilli()))
-                ?: return null
+            requireEpochMs(after.toEpochMilli(), "after")
+            val info = upstream("searchLunarEclipse") {
+                io.github.cosinekitty.astronomy.searchLunarEclipse(Ephemeris.time(after.toEpochMilli()))
+            } ?: return null
             return LunarEclipse(
                 kind = eclipseKind(info.kind),
                 peakEpochMs = info.peak.toMillisecondsSince1970(),
@@ -336,7 +414,10 @@ object Astronomy {
 
     /** Equinoxes and solstices for [year] — passthrough over cosinekitty Seasons. */
     fun seasons(year: Int): com.khushu.engine.astronomy.Seasons {
-        val info = io.github.cosinekitty.astronomy.seasons(year)
+        validate(year in 1700..2199) {
+            InvalidParameterException("year", "$year", "must be within 1700..2199 (cosinekitty envelope)")
+        }
+        val info = upstream("seasons") { io.github.cosinekitty.astronomy.seasons(year) }
         return com.khushu.engine.astronomy.Seasons(
             marchEquinox = info.marchEquinox.toMillisecondsSince1970().let(Instant::ofEpochMilli),
             juneSolstice = info.juneSolstice.toMillisecondsSince1970().let(Instant::ofEpochMilli),
