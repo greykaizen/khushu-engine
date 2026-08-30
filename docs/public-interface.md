@@ -723,3 +723,35 @@ solarDayReference rows verified-as-fallback and regenerated (corrections
   sunset-variant ordering/monotonicity, exact ⅔ for both methods.
 - QiblaTest: Kohat bearing vs Muwaqqit 254.6° cross-check.
 - Golden: 30 solarDayReference rows regenerated post-D23.
+
+## v1.15 additions (2026-08) — observed (moonsighted) calendar mode
+
+Un-gated per the operational model: astronomy certifies plausibility
+(`hilal.visibility`), humans confirm/deny on the moon-track path, the
+committee's announcement records the outcome, and THIS derives every date of
+that month from the anchor. The engine never decides a sighting; no
+networking, no persistence, no fiqh verdicts (design:
+docs/sighting-mode-design.md).
+
+```
+SightedCalendar.AnnouncedMonthStart(hijriYear, hijriMonth, observedFirstDay, authority)
+SightedCalendar.SightedCalendarParams(
+    announcements,                          // host-supplied, by value
+    localOffsetDays = 0,                    // global user correction, applied LAST (−2..+2) — the
+                                            // "everything went south" escape hatch
+    tabularOffsetDays = 0,                  // fallback-month offset (CalendarParams domain)
+)                                           // contradictions throw InvalidParameterException
+SightedCalendar.hijriSighted(civilDate, params): SightedHijriDate
+  // governing anchor = latest announcement at/before the (offset-adjusted)
+  // date, bounded by the next anchor or 30 days; unannounced → tabular.
+  // SightedHijriDate carries fromAnnouncement + anchoredBy provenance.
+SightedCalendar.civilOf(year, month, day, params): LocalDate   // inverse mapping
+SightedCalendar.eventsSighted(range, params): List<Pair<LocalDate, EventDefinition>>
+  // built-in events keyed on each day's SIGHTED hijri date (≤400-day ranges)
+```
+ObservanceContext/ObservedDateOverride (v1.8) remain for per-event host
+statements; announcements govern whole months. 15 tests: anchor derivation,
+29-day bounding by next announcement, tabular fallback + identity, offset
+shifts + range validation, contradiction rejection, multi-authority agreement,
+civilOf round-trip incl. offset, eid-follows-announced-Shawwal, tabular
+immutability.
