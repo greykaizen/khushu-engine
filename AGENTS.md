@@ -327,7 +327,7 @@ domain is how this regrows the bloat we're escaping.
 | Qada/excused-range helpers | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/qada-design.md` citations, then code |
 | Zakat expansion (debt/shares/agri/jewelry/fitr) | ✅ shipped v1.11.0 (design `docs/v1.11-zakat-design.md`, D1–D9 approved; implemented as madhab-default policies + citation notes) | follow-ups: retro-assessment math for collected receivables; non-grain wasaq re-derivation |
 | Observed/moonsighting calendar mode | 🟨 design drafted 2026-08-28 | knowledgeable-reader review of `docs/sighting-mode-design.md`, then code |
-| `NightDivisionMethod` wiring (sunset→fajr vs maghrib→fajr night division) | ⬜ enum kept, intentionally unwired (v1.5.0) | a host needing it + fiqh-source verification for both divisions |
+| `NightDivisionMethod` wiring (sunset→fajr vs maghrib→fajr night division) | ✅ shipped v1.14.0 (`nightDivisions(method=)` — MAGHRIB_TO_FAJR default per Muwaqqit-documented sharʿī night; exact span-fractions; fixture-anchored) | — |
 | Typed `Kilometers`-at-boundary retypes (`travelFacts`, `passagesOver` raw Doubles) | ⬜ breaking → 2.0.0 | host-integration milestone |
 | khushu-data content-pipeline sibling | ✅ superseded | absorbed by `khushu-data-api` (greykaizen/khushu-data-api) — do NOT scaffold separately |
-| KMP targets, recitation audio mirroring, adhan2↔cosinekitty rise/set unification | ⬜ open deferrals | unchanged |
+| KMP targets, recitation audio mirroring, adhan2↔cosinekitty rise/set unification | ⬜ open deferrals | KMP resolved: Android-only suffices (pure-Kotlin JVM artifacts already serve it — no KMP migration needed unless iOS is wanted) |

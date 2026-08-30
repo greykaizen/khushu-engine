@@ -127,7 +127,10 @@ fun main(args: Array<String>) {
             } catch (e: Exception) { null }
             val noon = io.github.cosinekitty.astronomy.searchHourAngle(Body.Sun, obs, 0.0, Time.fromMillisecondsSince1970(dayStart)).time.toMillisecondsSince1970().coerceIn(dayStart, dayEnd - 1)
             val mid = try {
-                io.github.cosinekitty.astronomy.searchHourAngle(Body.Sun, obs, 180.0, Time.fromMillisecondsSince1970(noon)).time.toMillisecondsSince1970()
+                // cosinekitty hour angle is in HOURS [0,24): 12 = 180° = lower
+                // meridian (v1.14 — the old 180.0 literal always threw, so the
+                // fixture silently recorded the noon+12h fallback).
+                io.github.cosinekitty.astronomy.searchHourAngle(Body.Sun, obs, 12.0, Time.fromMillisecondsSince1970(noon)).time.toMillisecondsSince1970()
             } catch (e: Exception) { noon + 43_200_000L }
             phaseRows += PhaseRow(
                 site.key, "$y-%02d-%02d".format(m, d),

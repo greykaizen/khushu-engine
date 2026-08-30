@@ -657,3 +657,69 @@ engine.astronomy.sun.audit()      // newly delegated (qibla.audit parity)
   window caps, seasons bounds, hilal nights, subsolar target validation
   (incl. Kaaba + antipode pass), no-fabrication invariant.
 - Core validation was already exemplary (ErrorModelTest/LocationTest).
+
+## v1.14 additions (2026-08) — Muwaqqit-parity round (parameters, not defaults)
+
+External reference: muwaqqit.com (CC-BY API + docs; attribution in
+`fixtures/muwaqqit_kohat_2026.json`). Implemented from documented formulas +
+published models (VSOP87D, King 2003, Odeh 2005) — no Muwaqqit code. Their
+parameter sets are host-supplied options; engine defaults are unchanged.
+
+### astronomy — new named facts (all pure hour-angle/crossing math)
+```
+Astronomy.sun.antiTransit(location, date, zoneId): Long
+  // lower-meridian crossing = solar midnight (Nisf qaws al-layl al-ḥaqīqī);
+  // the persistent-twilight Fajr anchor per the (separately reviewed,
+  // still-parked) Muwaqqit aqrab-al-ayyam position. Validated vs Muwaqqit <2s.
+Astronomy.sun.istiwaPeriod(location, date, zoneId): IstiwaPeriod
+  // limb-to-limb upper-meridian crossing (leading start, center, trailing
+  // end) — prayer-prohibited window; Zuhr enters after. NoResultException on
+  // polar days without transit.
+Astronomy.sun.zuhrShadowIncrease(location, date, zoneId, shadowIncreaseMm = 1.0): Long?
+  // 2m-gnomon noon shadow grown by N mm — King 2003 convention (Muwaqqit
+  // default 1 mm). InvalidParameterException on non-positive input.
+SolarEventType += ANTI_TRANSIT, ISTIWA_START, ISTIWA_END, KARAHAH, ISHTIBAK_AL_NUJUM
+AltitudeConventions += karahahDeg: Double? = null, ishtibakAlNujumDeg: Double? = null
+  // nullable named conventions (rumḥ 4.5°, −10° King 2003) — opt-in via
+  // sun.events(location, date, zoneId, conventions); null = not computed.
+  // Parameters, never defaults.
+```
+
+### prayer — NightDivisionMethod wired (was deferred since v1.5.0)
+```
+Prayer.nightDivisions(location, date, config, method = MAGHRIB_TO_FAJR)
+  // MAGHRIB_TO_FAJR (default, sharʿī night — Muwaqqit-documented) or
+  // SUNSET_TO_FAJR. All divisions are now EXACT fractions of the chosen
+  // span (the old partial reuse of adhan2 midnight/lastThird differed from
+  // exact span-fractions by seconds; Muwaqqit fixture anchors ⅓/½/⅔/⅚).
+```
+
+### bug fix surfaced by this round (D23)
+```
+sun.phases().midnight: was ALWAYS noon+12h fallback — the underlying
+searchHourAngle call passed 180.0 where cosinekitty expects HOURS [0,24);
+it threw every time and runCatching masked it. Fixed (12.0); all 30 golden
+solarDayReference rows verified-as-fallback and regenerated (corrections
+±15s = equation-of-time drift). golden-dumper fixed identically.
+```
+
+### deferred (with rationale)
+- AtmosphereModel (k-refraction coefficient, temp/pressure scaling, horizon
+  dip, ±uncertainty bands): cosinekitty bakes Refraction.Normal into every
+  crossing call — a full atmosphere seam needs our own refraction-corrected
+  solver + full golden revalidation; its own round, not a bolt-on. Low
+  altitude Muwaqqit-parity tolerance (±390s) documents the current bound.
+- Fajr-at-anti-transit persistent-twilight policy: parked behind fiqh review
+  (see AGENTS deferred queue); antiTransit fact shipped makes it implementable
+  on approval.
+- Magnetic qibla (IGRF-12), light-pollution data: stays out (dataset/data
+  concerns — host-side like weather).
+
+### tests
+- MuwaqqitParityTest (8): antiTransit <90s, transit, fajr −19°/ishā −16°/−19°
+  inside Muwaqqit's own ±1° band, named-convention events opt-in + absent by
+  default, istiwa brackets transit, zuhr +1mm ordering + rejection, duhā 4.5°.
+- NightDivisionMethodTest (4): default=maghrib + Muwaqqit ⅓/½/⅔/⅚ anchors,
+  sunset-variant ordering/monotonicity, exact ⅔ for both methods.
+- QiblaTest: Kohat bearing vs Muwaqqit 254.6° cross-check.
+- Golden: 30 solarDayReference rows regenerated post-D23.

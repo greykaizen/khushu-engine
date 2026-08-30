@@ -249,6 +249,38 @@ class KhushuEngine {
             fun events(location: Location, date: LocalDate, zoneId: ZoneId): SolarEvents =
                 Astronomy.sun.events(location, date, zoneId)
 
+            /**
+             * Events with named opt-in conventions (v1.14): set
+             * [conventions]' karahah/ishtibak fields to include KARAHAH /
+             * ISHTIBAK_AL_NUJUM events. Null fields = not computed.
+             */
+            fun events(
+                location: Location,
+                date: LocalDate,
+                zoneId: ZoneId,
+                conventions: com.khushu.engine.astronomy.AltitudeConventions,
+            ): SolarEvents = Astronomy.sun.events(location, date, zoneId, conventions)
+
+            /** Anti-transit: solar midnight (lower-meridian crossing), epoch ms (v1.14). */
+            fun antiTransit(location: Location, date: LocalDate, zoneId: ZoneId): Long =
+                Astronomy.sun.antiTransit(location, date, zoneId)
+
+            /** Istiwā limb-to-limb meridian-crossing period (v1.14); prayer karahah window. */
+            fun istiwaPeriod(
+                location: Location,
+                date: LocalDate,
+                zoneId: ZoneId,
+            ): com.khushu.engine.astronomy.IstiwaPeriod =
+                Astronomy.sun.istiwaPeriod(location, date, zoneId)
+
+            /** Ẓuhr entry by noon-shadow increase (mm per 2m gnomon; King 2003; v1.14). */
+            fun zuhrShadowIncrease(
+                location: Location,
+                date: LocalDate,
+                zoneId: ZoneId,
+                shadowIncreaseMm: Double = 1.0,
+            ): Long? = Astronomy.sun.zuhrShadowIncrease(location, date, zoneId, shadowIncreaseMm)
+
             /** Solar phases (twilight bands) of a day. */
             fun phases(location: Location, date: LocalDate, zoneId: ZoneId): SolarDayPhases =
                 Astronomy.sun.phases(location, date, zoneId)

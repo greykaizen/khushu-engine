@@ -182,16 +182,21 @@ public final class com/khushu/engine/KhushuEngine$AstronomyApi$MoonApi {
 }
 
 public final class com/khushu/engine/KhushuEngine$AstronomyApi$SunApi {
+	public final fun antiTransit (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)J
 	public final fun audit ()Lcom/khushu/engine/astronomy/AstroAudit;
 	public final fun conventions ()Lcom/khushu/engine/astronomy/AltitudeConventions;
 	public final fun dayLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
 	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/astronomy/AltitudeConventions;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun istiwaPeriod (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/IstiwaPeriod;
 	public final fun nightLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
 	public final fun phases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarDayPhases;
 	public final fun position (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
 	public final fun riseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
 	public final fun track (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SunTrack;
 	public static synthetic fun track$default (Lcom/khushu/engine/KhushuEngine$AstronomyApi$SunApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SunTrack;
+	public final fun zuhrShadowIncrease (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;D)Ljava/lang/Long;
+	public static synthetic fun zuhrShadowIncrease$default (Lcom/khushu/engine/KhushuEngine$AstronomyApi$SunApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;DILjava/lang/Object;)Ljava/lang/Long;
 }
 
 public final class com/khushu/engine/KhushuEngine$CalendarApi {

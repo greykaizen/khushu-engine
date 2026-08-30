@@ -79,13 +79,19 @@ internal object Ephemeris {
             time(afterEpochMs), windowDays, degrees,
         )?.toMillisecondsSince1970()
 
+    /**
+     * Instant the body reaches the given hour angle after [afterEpochMs].
+     * NOTE: cosinekitty's searchHourAngle takes the hour angle in HOURS
+     * [0, 24), not degrees — 0 = upper meridian (transit), 12 = lower
+     * meridian (anti-transit).
+     */
     fun hourAngleTransitMs(
         body: Body,
         afterEpochMs: Long,
         location: com.khushu.engine.core.geo.Location,
-        hourAngleDeg: Double = 0.0,
+        hourAngleHours: Double = 0.0,
     ): Long =
-        searchHourAngle(body, observer(location), hourAngleDeg, time(afterEpochMs)).time.toMillisecondsSince1970()
+        searchHourAngle(body, observer(location), hourAngleHours, time(afterEpochMs)).time.toMillisecondsSince1970()
 
     fun moonPhaseAngleDeg(epochMs: Long): Double = moonPhase(time(epochMs))
 

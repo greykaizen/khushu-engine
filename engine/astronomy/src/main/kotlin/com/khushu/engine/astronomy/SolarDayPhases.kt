@@ -117,7 +117,10 @@ internal object SolarDaySolver {
             .coerceIn(startMs, endMs - 1)
         val noon = Instant.ofEpochMilli(noonMs)
         val midnightMs = runCatching {
-            Ephemeris.hourAngleTransitMs(Body.Sun, noonMs, location, hourAngleDeg = 180.0)
+            // 12 HOURS = 180° = lower meridian (v1.14: was 180.0, which
+            // cosinekitty rejects — the range is [0, 24) HOURS. Every midnight
+            // before v1.14 silently fell through to the noon+12h fallback.)
+            Ephemeris.hourAngleTransitMs(Body.Sun, noonMs, location, hourAngleHours = 12.0)
         }.getOrElse { SolarDayMidnight.midnightFallback(noonMs) }
         val midnight = Instant.ofEpochMilli(midnightMs)
 

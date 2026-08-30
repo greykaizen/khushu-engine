@@ -24,6 +24,18 @@ data class AltitudeConventions(
     val civilTwilightDeg: Double = -6.0,
     val nauticalTwilightDeg: Double = -12.0,
     val astronomicalTwilightDeg: Double = -18.0,
+    /**
+     * Karāhah / Ḍuḥā altitude: the Sun at one rumḥ (spear = 12 spans ≈ 4.5°)
+     * above the horizon — Muwaqqit docs, King 2003; variations of 5° documented.
+     * NULL = not computed (opt-in named convention — parameters, never defaults).
+     */
+    val karahahDeg: Double? = null,
+    /**
+     * Ishtibāk al-Nujūm altitude (−10°, King 2003): stars blend into the sky —
+     * the Ḥanafi reprehensible-late bound for Maghrib/fast-breaking.
+     * NULL = not computed (opt-in named convention).
+     */
+    val ishtibakAlNujumDeg: Double? = null,
 )
 
 /**

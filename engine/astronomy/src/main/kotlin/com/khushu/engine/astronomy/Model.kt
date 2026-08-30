@@ -86,12 +86,45 @@ enum class SolarEventType {
     SUNRISE, SOLAR_NOON, SUNSET,
     GOLDEN_HOUR_EVENING_START, BLUE_HOUR_EVENING_START,
     CIVIL_DUSK, NAUTICAL_DUSK, ASTRONOMICAL_DUSK,
+    /** Anti-transit: the Sun at the observer's LOWER meridian (solar midnight) —
+     *  the persistent-twilight Fajr anchor per Muwaqqit's sourced position. */
+    ANTI_TRANSIT,
+    /** Istiwa period START: the Sun's LEADING limb begins crossing the upper meridian. */
+    ISTIWA_START,
+    /** Istiwa period END: the Sun's TRAILING limb has fully crossed the upper meridian
+     *  (Ẓuhr enters after this). */
+    ISTIWA_END,
+    /** Sun descends to [AltitudeConventions.karahahDeg] (default 4.5° rumḥ) in the west —
+     *  karāhah (disliked time) for delaying ʿAṣr per the Ḥanafi position. */
+    KARAHAH,
+    /** Ishtibāk al-Nujūm: stars blend into the sky at [AltitudeConventions.ishtibakAlNujumDeg]
+     *  (default −10°, King 2003) — Ḥanafi upper bound for delaying Maghrib/fast-breaking. */
+    ISHTIBAK_AL_NUJUM,
 }
 
 data class SolarEvent(val type: SolarEventType, val epochMs: Long)
 
 /** All canonical solar events of one civil day, chronological. */
 data class SolarEvents(val date: java.time.LocalDate, val events: List<SolarEvent>)
+
+/**
+ * The Istiwā period — the Sun crossing the observer's upper meridian, measured
+ * limb-to-limb (leading limb starts, trailing limb completes). Prayer is
+ * prohibited (karahah) during this interval; Ẓuhr enters after it.
+ *
+ * Limb convention per Muwaqqit docs: istiwā starts when the leading edge of the
+ * solar disc begins crossing the meridian and ends when the trailing edge has
+ * fully crossed. The [leadingLimbStartEpochMs]..[trailingLimbEndEpochMs] span
+ * approximates the semidiameter crossing time via consecutive altitude crossings.
+ */
+data class IstiwaPeriod(
+    val leadingLimbStartEpochMs: Long,
+    val trailingLimbEndEpochMs: Long,
+    /** The instant the Sun's CENTER is on the meridian (true solar noon/transit). */
+    val centerEpochMs: Long,
+) {
+    val durationMs: Long get() = trailingLimbEndEpochMs - leadingLimbStartEpochMs
+}
 
 /** One discrete point along a celestial trajectory (render-ready ENU included). */
 data class CelestialPathPoint(

@@ -147,16 +147,25 @@ object Astronomy {
          * blue/golden hour anchors, sunrise, solar noon, sunset — chronological.
          * Thresholds come from the pinned [AltitudeConventions] table — the same
          * table [phases] uses, so the two APIs can never drift apart.
+         *
+         * v1.14: pass [conventions] with [AltitudeConventions.karahahDeg] /
+         * [AltitudeConventions.ishtibakAlNujumDeg] set to include the named
+         * KARAHAH / ISHTIBAK_AL_NUJUM events (opt-in — null means not computed).
          */
-        fun events(location: Location, date: LocalDate, zoneId: ZoneId): SolarEvents {
+        fun events(
+            location: Location,
+            date: LocalDate,
+            zoneId: ZoneId,
+            conventions: AltitudeConventions = AltitudeConventions(),
+        ): SolarEvents {
             val startMs = MoonTrackSolver.dayStartEpochMs(date, zoneId)
             val endMs = MoonTrackSolver.dayStartEpochMs(date.plusDays(1), zoneId)
-            val c = AltitudeConventions()
+            val c = conventions
 
             fun crossing(degrees: Double, rising: Boolean): SolarEvent? =
                 Ephemeris.altitudeCrossingMs(Body.Sun, rising, startMs, degrees, location)
                     ?.takeIf { it < endMs }
-                    ?.let { SolarEvent(typeFor(degrees, rising), it) }
+                    ?.let { SolarEvent(typeFor(degrees, rising, c), it) }
 
             val noon = Ephemeris.hourAngleTransitMs(Body.Sun, startMs, location)
             val events = buildList {
@@ -170,6 +179,13 @@ object Astronomy {
                 crossing(c.sunriseSunsetDeg, false)?.let { add(SolarEvent(SolarEventType.SUNSET, it.epochMs)) }
                 crossing(c.goldenHourUpperDeg, false)?.let { add(SolarEvent(SolarEventType.GOLDEN_HOUR_EVENING_START, it.epochMs)) }
                 crossing(c.blueHourUpperDeg, false)?.let { add(SolarEvent(SolarEventType.BLUE_HOUR_EVENING_START, it.epochMs)) }
+                // Opt-in named conventions (null = not computed):
+                c.ishtibakAlNujumDeg?.let { deg ->
+                    crossing(deg, false)?.let { add(SolarEvent(SolarEventType.ISHTIBAK_AL_NUJUM, it.epochMs)) }
+                }
+                c.karahahDeg?.let { deg ->
+                    crossing(deg, false)?.let { add(SolarEvent(SolarEventType.KARAHAH, it.epochMs)) }
+                }
                 crossing(c.civilTwilightDeg, false)?.let { add(it) }
                 crossing(c.nauticalTwilightDeg, false)?.let { add(it) }
                 crossing(c.astronomicalTwilightDeg, false)?.let { add(it) }
@@ -177,8 +193,7 @@ object Astronomy {
             return SolarEvents(date, events)
         }
 
-        private fun typeFor(degrees: Double, rising: Boolean): SolarEventType {
-            val c = AltitudeConventions()
+        private fun typeFor(degrees: Double, rising: Boolean, c: AltitudeConventions): SolarEventType {
             return when {
                 degrees == c.astronomicalTwilightDeg && rising -> SolarEventType.ASTRONOMICAL_DAWN
                 degrees == c.nauticalTwilightDeg && rising -> SolarEventType.NAUTICAL_DAWN
@@ -187,6 +202,96 @@ object Astronomy {
                 degrees == c.nauticalTwilightDeg -> SolarEventType.NAUTICAL_DUSK
                 else -> SolarEventType.CIVIL_DUSK
             }
+        }
+
+        /**
+         * ANTI-TRANSIT (Nisf qaws al-layl al-ḥaqīqī): the instant the Sun
+         * crosses the observer's LOWER meridian — solar midnight, the Sun's
+         * lowest point. Fajr's anchor during persistent twilight per the
+         * Muwaqqit-documented position (see docs/aqrab-al-ayyam review);
+         * also equals the midpoint of (maghrib, tomorrow's fajr) in normal
+         * conditions. Pure fact — no fiqh interpretation attached.
+         */
+        fun antiTransit(location: Location, date: LocalDate, zoneId: ZoneId): Long {
+            // The anti-transit in the early hours of [date] (≈ solar midnight
+            // ending [date]'s night) is ~12 sidereal hours after the PREVIOUS
+            // day's transit — anchor the search at the previous day's civil
+            // noon so the first lower-meridian event found belongs to [date]'s
+            // small hours. (cosinekitty takes hour angle in HOURS: 12 = 180°.)
+            val anchorMs = MoonTrackSolver.dayStartEpochMs(date, zoneId) - 12L * 3_600_000L
+            return Ephemeris.hourAngleTransitMs(Body.Sun, anchorMs, location, hourAngleHours = 12.0)
+        }
+
+        /**
+         * ISTIWĀ period: the Sun crossing the upper meridian measured
+         * limb-to-limb — leading limb starts, trailing limb completes. Prayer
+         * is prohibited (karahah) within; Ẓuhr enters after. Limb convention
+         * per Muwaqqit docs (leading/trailing edge on the meridian); the limb
+         * instants are derived from the Sun's angular semidiameter at transit.
+         */
+        fun istiwaPeriod(location: Location, date: LocalDate, zoneId: ZoneId): IstiwaPeriod {
+            val startMs = MoonTrackSolver.dayStartEpochMs(date, zoneId)
+            val endMs = MoonTrackSolver.dayStartEpochMs(date.plusDays(1), zoneId)
+            val center = Ephemeris.hourAngleTransitMs(Body.Sun, startMs, location)
+            if (center >= endMs) {
+                throw com.khushu.engine.core.error.NoResultException(
+                    "no upper-meridian transit within the civil day of $date at this location (polar)",
+                )
+            }
+            // Solar angular semidiameter from distance at transit:
+            // arcsin(696,000 km / distance). At 1 AU ≈ 0.2666° ≈ 15.99 arcmin.
+            val pos = upstream("istiwaPeriod") {
+                Ephemeris.horizontalPosition(Body.Sun, center, location)
+            }
+            val semidiameterDeg = Math.toDegrees(
+                kotlin.math.asin(696_000.0 / (pos.distanceAu * Ephemeris.AU_KM)),
+            )
+            // Hour-angle sweep rate near the meridian (deg/ms) from the altitude
+            // derivative: dH/dt ≈ 360°/86164s (sidereal). The limb instants:
+            // crossing happens semidiameter before/after center in hour angle.
+            val siderealRateDegPerMs = 360.0 / 86_164_090.0
+            val limbOffsetMs = (semidiameterDeg / siderealRateDegPerMs).toLong()
+            return IstiwaPeriod(
+                leadingLimbStartEpochMs = center - limbOffsetMs,
+                trailingLimbEndEpochMs = center + limbOffsetMs,
+                centerEpochMs = center,
+            )
+        }
+
+        /**
+         * ẒUHR SHADOW-INCREASE: the instant the noon shadow of a 2m gnomon has
+         * grown by [shadowIncreaseMm] past its transit (meridian) length — the
+         * classical Ẓuhr-entry convention (King 2003 documents one-twelfth and
+         * one-quarter gnomon fractions; Muwaqqit defaults to 1 mm). Shadow
+         * length at altitude h for gnomon G is G/tan(h); this solves for the
+         * altitude at which the 2m-gnomon shadow exceeds its transit shadow by
+         * the requested increment.
+         */
+        fun zuhrShadowIncrease(
+            location: Location,
+            date: LocalDate,
+            zoneId: ZoneId,
+            shadowIncreaseMm: Double = 1.0,
+        ): Long? {
+            if (!shadowIncreaseMm.isFinite() || shadowIncreaseMm <= 0.0) {
+                throw InvalidParameterException(
+                    "shadowIncreaseMm", "$shadowIncreaseMm", "must be finite and > 0",
+                )
+            }
+            val startMs = MoonTrackSolver.dayStartEpochMs(date, zoneId)
+            val endMs = MoonTrackSolver.dayStartEpochMs(date.plusDays(1), zoneId)
+            val noon = upstream("zuhrShadowIncrease") {
+                Ephemeris.horizontalPosition(Body.Sun, Ephemeris.hourAngleTransitMs(Body.Sun, startMs, location), location)
+            }
+            // Shadow of a 2 m gnomon (2000 mm) at transit:
+            val gnomonMm = 2000.0
+            val transitShadowMm = gnomonMm / kotlin.math.tan(Math.toRadians(noon.altitudeDeg.coerceAtLeast(0.01)))
+            val targetShadowMm = transitShadowMm + shadowIncreaseMm
+            // Altitude h where shadow = target: tan(h) = gnomon/target.
+            val targetAltitudeDeg = Math.toDegrees(kotlin.math.atan(gnomonMm / targetShadowMm))
+            if (targetAltitudeDeg <= 0.0) return null
+            return Ephemeris.altitudeCrossingMs(Body.Sun, rising = false, startMs, targetAltitudeDeg, location)
+                ?.takeIf { it < endMs }
         }
     }
 

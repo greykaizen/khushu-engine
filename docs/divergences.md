@@ -234,6 +234,24 @@ references, never gospel (AGENTS.md §2).
   keeps the published API additive (nullable retyping parked for 2.0.0
   with the other breaking cleanups).
 
+### D23. Solar-midnight was always the fallback — hour-angle unit bug (found by v1.14 Muwaqqit parity)
+- **Donor→v1.13 engine**: `SolarDayPhases` computed the day's midnight via
+  `searchHourAngle(..., hourAngleDeg = 180.0)` — but cosinekitty's hour
+  angle parameter is in **HOURS [0, 24)**, not degrees. The call threw
+  `IllegalArgumentException` every single time and the surrounding
+  `runCatching` silently substituted the noon+12h fallback. Every
+  `sun.phases().midnight` since the SolarDayPhases introduction was
+  therefore noon+12h, not the true lower-meridian anti-transit.
+- **v1.14 engine**: hour angle 12.0 (hours) — the true search runs; the
+  noon+12h fallback remains only as the polar guard it was designed to be.
+  All 30 `solarDayReference` golden rows were verified to have recorded the
+  fallback (|row − (noon+12h)| < 100 ms for every row) and were regenerated;
+  corrections range −10.5…+14.9 s — exactly the equation-of-time drift
+  between noon+12h and the true anti-transit, confirming the fix is the
+  real event. `sun.antiTransit` (new) validated against Muwaqqit's
+  published Kohat solar-midnight to <2 s. The golden-dumper replica carried
+  the same bug and was fixed identically.
+
 ## Regenerating goldens
 Both dumpers are committed under `tools/golden-dumper/` as standalone Gradle
 projects that replicate the donor's exact call path and dependency set

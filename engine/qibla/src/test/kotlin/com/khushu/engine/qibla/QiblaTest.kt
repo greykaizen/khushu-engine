@@ -107,3 +107,16 @@ class QiblaTest {
         }
     }
 }
+
+    @Test
+    fun bearingMatchesMuwaqqitKohatReference() {
+        // Muwaqqit (CC-BY attribution) publishes 254.6° true bearing for
+        // Kohat (33.5888559, 71.4429286) — external cross-check alongside
+        // the adhan2 golden matrix (divergences D5).
+        val kohat = com.khushu.engine.core.geo.Location.of(33.5888559, 71.4429286)
+        val bearing = Qibla.bearing(kohat).bearingDegFromNorth.value
+        assertTrue(
+            kotlin.math.abs(bearing - 254.6) <= 0.15,
+            "qibla bearing $bearing vs Muwaqqit 254.6°",
+        )
+    }

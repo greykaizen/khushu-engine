@@ -453,7 +453,15 @@ object Prayer {
 
     // ── Windows: fiqh-relevant intervals as raw facts ───────────────────────
 
-    /** Night-division strategy for Tahajjud/third-of-night computations. */
+    /**
+     * Night-division strategy for Tahajjud/third-of-night computations.
+     * Wired since v1.14 (was deferred v1.5.0): `nightDivisions(..., method)`
+     * selects the span start. `MAGHRIB_TO_FAJR` is the sharʿī convention
+     * (Muwaqqit-documented, default); `SUNSET_TO_FAJR` starts at astronomical
+     * sunset. Fiqh verification for both divisions: Muwaqqit technical notes
+     * (night fractions use the current day's Maghrib) + SeekersGuidance
+     * night-prayer guidance; default kept the pre-wiring behavior.
+     */
     enum class NightDivisionMethod { SUNSET_TO_FAJR, MAGHRIB_TO_FAJR }
 
     /** Prohibited (karahat) prayer windows with configurable margins. */
@@ -596,27 +604,37 @@ object Prayer {
     )
 
     /**
-     * Full night-division set for the night beginning at [date]'s maghrib.
-     * `midpoint` and `lastThirdBegins` reuse the adhan2-derived values when
-     * available; the first third is the exact one-third point of the night span.
+     * Full night-division set for the night beginning at [date]'s maghrib
+     * (or sunset — see [method]).
+     *
+     * v1.14 semantics: all divisions are EXACT FRACTIONS of the chosen span
+     * (Muwaqqit-documented convention — night fractions run Maghrib → next
+     * Fajr). The previous implementation partially reused adhan2's internal
+     * midnight/lastThird values, which differ from exact fractions of the
+     * maghrib→fajr span by small amounts; fractions are now computed on the
+     * span itself for both methods.
      */
     fun nightDivisions(
         location: Location,
         date: LocalDate,
         config: PrayerConfiguration = PrayerConfiguration(),
+        method: NightDivisionMethod = NightDivisionMethod.MAGHRIB_TO_FAJR,
     ): NightDivisions? {
         val today = times(location, date, config)
         val tomorrow = times(location, date.plusDays(1), config)
-        val start = today.maghrib.adjusted ?: return null
+        val start = when (method) {
+            NightDivisionMethod.MAGHRIB_TO_FAJR -> today.maghrib.adjusted ?: return null
+            NightDivisionMethod.SUNSET_TO_FAJR -> today.sunset.adjusted ?: return null
+        }
         val end = tomorrow.fajr.adjusted ?: return null
-        val durMs = end.toEpochMilli() - start.toEpochMilli()
+        val startMs = start.toEpochMilli()
+        val durMs = end.toEpochMilli() - startMs
         if (durMs <= 0) return null
         return NightDivisions(
             nightStarts = start,
-            firstThirdBegins = Instant.ofEpochMilli(start.toEpochMilli() + durMs / 3),
-            midpoint = today.midnight ?: Instant.ofEpochMilli(start.toEpochMilli() + durMs / 2),
-            lastThirdBegins = today.lastThirdOfNight
-                ?: Instant.ofEpochMilli(start.toEpochMilli() + 2 * durMs / 3),
+            firstThirdBegins = Instant.ofEpochMilli(startMs + durMs / 3),
+            midpoint = Instant.ofEpochMilli(startMs + durMs / 2),
+            lastThirdBegins = Instant.ofEpochMilli(startMs + 2 * durMs / 3),
             nightEnds = end,
         )
     }

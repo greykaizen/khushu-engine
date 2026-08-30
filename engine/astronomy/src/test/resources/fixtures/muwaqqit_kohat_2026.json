@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "source": "muwaqqit.com CC-BY API + web UI, fetched 2026-08-30",
+    "location": {"name": "Kohat, Pakistan", "latitude": 33.5888559, "longitude": 71.4429286, "elevationM": 0.0},
+    "date": "2026-08-30",
+    "zone": "Asia/Karachi",
+    "settings": {"fajrDeg": -19.0, "ishaAwwalDeg": -16.0, "ishaThaniDeg": -19.0, "karahahDeg": 4.5, "ishtibakDeg": -10.0, "zuhrShadowIncreaseMm": 1.0, "refractionK": 0.155, "temperatureC": 15.0, "pressureMb": 1010.0},
+    "license": "Muwaqqit API data is CC Attribution — external validation source with attribution; implementation is from docs+published models (VSOP87D, King 2003, Odeh 2005), no code copied",
+    "toleranceNote": "±90s tolerance: Muwaqqit uses its own refraction/dip stack (k=0.155, temp/pressure aware); our engine pins Refraction.Normal. Sub-arcminute divergence at low altitudes is expected and bounded."
+  },
+  "expected": {
+    "antiTransit": "2026-08-30T00:15:04+05:00",
+    "transit": "2026-08-30T12:14:55+05:00",
+    "sunrise": "2026-08-30T05:46:23+05:00",
+    "sunset": "2026-08-30T18:42:55+05:00",
+    "fajrMinus19": "2026-08-30T04:14:32+05:00",
+    "ishaAwwalMinus16": "2026-08-30T19:58:46+05:00",
+    "ishaThaniMinus19": "2026-08-30T20:14:29+05:00",
+    "karahah4_5": "2026-08-30T18:17:35+05:00",
+    "ishtibakMinus10": "2026-08-30T19:28:06+05:00",
+    "duha4_5Rising": "2026-08-30T06:11:47+05:00",
+    "nightThirdOne": "2026-08-30T21:53:46+05:00",
+    "nightHalf": "2026-08-30T23:29:11+05:00",
+    "nightThirdTwo": "2026-08-31T01:04:36+05:00",
+    "nightSixthsFive": "2026-08-31T02:40:02+05:00",
+    "qiblaBearingDeg": 254.6
+  }
+}

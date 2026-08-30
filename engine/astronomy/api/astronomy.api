@@ -1,7 +1,7 @@
 public final class com/khushu/engine/astronomy/AltitudeConventions {
 	public fun <init> ()V
-	public fun <init> (DDDDDDD)V
-	public synthetic fun <init> (DDDDDDDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (DDDDDDDLjava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (DDDDDDDLjava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()D
 	public final fun component2 ()D
 	public final fun component3 ()D
@@ -9,14 +9,18 @@ public final class com/khushu/engine/astronomy/AltitudeConventions {
 	public final fun component5 ()D
 	public final fun component6 ()D
 	public final fun component7 ()D
-	public final fun copy (DDDDDDD)Lcom/khushu/engine/astronomy/AltitudeConventions;
-	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/AltitudeConventions;DDDDDDDILjava/lang/Object;)Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public final fun component8 ()Ljava/lang/Double;
+	public final fun component9 ()Ljava/lang/Double;
+	public final fun copy (DDDDDDDLjava/lang/Double;Ljava/lang/Double;)Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/AltitudeConventions;DDDDDDDLjava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/AltitudeConventions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAstronomicalTwilightDeg ()D
 	public final fun getBlueHourLowerDeg ()D
 	public final fun getBlueHourUpperDeg ()D
 	public final fun getCivilTwilightDeg ()D
 	public final fun getGoldenHourUpperDeg ()D
+	public final fun getIshtibakAlNujumDeg ()Ljava/lang/Double;
+	public final fun getKarahahDeg ()Ljava/lang/Double;
 	public final fun getNauticalTwilightDeg ()D
 	public final fun getSunriseSunsetDeg ()D
 	public fun hashCode ()I
@@ -74,16 +78,21 @@ public final class com/khushu/engine/astronomy/Astronomy$moon {
 
 public final class com/khushu/engine/astronomy/Astronomy$sun {
 	public static final field INSTANCE Lcom/khushu/engine/astronomy/Astronomy$sun;
+	public final fun antiTransit (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)J
 	public final fun audit ()Lcom/khushu/engine/astronomy/AstroAudit;
 	public final fun conventions ()Lcom/khushu/engine/astronomy/AltitudeConventions;
 	public final fun dayLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
-	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun events (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/astronomy/AltitudeConventions;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public static synthetic fun events$default (Lcom/khushu/engine/astronomy/Astronomy$sun;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;Lcom/khushu/engine/astronomy/AltitudeConventions;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/SolarEvents;
+	public final fun istiwaPeriod (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/IstiwaPeriod;
 	public final fun nightLength (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Ljava/time/Duration;
 	public final fun phases (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/SolarDayPhases;
 	public final fun position (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;)Lcom/khushu/engine/astronomy/SolarPosition;
 	public final fun riseSet (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;)Lcom/khushu/engine/astronomy/RiseSet;
 	public final fun track (Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;Z)Lcom/khushu/engine/astronomy/SunTrack;
 	public static synthetic fun track$default (Lcom/khushu/engine/astronomy/Astronomy$sun;Lcom/khushu/engine/core/geo/Location;Ljava/time/YearMonth;Ljava/time/ZoneId;ZILjava/lang/Object;)Lcom/khushu/engine/astronomy/SunTrack;
+	public final fun zuhrShadowIncrease (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;D)Ljava/lang/Long;
+	public static synthetic fun zuhrShadowIncrease$default (Lcom/khushu/engine/astronomy/Astronomy$sun;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/ZoneId;DILjava/lang/Object;)Ljava/lang/Long;
 }
 
 public final class com/khushu/engine/astronomy/CelestialPathPoint {
@@ -197,6 +206,22 @@ public final class com/khushu/engine/astronomy/HilalReport {
 	public final fun getSunsetEpochMs ()J
 	public final fun getVerdicts ()Ljava/util/List;
 	public final fun getYallop ()Lcom/khushu/engine/astronomy/YallopGrade;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/astronomy/IstiwaPeriod {
+	public fun <init> (JJJ)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun copy (JJJ)Lcom/khushu/engine/astronomy/IstiwaPeriod;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/IstiwaPeriod;JJJILjava/lang/Object;)Lcom/khushu/engine/astronomy/IstiwaPeriod;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCenterEpochMs ()J
+	public final fun getDurationMs ()J
+	public final fun getLeadingLimbStartEpochMs ()J
+	public final fun getTrailingLimbEndEpochMs ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -463,6 +488,7 @@ public final class com/khushu/engine/astronomy/SolarEvent {
 }
 
 public final class com/khushu/engine/astronomy/SolarEventType : java/lang/Enum {
+	public static final field ANTI_TRANSIT Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field ASTRONOMICAL_DAWN Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field ASTRONOMICAL_DUSK Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field BLUE_HOUR_EVENING_START Lcom/khushu/engine/astronomy/SolarEventType;
@@ -472,6 +498,10 @@ public final class com/khushu/engine/astronomy/SolarEventType : java/lang/Enum {
 	public static final field GOLDEN_HOUR_EVENING_START Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field GOLDEN_HOUR_MORNING_END Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field GOLDEN_HOUR_MORNING_START Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field ISHTIBAK_AL_NUJUM Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field ISTIWA_END Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field ISTIWA_START Lcom/khushu/engine/astronomy/SolarEventType;
+	public static final field KARAHAH Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field NAUTICAL_DAWN Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field NAUTICAL_DUSK Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field SOLAR_NOON Lcom/khushu/engine/astronomy/SolarEventType;
