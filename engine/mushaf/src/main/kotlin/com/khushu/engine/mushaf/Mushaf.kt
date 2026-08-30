@@ -1,5 +1,7 @@
 package com.khushu.engine.mushaf
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -53,6 +55,19 @@ object Mushaf {
 
     // ── Measurement ─────────────────────────────────────────────────────────
 
+    /** Throws on non-finite font sizes so NaN can never leak into a layout. */
+    private fun requireFontSize(fontSizePx: Float, name: String = "fontSizePx") {
+        if (!fontSizePx.isFinite() || fontSizePx <= 0f) {
+            throw InvalidParameterException(name, "$fontSizePx", "must be finite and > 0")
+        }
+    }
+
+    private fun requireFinite(name: String, v: Float) {
+        if (!v.isFinite() || v < 0f) {
+            throw InvalidParameterException(name, "$v", "must be finite and >= 0")
+        }
+    }
+
     /** Raw advance width of one word in font units. */
     fun wordWidthFu(placements: List<GlyphPlacement>): Double = placements.sumOf { it.xAdvanceFu }
 
@@ -61,7 +76,10 @@ object Mushaf {
         spec: AtlasSpec,
         placements: List<GlyphPlacement>,
         fontSizePx: Float,
-    ): Float = (wordWidthFu(placements) * fontSizePx / spec.font.unitsPerEm).toFloat()
+    ): Float {
+        requireFontSize(fontSizePx)
+        return (wordWidthFu(placements) * fontSizePx / spec.font.unitsPerEm).toFloat()
+    }
 
     /**
      * Line width in pixels given pre-measured word widths at one font size.
@@ -159,6 +177,7 @@ object Mushaf {
         placements: List<GlyphPlacement>,
         fontSizePx: Float,
     ): WordLayout {
+        requireFontSize(fontSizePx)
         val fontScale = fontSizePx / spec.font.unitsPerEm
         val glyphScale = fontSizePx / spec.ppem
         val ascenderFu = spec.font.ascenderFu
@@ -171,6 +190,7 @@ object Mushaf {
         }
 
         val prepared = ArrayList<PlacedGlyph>(placements.size)
+        val skipped = ArrayList<Int>()
         var currentX = 0f
         for (p in placements) {
             val g = spec.glyphs[p.glyphId]
@@ -189,6 +209,8 @@ object Mushaf {
                     dstW = g.rect.w * glyphScale,
                     dstH = g.rect.h * glyphScale,
                 )
+            } else {
+                skipped += p.glyphId
             }
             currentX += (p.xAdvanceFu * fontScale).toFloat()
         }
@@ -215,7 +237,7 @@ object Mushaf {
             tightHeightPx = (maxY - minY).coerceAtLeast(1f)
         }
 
-        return WordLayout(widthPx, tightMinY, tightHeightPx, prepared)
+        return WordLayout(widthPx, tightMinY, tightHeightPx, prepared, skipped)
     }
 
     /**
@@ -231,6 +253,9 @@ object Mushaf {
         lineHeightPx: Float,
         wordGapPx: Float,
     ): LineLayout {
+        requireFontSize(fontSizePx)
+        requireFinite("lineHeightPx", lineHeightPx)
+        requireFinite("wordGapPx", wordGapPx)
         val layouts = words.map { layoutWord(spec, it, fontSizePx) }
         return composeLine(layouts, lineHeightPx, wordGapPx)
     }
@@ -249,6 +274,12 @@ object Mushaf {
         wordGapPx: Float,
         maxLineWidthPx: Float = 0f,
     ): AyahLayout {
+        requireFontSize(fontSizePx)
+        requireFinite("lineHeightPx", lineHeightPx)
+        requireFinite("wordGapPx", wordGapPx)
+        if (maxLineWidthPx < 0f || !maxLineWidthPx.isFinite()) {
+            throw InvalidParameterException("maxLineWidthPx", "$maxLineWidthPx", "must be finite and >= 0")
+        }
         if (words.isEmpty()) return AyahLayout(0, 0, emptyList(), emptyList())
 
         val layouts = words.map { layoutWord(spec, it, fontSizePx) }
@@ -266,6 +297,8 @@ object Mushaf {
         for (line in composed) totalHeight += line.boxHeightPx
         if (composed.size > 1) totalHeight += interLineGapPx * (composed.size - 1)
         val heightPx = totalHeight.roundToInt().coerceAtLeast(1)
+
+        val skippedAll = layouts.flatMap { it.skippedGlyphIds }.distinct()
 
         val ayahLines = ArrayList<AyahLine>(composed.size)
         val allGlyphs = ArrayList<PlacedGlyph>()
@@ -290,7 +323,7 @@ object Mushaf {
             if (i != composed.lastIndex) yLine += interLineGapPx
         }
 
-        return AyahLayout(widthPx, heightPx, ayahLines, allGlyphs)
+        return AyahLayout(widthPx, heightPx, ayahLines, allGlyphs, skippedAll)
     }
 
     // ── Internals ──────────────────────────────────────────────────────────

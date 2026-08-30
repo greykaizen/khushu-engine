@@ -1,5 +1,8 @@
 package com.khushu.engine.mushaf
 
+import com.khushu.engine.core.error.InvalidParameterException
+import com.khushu.engine.core.error.validate
+
 /**
  * Typographic metrics of the mushaf script font, in font units (fu).
  * Mirrors the `font` block of an atlas bundle `meta.json`.
@@ -10,7 +13,16 @@ data class AtlasFontMetrics(
     val descenderFu: Int,
     val heightFu: Int = ascenderFu - descenderFu,
     val lineGapFu: Int = 0,
-)
+) {
+    init {
+        if (unitsPerEm <= 0) {
+            throw InvalidParameterException("unitsPerEm", "$unitsPerEm", "must be > 0 — divide-by-zero guard")
+        }
+        validate(heightFu > 0) {
+            InvalidParameterException("heightFu", "$heightFu", "must be > 0")
+        }
+    }
+}
 
 /** Pixel rectangle of one glyph inside an atlas texture page. */
 data class GlyphSrcRect(
@@ -19,7 +31,19 @@ data class GlyphSrcRect(
     val y: Int,
     val w: Int,
     val h: Int,
-)
+) {
+    init {
+        validate(w > 0 && h > 0) {
+            InvalidParameterException("w/h", "$w/$h", "glyph rect dimensions must be > 0")
+        }
+        validate(x >= 0 && y >= 0) {
+            InvalidParameterException("x/y", "$x/$y", "atlas coordinates must be >= 0")
+        }
+        validate(textureIndex >= 0) {
+            InvalidParameterException("textureIndex", "$textureIndex", "must be >= 0")
+        }
+    }
+}
 
 /**
  * One pre-rendered glyph: its texture rectangle plus FreeType-style metrics.
@@ -30,7 +54,13 @@ data class GlyphMetrics(
     val bearingX: Int = 0,
     val bearingY: Int = 0,
     val advance: Double = 0.0,
-)
+) {
+    init {
+        validate(advance.isFinite() && advance >= 0.0) {
+            InvalidParameterException("advance", "$advance", "must be finite and >= 0")
+        }
+    }
+}
 
 /**
  * Everything needed to place glyphs of one atlas bundle — the computation
@@ -42,9 +72,15 @@ data class AtlasSpec(
     val font: AtlasFontMetrics,
     /** Pixels-per-em the glyph texture was rasterized at (e.g. 192 at 6x). */
     val ppem: Int,
-    /** glyph id → metrics. Missing ids are skipped during placement. */
+    /** glyph id → metrics. Missing ids are skipped during placement (reported via [WordLayout.skippedGlyphIds]). */
     val glyphs: Map<Int, GlyphMetrics>,
-)
+) {
+    init {
+        if (ppem <= 0) {
+            throw InvalidParameterException("ppem", "$ppem", "must be > 0 — divide-by-zero guard")
+        }
+    }
+}
 
 /**
  * One glyph placement within a word: glyph id + positional parameters in
@@ -57,7 +93,20 @@ data class GlyphPlacement(
     val yAdvanceFu: Double = 0.0,
     val xOffsetFu: Double = 0.0,
     val yOffsetFu: Double = 0.0,
-)
+) {
+    init {
+        listOf(
+            "xAdvanceFu" to xAdvanceFu,
+            "yAdvanceFu" to yAdvanceFu,
+            "xOffsetFu" to xOffsetFu,
+            "yOffsetFu" to yOffsetFu,
+        ).forEach { (name, v) ->
+            validate(v.isFinite()) {
+                InvalidParameterException(name, "$v", "must be finite — NaN/Infinity placements produce garbage layouts")
+            }
+        }
+    }
+}
 
 /** A glyph positioned in pixel space — source rect in the atlas + destination rect on screen. */
 data class PlacedGlyph(
@@ -73,12 +122,18 @@ data class PlacedGlyph(
     val dstH: Float,
 )
 
-/** Laid-out word: advance width plus its placed glyphs + tight vertical extents. */
+/**
+ * Laid-out word: advance width plus its placed glyphs + tight vertical
+ * extents. [skippedGlyphIds] lists glyph ids absent from the atlas table —
+ * they advance the pen (donor parity) but are not drawn; a non-empty list
+ * usually means a malformed bundle.
+ */
 data class WordLayout(
     val widthPx: Float,
     val tightMinYPx: Float,
     val tightHeightPx: Float,
     val glyphs: List<PlacedGlyph>,
+    val skippedGlyphIds: List<Int> = emptyList(),
 )
 
 /** One output line of an ayah layout pass: words placed right-to-left. */
@@ -90,12 +145,16 @@ data class AyahLine(
     val glyphs: List<PlacedGlyph>,
 )
 
-/** Full layout of one ayah (possibly wrapped): canvas size + all glyphs. */
+/**
+ * Full layout of one ayah (possibly wrapped): canvas size + all glyphs.
+ * [skippedGlyphIds] aggregates every word's missing glyph ids.
+ */
 data class AyahLayout(
     val widthPx: Int,
     val heightPx: Int,
     val lines: List<AyahLine>,
     val glyphs: List<PlacedGlyph>,
+    val skippedGlyphIds: List<Int> = emptyList(),
 )
 
 /** Pre-measured line input for [Mushaf.fitPageScale]: word widths at base font size. */

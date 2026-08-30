@@ -3,6 +3,7 @@ package com.khushu.engine.mushaf
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class MushafGoldenTest {
@@ -242,5 +243,97 @@ class MushafPropertyTest {
             assertTrue(scale >= Mushaf.FONT_SCALE_AT_MIN_WIDTH)
             assertTrue(scale <= minOf(fallback, Mushaf.FONT_SCALE_AT_MAX_WIDTH) + 1e-6f)
         }
+    }
+}
+
+// ── v1.12: typed input validation + skipped-glyph reporting ───────────────
+
+class MushafValidationTest {
+
+    private val spec = AtlasSpec(
+        font = AtlasFontMetrics(unitsPerEm = 2048, ascenderFu = 2400, descenderFu = -1200),
+        ppem = 192,
+        glyphs = mapOf(
+            1 to GlyphMetrics(GlyphSrcRect(0, 0, 0, 100, 80), bearingX = 0, bearingY = 80, advance = 150.0),
+        ),
+    )
+
+    private fun word(vararg ids: Int) = ids.map { GlyphPlacement(glyphId = it, xAdvanceFu = 1024.0) }
+
+    @Test
+    fun zeroUnitsPerEmIsRejected() {
+        assertFailsWith<IllegalArgumentException> {
+            AtlasFontMetrics(unitsPerEm = 0, ascenderFu = 2400, descenderFu = -1200)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            AtlasSpec(AtlasFontMetrics(unitsPerEm = 0, ascenderFu = 1, descenderFu = 0), 192, emptyMap())
+        }
+    }
+
+    @Test
+    fun zeroPpemIsRejected() {
+        assertFailsWith<IllegalArgumentException> {
+            AtlasSpec(AtlasFontMetrics(2048, 2400, -1200), 0, emptyMap())
+        }
+    }
+
+    @Test
+    fun nonFiniteGlyphPlacementsAreRejected() {
+        assertFailsWith<IllegalArgumentException> { GlyphPlacement(glyphId = 1, xAdvanceFu = Double.NaN) }
+        assertFailsWith<IllegalArgumentException> { GlyphPlacement(glyphId = 1, yOffsetFu = Double.POSITIVE_INFINITY) }
+        assertFailsWith<IllegalArgumentException> { GlyphPlacement(glyphId = 1, xOffsetFu = Double.NEGATIVE_INFINITY) }
+    }
+
+    @Test
+    fun nonFiniteFontSizesAreRejectedEverywhere() {
+        assertFailsWith<IllegalArgumentException> { Mushaf.measureWordWidthPx(spec, word(1), Float.NaN) }
+        assertFailsWith<IllegalArgumentException> { Mushaf.measureWordWidthPx(spec, word(1), 0f) }
+        assertFailsWith<IllegalArgumentException> { Mushaf.measureWordWidthPx(spec, word(1), -28f) }
+        assertFailsWith<IllegalArgumentException> {
+            Mushaf.layoutWord(spec, word(1), Float.POSITIVE_INFINITY)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            Mushaf.layoutLine(spec, listOf(word(1)), 28f, lineHeightPx = Float.NaN, wordGapPx = 3f)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            Mushaf.layoutAyah(spec, listOf(word(1)), 28f, 56f, wordGapPx = Float.NaN)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            Mushaf.layoutAyah(spec, listOf(word(1)), 28f, 56f, 3f, maxLineWidthPx = Float.NEGATIVE_INFINITY)
+        }
+    }
+
+    @Test
+    fun badGlyphRectsAreRejectedAtConstruction() {
+        assertFailsWith<IllegalArgumentException> { GlyphSrcRect(0, 0, 0, w = 0, h = 80) }
+        assertFailsWith<IllegalArgumentException> { GlyphSrcRect(0, x = -1, y = 0, w = 10, h = 10) }
+        assertFailsWith<IllegalArgumentException> {
+            GlyphMetrics(GlyphSrcRect(0, 0, 0, 10, 10), advance = -1.0)
+        }
+    }
+
+    @Test
+    fun skippedGlyphIdsAreReportedPerWordAndAggregated() {
+        // glyph 2 is absent from the spec's table
+        val w = Mushaf.layoutWord(spec, word(1, 2, 1), fontSizePx = 32f)
+        assertEquals(listOf(2), w.skippedGlyphIds)
+        assertEquals(2, w.glyphs.size, "drawn glyphs only")
+
+        val ayah = Mushaf.layoutAyah(
+            spec, listOf(word(1, 2), word(2, 1)), fontSizePx = 32f,
+            lineHeightPx = 64f, wordGapPx = 3f,
+        )
+        assertEquals(listOf(2), ayah.skippedGlyphIds, "aggregated + distinct")
+    }
+
+    @Test
+    fun validInputsStillProduceIdenticalLayouts() {
+        // numeric back-compat: the golden formula test values hold
+        val w = Mushaf.measureWordWidthPx(
+            spec,
+            listOf(GlyphPlacement(1, xAdvanceFu = 1024.0), GlyphPlacement(1, xAdvanceFu = 512.0)),
+            fontSizePx = 32f,
+        )
+        assertEquals(24f, w, 0.01f)
     }
 }

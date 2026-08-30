@@ -580,3 +580,28 @@ engine.zakat.fitrana(..., mode = FOOD)   // existing mal/fitrana unchanged
   incl. 7.5% at half, bounds validation, both nisab policies at 653 kg.
 - Fitr: FOOD/CASH_EQUIVALENT same numbers, distinct notes.
 - Store: v1.11 field round-trip; v1.10-file forward-compat with defaults.
+
+## v1.12 additions (2026-08) — mushaf hardening
+
+Design gap closed from the mushaf module audit (docs/v1.3-zakat-design.md
+sibling review round): mushaf was the only engine module without typed
+input validation.
+
+```
+AtlasFontMetrics / AtlasSpec / GlyphSrcRect / GlyphMetrics / GlyphPlacement:
+  init-time InvalidParameterException — unitsPerEm > 0, ppem > 0, rect w/h
+  > 0, atlas coords >= 0, finite non-negative advance/placements
+Mushaf.measureWordWidthPx / layoutWord / layoutLine / layoutAyah:
+  fontSizePx must be finite & > 0; lineHeight/wordGap/maxWidth finite &
+  >= 0 — NaN/Infinity can never leak into a layout (typed failure, not
+  silent garbage coordinates)
+WordLayout.skippedGlyphIds: List<Int> = []   // per-word missing glyphs
+AyahLayout.skippedGlyphIds: List<Int> = []  // aggregated + distinct
+  // missing glyphs still advance the pen (donor parity) but are now
+  // diagnosable — a non-empty list usually means a malformed bundle
+```
+
+Additive only: golden/property tests unchanged and green (7 new validation
+tests); API diff is data-class constructor shifts + defaults, source-compatible.
+`engine:core` dependency added for the shared error model (mushaf now uses
+the same InvalidParameterException as zakat/prayer/qibla).
