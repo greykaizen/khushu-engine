@@ -324,7 +324,7 @@ domain is how this regrows the bloat we're escaping.
 | Item | Status | Gate |
 |---|---|---|
 | Host-app transplant (Osprey AR) | ⬜ deferred by user decision | `docs/ar-transplant.md` is the seam contract when resumed |
-| Qada/excused-range helpers | 🟨 sources collected 2026-08-28 | knowledgeable-reader review of `docs/qada-design.md` citations, then code |
+| Qada/excused-range helpers | 🟨 design revision 2 complete 2026-08-30 (`docs/qada-design.md`: Instant-based FiqhPeriod API, classification-layer split, pairing-keyed boundary table, resolved tuhr/nifas cells; both reviewer passes integrated) | remaining: pairing-table + granularity primary-text pulls, Mālik-retraction sourced-or-stricken, knowledgeable-reader sign-off, then code |
 | Zakat expansion (debt/shares/agri/jewelry/fitr) | ✅ shipped v1.11.0 (design `docs/v1.11-zakat-design.md`, D1–D9 approved; implemented as madhab-default policies + citation notes) | follow-ups: retro-assessment math for collected receivables; non-grain wasaq re-derivation |
 | Observed/moonsighting calendar mode | ✅ shipped v1.15.0 (`SightedCalendar`: AnnouncedMonthStart + SightedCalendarParams w/ localOffsetDays escape hatch + tabular fallback + contradiction rejection; design doc satisfied; un-gated per astronomy-plausibility + human-confirmation model) | real-committee announcement dataset can be added as a fixture when hosts supply one |
 | `NightDivisionMethod` wiring (sunset→fajr vs maghrib→fajr night division) | ✅ shipped v1.14.0 (`nightDivisions(method=)` — MAGHRIB_TO_FAJR default per Muwaqqit-documented sharʿī night; exact span-fractions; fixture-anchored) | — |
