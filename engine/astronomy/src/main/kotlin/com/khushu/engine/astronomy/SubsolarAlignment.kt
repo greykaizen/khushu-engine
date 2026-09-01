@@ -2,7 +2,9 @@ package com.khushu.engine.astronomy
 
 import com.khushu.engine.core.error.InvalidParameterException
 import com.khushu.engine.core.error.validate
+import com.khushu.engine.core.geo.Latitude
 import com.khushu.engine.core.geo.Location
+import com.khushu.engine.core.geo.Longitude
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -27,16 +29,18 @@ object SubsolarAlignment {
     data class ZenithPassage(val instant: Instant, val separationDeg: Double)
 
     fun passagesOver(
-        targetLatDeg: Double,
-        targetLonDeg: Double,
+        targetLat: Latitude,
+        targetLon: Longitude,
         year: Int,
         toleranceDeg: Double = 1.0,
     ): List<ZenithPassage> {
+        val targetLatDeg = targetLat.degrees
+        val targetLonDeg = targetLon.degrees
         validate(targetLatDeg.isFinite() && targetLatDeg >= -MAX_SUNSUPPORTED_LAT_DEG && targetLatDeg <= MAX_SUNSUPPORTED_LAT_DEG) {
-            InvalidParameterException("targetLatDeg", "$targetLatDeg", "must be finite within ±23.44 (subsolar envelope)")
+            InvalidParameterException("targetLat", "$targetLatDeg", "must be finite within ±23.44 (subsolar envelope)")
         }
         validate(targetLonDeg.isFinite() && targetLonDeg >= -180.0 && targetLonDeg <= 180.0) {
-            InvalidParameterException("targetLonDeg", "$targetLonDeg", "must be finite within [-180, 180]")
+            InvalidParameterException("targetLon", "$targetLonDeg", "must be finite within [-180, 180]")
         }
         validate(toleranceDeg.isFinite() && toleranceDeg > 0.0) {
             InvalidParameterException("toleranceDeg", "$toleranceDeg", "must be finite and > 0")

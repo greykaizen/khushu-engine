@@ -144,7 +144,7 @@ class AstronomyPropertyTest {
         assertTrue(report.crescentWidthArcmin.value >= 0.0)
         assertTrue(report.lagMinutes >= 0)
         assertEquals(4, report.verdicts.size)
-        assertTrue(report.moonAgeHours > 24) // ~2 days after conjunction; never fabricated (D7)
+        assertTrue(report.moonAgeHours != null && report.moonAgeHours > 24) // ~2 days after conjunction; never fabricated (D7)
 
         // Polar summer: no sunset → no report.
         val polar = Astronomy.hilal.visibility(tromso, LocalDate.of(2025, 6, 27), ZoneId.of("Europe/Oslo"))

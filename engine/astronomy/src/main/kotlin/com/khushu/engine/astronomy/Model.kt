@@ -82,7 +82,7 @@ data class RiseSet(
 
 enum class SolarEventType {
     ASTRONOMICAL_DAWN, NAUTICAL_DAWN, CIVIL_DAWN,
-    BLUE_HOUR_MORNING_START, GOLDEN_HOUR_MORNING_START, GOLDEN_HOUR_MORNING_END,
+    BLUE_HOUR_MORNING_START, GOLDEN_HOUR_MORNING_END,
     SUNRISE, SOLAR_NOON, SUNSET,
     GOLDEN_HOUR_EVENING_START, BLUE_HOUR_EVENING_START,
     CIVIL_DUSK, NAUTICAL_DUSK, ASTRONOMICAL_DUSK,
@@ -188,9 +188,8 @@ data class HilalReport(
     val moonsetEpochMs: Long?,
     val bestTimeEpochMs: Long,
     val lagMinutes: Int,
-    /** Hours since the most recent conjunction. Unresolvable conjunctions fail with
-     *  NoResultException instead of fabricating an age (D7; non-null keeps the v1.x API additive). */
-    val moonAgeHours: Int,
+    /** Hours since the most recent conjunction; null when unresolvable (D7 — no fabrication). */
+    val moonAgeHours: Int?,
     val arcvDeg: Double,
     val elongationDeg: Double,
     val crescentWidthArcmin: ArcMinutes,

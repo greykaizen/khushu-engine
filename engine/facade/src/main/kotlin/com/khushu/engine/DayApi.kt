@@ -312,7 +312,7 @@ class CachedEngine(val delegate: KhushuEngine = KhushuEngine(), private val capa
     fun travelFacts(
         location: Location,
         date: LocalDate,
-        travelledDistanceKm: Double,
+        travelledDistanceKm: com.khushu.engine.core.units.Kilometers,
         distanceThresholdKm: Double? = null,
         params: PrayerConfiguration = PrayerConfiguration(),
         forceRecompute: Boolean = false,

@@ -19,21 +19,6 @@ value class Degrees(val value: Double) {
 }
 
 @JvmInline
-value class Radians(val value: Double) {
-    init {
-        validate(value.isFinite()) {
-            InvalidParameterException("radians", "$value", "must be finite")
-        }
-    }
-
-    companion object {
-        fun ofDegrees(degrees: Degrees): Radians = Radians(Math.toRadians(degrees.value))
-    }
-
-    fun toDegrees(): Degrees = Degrees(Math.toDegrees(value))
-}
-
-@JvmInline
 value class Kilometers(val value: Double) {
     init {
         validate(value.isFinite() && value >= 0.0) {

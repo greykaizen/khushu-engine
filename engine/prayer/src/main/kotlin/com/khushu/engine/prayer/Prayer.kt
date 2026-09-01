@@ -3,6 +3,7 @@ package com.khushu.engine.prayer
 import com.khushu.engine.core.error.InvalidParameterException
 import com.khushu.engine.core.error.validate
 import com.khushu.engine.core.geo.Location
+import com.khushu.engine.core.units.Kilometers
 import com.khushu.engine.prayer.internal.PrayerCalculator
 import java.time.Instant
 import java.time.LocalDate
@@ -396,47 +397,25 @@ object Prayer {
             PrayerStatus.Prayer.ISHA,
         )
 
-        data class DayState(val complete: Boolean, val excused: Boolean)
-
         val byDate = records.groupBy { it.date }
         val firstDate = byDate.keys.min()
         val lastDate = byDate.keys.max()
 
-        fun isExcused(date: LocalDate) = excusedRanges.any { date in it }
-
-        // Classify every civil day in the logged span.
-        val days = mutableListOf<DayState>()
-        var d = firstDate
-        while (!d.isAfter(lastDate)) {
-            if (isExcused(d)) {
-                days += DayState(complete = false, excused = true)
-            } else {
+        // Day classification + streak math now delegates to core DayStreakMath
+        // (2.0.0 cleanup — the algorithm was inlined in v1.6 before the second
+        // consumer existed). Semantics are identical (proven by golden matrix).
+        val dayClassList = com.khushu.engine.core.observance.DayStreakMath.dayClasses(
+            firstDate, lastDate,
+            isComplete = { d ->
                 val recs = byDate[d].orEmpty().filter { it.kind in applicable }
-                val complete = recs.isNotEmpty() &&
-                    applicable.all { kind -> recs.any { it.kind == kind && it.completed } }
-                days += DayState(complete = complete, excused = false)
-            }
-            d = d.plusDays(1)
-        }
-
-        // Longest run of complete-or-excused days; current = trailing such run
-        // ending at the last logged date.
-        var longest = 0
-        var running = 0
-        for (day in days) {
-            if (day.complete || day.excused) {
-                running++
-                if (running > longest) longest = running
-            } else {
-                running = 0
-            }
-        }
-        var current = 0
-        for (day in days.reversed()) {
-            if (day.complete || day.excused) current++ else break
-        }
+                recs.isNotEmpty() && applicable.all { kind -> recs.any { it.kind == kind && it.completed } }
+            },
+            excusedRanges = excusedRanges,
+        )
+        val facts = com.khushu.engine.core.observance.DayStreakMath.streakFacts(dayClassList)
 
         // Per-prayer completion rates over non-excused days only.
+        fun isExcused(date: LocalDate) = excusedRanges.any { date in it }
         val rates = applicable.associateWith { kind ->
             val logged = records.filter { it.kind == kind && !isExcused(it.date) }
             if (logged.isEmpty()) {
@@ -447,11 +426,11 @@ object Prayer {
         }
 
         return StreakStats(
-            currentStreakDays = current,
-            longestStreakDays = longest,
+            currentStreakDays = facts.currentStreakDays,
+            longestStreakDays = facts.longestStreakDays,
             perPrayerCompletionRate = rates,
-            spanDaysNonExcused = days.count { !it.excused },
-            excusedDaysCount = days.count { it.excused },
+            spanDaysNonExcused = facts.spanDays - facts.excusedDays,
+            excusedDaysCount = facts.excusedDays,
         )
     }
 
@@ -567,14 +546,14 @@ object Prayer {
     fun travelFacts(
         location: Location,
         date: LocalDate,
-        travelledDistanceKm: Double,
+        travelledDistanceKm: Kilometers,
         distanceThresholdKm: Double? = null,
         config: PrayerConfiguration = PrayerConfiguration(),
     ): TravelFacts {
         val threshold = distanceThresholdKm ?: DEFAULT_MAJORITY_THRESHOLD_KM
         val t = times(location, date, config)
         return TravelFacts(
-            qasrEligibleByDistance = travelledDistanceKm >= threshold,
+            qasrEligibleByDistance = travelledDistanceKm.value >= threshold,
             shortenable = setOf(PrayerStatus.Prayer.DHUHR, PrayerStatus.Prayer.ASR, PrayerStatus.Prayer.ISHA),
             dhuhrJoinsAsrAt = t.asr.adjusted,
             maghribJoinsIshaAt = t.isha.adjusted,

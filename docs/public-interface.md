@@ -898,3 +898,38 @@ engine.qada.qadaReport(periods, schedules, config)
   unchanged, winter normal, audit carries rule+resolution+warning
 - QadaTest (9): full-day suppression, no-overlap, paired/unpaired boundary,
   school defaults, ghusl, validation
+
+## 2.0.0 — BREAKING: typed boundaries + dead-API removal (parameter model final)
+
+All items from the deferred-queue 2.0.0 inventory shipped. Khushu is the
+only consumer; the recompile burden is absorbed by one coordinated upgrade.
+
+### BREAKING changes
+```
+prayer.travelFacts: travelledDistanceKm: Double → Kilometers (core typed unit)
+SubsolarAlignment.passagesOver: targetLatDeg/targetLonDeg: Double →
+    Latitude/Longitude (core typed geo units)
+HighLatitudeResolution += RESOLVED_BY_ANTI_TRANSIT
+HighLatitudeRule += ANTI_TRANSIT_FAJR (v1.17 additive, listed here for
+    migration reference)
+SolarEventType: GOLDEN_HOUR_MORNING_START REMOVED (never constructed)
+core.units: Radians REMOVED (unused; Math.toRadians is the stdlib path)
+AltitudeConventions: blueHourLowerDeg REMOVED (duplicates civilTwilightDeg)
+HilalReport.moonAgeHours: Int → Int? (null = conjunction unresolvable;
+    D7 no-fabrication enforced at the TYPE level, not just runtime)
+```
+
+### Cleanup (non-breaking)
+```
+prayer.streakStats delegates to core DayStreakMath (v1.16 extraction);
+    the inlined v1.6 algorithm is retired
+qibla.normalizeDeg: 4 inline copies → core observance.AngleMath.normalizeDeg
+    (AGENTS §2 extraction — qibla was the second consumer)
+```
+
+### Migration guide (Khushu host)
+- `travelFacts(location, date, 120.0, ...)` → `travelFacts(location, date, Kilometers(120.0), ...)`
+- `passagesOver(latDeg, lonDeg, year)` → `passagesOver(Latitude(latDeg), Longitude(lonDeg), year)`
+- Any reference to `Radians` → use `Math.toRadians()` directly
+- Any reference to `GOLDEN_HOUR_MORNING_START` → use `GOLDEN_HOUR_MORNING_END`
+- `report.moonAgeHours` → now nullable: `report.moonAgeHours ?: 0` for legacy behavior

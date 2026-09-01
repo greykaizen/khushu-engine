@@ -97,7 +97,7 @@ class PrayerBreadthTest {
     fun travelFactsAreObjectiveAndNeverMutateTimes() {
         val date = LocalDate.of(2025, 7, 8)
         val travelled = engine.prayer.windows.travelFacts(
-            london, date, travelledDistanceKm = 120.0,
+            london, date, travelledDistanceKm = com.khushu.engine.core.units.Kilometers(120.0),
         )
         assertEquals(true, travelled.qasrEligibleByDistance)
         assertEquals(setOf(PrayerStatus.Prayer.DHUHR, PrayerStatus.Prayer.ASR, PrayerStatus.Prayer.ISHA), travelled.shortenable)
@@ -106,7 +106,7 @@ class PrayerBreadthTest {
         assertEquals(t.asr.adjusted, travelled.dhuhrJoinsAsrAt)
         assertEquals(t.isha.adjusted, travelled.maghribJoinsIshaAt)
 
-        val notTravelled = engine.prayer.windows.travelFacts(london, date, travelledDistanceKm = 5.0)
+        val notTravelled = engine.prayer.windows.travelFacts(london, date, travelledDistanceKm = com.khushu.engine.core.units.Kilometers(5.0))
         assertEquals(false, notTravelled.qasrEligibleByDistance)
     }
 

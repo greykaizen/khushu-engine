@@ -18,7 +18,6 @@ package com.khushu.engine.astronomy
  */
 data class AltitudeConventions(
     val sunriseSunsetDeg: Double = -0.833,
-    val blueHourLowerDeg: Double = -6.0,
     val blueHourUpperDeg: Double = -4.0,
     val goldenHourUpperDeg: Double = 6.0,
     val civilTwilightDeg: Double = -6.0,

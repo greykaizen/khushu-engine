@@ -240,7 +240,7 @@ class KhushuEngine {
             fun travelFacts(
                 location: Location,
                 date: LocalDate,
-                travelledDistanceKm: Double,
+                travelledDistanceKm: com.khushu.engine.core.units.Kilometers,
                 distanceThresholdKm: Double? = null,
                 config: PrayerConfiguration = PrayerConfiguration(),
             ): Prayer.TravelFacts = Prayer.travelFacts(location, date, travelledDistanceKm, distanceThresholdKm, config)

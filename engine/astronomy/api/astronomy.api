@@ -1,21 +1,19 @@
 public final class com/khushu/engine/astronomy/AltitudeConventions {
 	public fun <init> ()V
-	public fun <init> (DDDDDDDLjava/lang/Double;Ljava/lang/Double;)V
-	public synthetic fun <init> (DDDDDDDLjava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (DDDDDDLjava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (DDDDDDLjava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()D
 	public final fun component2 ()D
 	public final fun component3 ()D
 	public final fun component4 ()D
 	public final fun component5 ()D
 	public final fun component6 ()D
-	public final fun component7 ()D
+	public final fun component7 ()Ljava/lang/Double;
 	public final fun component8 ()Ljava/lang/Double;
-	public final fun component9 ()Ljava/lang/Double;
-	public final fun copy (DDDDDDDLjava/lang/Double;Ljava/lang/Double;)Lcom/khushu/engine/astronomy/AltitudeConventions;
-	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/AltitudeConventions;DDDDDDDLjava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public final fun copy (DDDDDDLjava/lang/Double;Ljava/lang/Double;)Lcom/khushu/engine/astronomy/AltitudeConventions;
+	public static synthetic fun copy$default (Lcom/khushu/engine/astronomy/AltitudeConventions;DDDDDDLjava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/AltitudeConventions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAstronomicalTwilightDeg ()D
-	public final fun getBlueHourLowerDeg ()D
 	public final fun getBlueHourUpperDeg ()D
 	public final fun getCivilTwilightDeg ()D
 	public final fun getGoldenHourUpperDeg ()D
@@ -178,7 +176,7 @@ public final class com/khushu/engine/astronomy/HilalForecastDay {
 }
 
 public final class com/khushu/engine/astronomy/HilalReport {
-	public synthetic fun <init> (JLjava/lang/Long;JIIDDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLjava/lang/Long;JILjava/lang/Integer;DDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()J
 	public final fun component10 ()Lcom/khushu/engine/astronomy/YallopGrade;
 	public final fun component11 ()Lcom/khushu/engine/astronomy/OdehZone;
@@ -186,13 +184,13 @@ public final class com/khushu/engine/astronomy/HilalReport {
 	public final fun component2 ()Ljava/lang/Long;
 	public final fun component3 ()J
 	public final fun component4 ()I
-	public final fun component5 ()I
+	public final fun component5 ()Ljava/lang/Integer;
 	public final fun component6 ()D
 	public final fun component7 ()D
 	public final fun component8-Kxo4Pdc ()D
 	public final fun component9 ()D
-	public final fun copy-NRnVkRQ (JLjava/lang/Long;JIIDDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;)Lcom/khushu/engine/astronomy/HilalReport;
-	public static synthetic fun copy-NRnVkRQ$default (Lcom/khushu/engine/astronomy/HilalReport;JLjava/lang/Long;JIIDDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/HilalReport;
+	public final fun copy-NRnVkRQ (JLjava/lang/Long;JILjava/lang/Integer;DDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;)Lcom/khushu/engine/astronomy/HilalReport;
+	public static synthetic fun copy-NRnVkRQ$default (Lcom/khushu/engine/astronomy/HilalReport;JLjava/lang/Long;JILjava/lang/Integer;DDDDLcom/khushu/engine/astronomy/YallopGrade;Lcom/khushu/engine/astronomy/OdehZone;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/astronomy/HilalReport;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getArcvDeg ()D
 	public final fun getBestTimeEpochMs ()J
@@ -200,7 +198,7 @@ public final class com/khushu/engine/astronomy/HilalReport {
 	public final fun getElongationDeg ()D
 	public final fun getIlluminationFraction ()D
 	public final fun getLagMinutes ()I
-	public final fun getMoonAgeHours ()I
+	public final fun getMoonAgeHours ()Ljava/lang/Integer;
 	public final fun getMoonsetEpochMs ()Ljava/lang/Long;
 	public final fun getOdeh ()Lcom/khushu/engine/astronomy/OdehZone;
 	public final fun getSunsetEpochMs ()J
@@ -497,7 +495,6 @@ public final class com/khushu/engine/astronomy/SolarEventType : java/lang/Enum {
 	public static final field CIVIL_DUSK Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field GOLDEN_HOUR_EVENING_START Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field GOLDEN_HOUR_MORNING_END Lcom/khushu/engine/astronomy/SolarEventType;
-	public static final field GOLDEN_HOUR_MORNING_START Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field ISHTIBAK_AL_NUJUM Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field ISTIWA_END Lcom/khushu/engine/astronomy/SolarEventType;
 	public static final field ISTIWA_START Lcom/khushu/engine/astronomy/SolarEventType;
@@ -547,8 +544,8 @@ public final class com/khushu/engine/astronomy/SolarPosition {
 public final class com/khushu/engine/astronomy/SubsolarAlignment {
 	public static final field INSTANCE Lcom/khushu/engine/astronomy/SubsolarAlignment;
 	public static final field MAX_SUNSUPPORTED_LAT_DEG D
-	public final fun passagesOver (DDID)Ljava/util/List;
-	public static synthetic fun passagesOver$default (Lcom/khushu/engine/astronomy/SubsolarAlignment;DDIDILjava/lang/Object;)Ljava/util/List;
+	public final fun passagesOver-WMQXus8 (DDID)Ljava/util/List;
+	public static synthetic fun passagesOver-WMQXus8$default (Lcom/khushu/engine/astronomy/SubsolarAlignment;DDIDILjava/lang/Object;)Ljava/util/List;
 }
 
 public final class com/khushu/engine/astronomy/SubsolarAlignment$ZenithPassage {

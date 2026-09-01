@@ -61,8 +61,8 @@ class BreadthTest {
         val instants = run {
             // solarAlignmentInstants moved to the qibla shadow-verification API.
             com.khushu.engine.astronomy.SubsolarAlignment.passagesOver(
-                com.khushu.engine.qibla.Qibla.KAABA_LATITUDE_DEG,
-                com.khushu.engine.qibla.Qibla.KAABA_LONGITUDE_DEG,
+                com.khushu.engine.core.geo.Latitude(com.khushu.engine.qibla.Qibla.KAABA_LATITUDE_DEG),
+                com.khushu.engine.core.geo.Longitude(com.khushu.engine.qibla.Qibla.KAABA_LONGITUDE_DEG),
                 2026,
             ).map { it.instant }
         }

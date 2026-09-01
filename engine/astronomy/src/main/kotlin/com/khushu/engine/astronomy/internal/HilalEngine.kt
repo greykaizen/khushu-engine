@@ -56,11 +56,8 @@ internal object HilalEngine {
         val widthArcmin = semiDiameterArcmin * (1.0 - cos(Math.toRadians(elongation)))
         val illumination = Ephemeris.moonIlluminationFraction(tBest)
 
-        // Most recent new moon before local sunset → moon age. Unresolvable
-        // conjunctions FAIL with NoResultException — never fabricated (D7;
-        // v1.13 removes the old sunset−24h fallback that invented one). A
-        // 31-day search window over a 29.53-day synodic cycle means this
-        // is a can't-happen guard, not an expected path.
+        // Most recent new moon before local sunset → moon age. Null when
+        // unresolvable (D7 — never fabricated).
         var conjunctionMs = io.github.cosinekitty.astronomy.searchMoonPhase(
             0.0, Ephemeris.time(sunsetMs - 30L * 86_400_000L), 31.0,
         )?.toMillisecondsSince1970()
@@ -69,11 +66,9 @@ internal object HilalEngine {
                 0.0, Ephemeris.time(sunsetMs - 45L * 86_400_000L), 46.0,
             )?.toMillisecondsSince1970()
         }
-        val conj = conjunctionMs
-            ?: throw com.khushu.engine.core.error.NoResultException(
-                "hilal conjunction not resolvable before sunset $sunsetMs",
-            )
-        val moonAgeHours = ((sunsetMs - conj).coerceAtLeast(0L) / 3_600_000L).toInt()
+        val moonAgeHours = conjunctionMs?.let { conj ->
+            ((sunsetMs - conj).coerceAtLeast(0L) / 3_600_000L).toInt()
+        }
 
         return HilalReport(
             sunsetEpochMs = sunsetMs,
@@ -144,8 +139,9 @@ internal object HilalEngine {
         return SightingVerdict("Turkey_Diyanet", checks.all { it }, checks.count { it }, checks.size)
     }
 
-    private fun wujudulHilal(moonAgeHours: Int, altAtSunset: Double): SightingVerdict {
-        val checks = listOf(moonAgeHours > 0, altAtSunset > 0.0)
+    /** Null (unresolvable) age cannot satisfy wujud-ul-hilal's age condition. */
+    private fun wujudulHilal(moonAgeHours: Int?, altAtSunset: Double): SightingVerdict {
+        val checks = listOf((moonAgeHours ?: 0) > 0, altAtSunset > 0.0)
         return SightingVerdict("Wujudul_Hilal", checks.all { it }, checks.count { it }, checks.size)
     }
 }

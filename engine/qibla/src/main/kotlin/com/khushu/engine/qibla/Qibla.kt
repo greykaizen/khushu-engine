@@ -2,7 +2,10 @@ package com.khushu.engine.qibla
 
 import com.khushu.engine.astronomy.Astronomy
 import com.khushu.engine.astronomy.SubsolarAlignment
+import com.khushu.engine.core.geo.Latitude
 import com.khushu.engine.core.geo.Location
+import com.khushu.engine.core.geo.Longitude
+import com.khushu.engine.core.observance.AngleMath
 import com.khushu.engine.core.units.Degrees
 import com.khushu.engine.core.units.Kilometers
 
@@ -41,8 +44,7 @@ object Qibla {
         val dLon = lon2 - lon1
         val y = kotlin.math.sin(dLon)
         val x = kotlin.math.cos(lat1) * kotlin.math.tan(lat2) - kotlin.math.sin(lat1) * kotlin.math.cos(dLon)
-        var b = Math.toDegrees(kotlin.math.atan2(y, x)) % 360.0
-        if (b < 0) b += 360.0
+        val b = AngleMath.normalizeDeg(Math.toDegrees(kotlin.math.atan2(y, x)))
 
         val central = kotlin.math.acos(
             (kotlin.math.sin(lat1) * kotlin.math.sin(lat2) +
@@ -58,20 +60,21 @@ object Qibla {
      * numerically unstable — these events are for everywhere else.
      */
     fun shadowVerification(year: Int, location: Location): List<QiblaShadowEvent> {
-        val kaaba = SubsolarAlignment.passagesOver(KAABA_LATITUDE_DEG, KAABA_LONGITUDE_DEG, year)
+        val kaaba = SubsolarAlignment.passagesOver(
+            Latitude(KAABA_LATITUDE_DEG), Longitude(KAABA_LONGITUDE_DEG), year,
+        )
         // Antipode of the Kaaba: negate latitude, flip longitude ±180.
         // (v1.13: IEEEremainder already normalizes to [-180, 180] — the old
         // `… - 180.0` post-subtract produced -320° for the Kaaba and was
         // caught by SubsolarAlignment's new range validation.)
-        val antiLat = -KAABA_LATITUDE_DEG
-        val antiLon = Math.IEEEremainder(KAABA_LONGITUDE_DEG + 180.0, 360.0)
+        val antiLat = Latitude(-KAABA_LATITUDE_DEG)
+        val antiLon = Longitude(Math.IEEEremainder(KAABA_LONGITUDE_DEG + 180.0, 360.0))
         val antipode = SubsolarAlignment.passagesOver(antiLat, antiLon, year)
 
         val out = mutableListOf<QiblaShadowEvent>()
         for (passage in kaaba) {
             val pos = Astronomy.sun.position(location, passage.instant)
-            var shadowB = pos.azimuthDeg % 360.0 // face toward sun == qibla; shadow points opposite
-            if (shadowB < 0) shadowB += 360.0
+            val shadowB = AngleMath.normalizeDeg(pos.azimuthDeg) // face toward sun == qibla; shadow points opposite
             out += QiblaShadowEvent(
                 instant = passage.instant,
                 method = ShadowMethod.FACE_TOWARD_SUN,
@@ -83,8 +86,7 @@ object Qibla {
         }
         for (passage in antipode) {
             val pos = Astronomy.sun.position(location, passage.instant)
-            var shadowB = (pos.azimuthDeg + 180.0) % 360.0 // face AWAY from sun
-            if (shadowB < 0) shadowB += 360.0
+            val shadowB = AngleMath.normalizeDeg(pos.azimuthDeg + 180.0) // face AWAY from sun
             out += QiblaShadowEvent(
                 instant = passage.instant,
                 method = ShadowMethod.FACE_AWAY_FROM_SUN,

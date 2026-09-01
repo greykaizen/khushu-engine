@@ -100,6 +100,11 @@ public final class com/khushu/engine/core/geo/Longitude {
 	public final synthetic fun unbox-impl ()D
 }
 
+public final class com/khushu/engine/core/observance/AngleMath {
+	public static final field INSTANCE Lcom/khushu/engine/core/observance/AngleMath;
+	public final fun normalizeDeg (D)D
+}
+
 public final class com/khushu/engine/core/observance/DayStreakMath {
 	public static final field INSTANCE Lcom/khushu/engine/core/observance/DayStreakMath;
 	public final fun dayClasses (Ljava/time/LocalDate;Ljava/time/LocalDate;Lkotlin/jvm/functions/Function1;Ljava/util/List;)Ljava/util/List;
@@ -179,25 +184,5 @@ public final class com/khushu/engine/core/units/Kilometers {
 	public fun toString ()Ljava/lang/String;
 	public static fun toString-impl (D)Ljava/lang/String;
 	public final synthetic fun unbox-impl ()D
-}
-
-public final class com/khushu/engine/core/units/Radians {
-	public static final field Companion Lcom/khushu/engine/core/units/Radians$Companion;
-	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/units/Radians;
-	public static fun constructor-impl (D)D
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (DLjava/lang/Object;)Z
-	public static final fun equals-impl0 (DD)Z
-	public final fun getValue ()D
-	public fun hashCode ()I
-	public static fun hashCode-impl (D)I
-	public static final fun toDegrees-Uf8F044 (D)D
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (D)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()D
-}
-
-public final class com/khushu/engine/core/units/Radians$Companion {
-	public final fun ofDegrees-zOj8m3g (D)D
 }
 

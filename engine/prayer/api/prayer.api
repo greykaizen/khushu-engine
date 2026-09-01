@@ -106,8 +106,8 @@ public final class com/khushu/engine/prayer/Prayer {
 	public static synthetic fun times$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/PrayerTimesResult;
 	public final fun timesForRange (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun timesForRange$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
-	public final fun travelFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
-	public static synthetic fun travelFacts$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+	public final fun travelFacts-5AGUcLE (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+	public static synthetic fun travelFacts-5AGUcLE$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
 	public final fun upcoming (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;ILcom/khushu/engine/prayer/PrayerConfiguration;)Ljava/util/List;
 	public static synthetic fun upcoming$default (Lcom/khushu/engine/prayer/Prayer;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;Ljava/time/ZoneId;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/util/List;
 }

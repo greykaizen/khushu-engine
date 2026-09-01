@@ -100,15 +100,19 @@ class AstronomyValidationTest {
 
     @Test
     fun subsolarAlignmentValidatesTargets() {
-        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(51.5, 0.0, 2026) } // outside tropics
-        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(Double.NaN, 0.0, 2026) }
-        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(0.0, -181.0, 2026) }
-        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(0.0, 0.0, 1650) }
-        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(0.0, 0.0, 2026, toleranceDeg = -1.0) }
-        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(0.0, 0.0, 2026, toleranceDeg = Double.NaN) }
+        fun lat(v: Double) = com.khushu.engine.core.geo.Latitude(v)
+        fun lon(v: Double) = com.khushu.engine.core.geo.Longitude(v)
+        // outside tropics — Latitude itself validates [-90,90] but tropics
+        // envelope (±23.44) is passagesOver's own check
+        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(lat(51.5), lon(0.0), 2026) }
+        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(lat(Double.NaN), lon(0.0), 2026) }
+        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(lat(0.0), lon(-181.0), 2026) }
+        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(lat(0.0), lon(0.0), 1650) }
+        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(lat(0.0), lon(0.0), 2026, toleranceDeg = -1.0) }
+        assertFailsWith<InvalidParameterException> { SubsolarAlignment.passagesOver(lat(0.0), lon(0.0), 2026, toleranceDeg = Double.NaN) }
         // The Kaaba and its antipode — qibla's exact usage — must pass.
-        assertTrue(SubsolarAlignment.passagesOver(21.4225, 39.8262, 2026).isNotEmpty())
-        assertTrue(SubsolarAlignment.passagesOver(-21.4225, -140.1738, 2026).isNotEmpty())
+        assertTrue(SubsolarAlignment.passagesOver(lat(21.4225), lon(39.8262), 2026).isNotEmpty())
+        assertTrue(SubsolarAlignment.passagesOver(lat(-21.4225), lon(-140.1738), 2026).isNotEmpty())
     }
 
     @Test
@@ -116,6 +120,6 @@ class AstronomyValidationTest {
         // Non-null age with a NoResultException guard on unresolvable
         // conjunctions (D7) — additive API preserved.
         val report = Astronomy.hilal.visibility(makkah, java.time.LocalDate.of(2026, 8, 30), java.time.ZoneId.of("Asia/Riyadh"))
-        assertTrue(report == null || report.moonAgeHours >= 0)
+        assertTrue(report == null || (report.moonAgeHours ?: 0) >= 0)
     }
 }
