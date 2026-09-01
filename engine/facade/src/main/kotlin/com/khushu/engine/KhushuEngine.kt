@@ -22,7 +22,9 @@ import com.khushu.engine.core.geo.Location
 import com.khushu.engine.prayer.Prayer
 import com.khushu.engine.prayer.PrayerConfiguration
 import com.khushu.engine.prayer.PrayerStatus
+import com.khushu.engine.prayer.PrayerTiming
 import com.khushu.engine.prayer.PrayerTimesResult
+import com.khushu.engine.prayer.Qada
 import com.khushu.engine.prayer.TahajjudWindow
 import com.khushu.engine.qibla.Qibla
 import com.khushu.engine.qibla.QiblaShadowEvent
@@ -90,6 +92,9 @@ class KhushuEngine {
 
     /** Whole-day composite: every fact of one civil date in a single pass. */
     val day = com.khushu.engine.DayApi()
+
+    /** Qadāʾ & excused-range boundary computation (docs/qada-design.md rev 3). */
+    val qada = QadaApi()
 
     // ── Namespaces: pure delegation, zero logic ─────────────────────────────
 
@@ -782,5 +787,28 @@ class KhushuEngine {
             totalAyahs: Int = Observance.TOTAL_AYAHS,
             dailyRateAyahs: Double? = null,
         ): KhatmFacts = Observance.khatmFacts(completed, juzRanges, today, totalAyahs, dailyRateAyahs)
+    }
+
+    /**
+     * Qadāʾ & excused-range computation (v1.17): boundary prayer obligations
+     * around caller-supplied ḥayḍ/nifās periods. The host PRE-CLASSIFIES
+     * periods; the engine never interprets raw bleeding. Every non-default
+     * parameter emits provenance into the result.
+     */
+    class QadaApi internal constructor() {
+        /** School default pairing: Ḥanafī=UNPAIRED; others=PAIRED. */
+        fun defaultPairing(school: Qada.QadaSchool): Qada.BoundaryPairing =
+            Qada.defaultPairing(school)
+
+        /** School default Witr inclusion: Ḥanafī=true; others=false. */
+        fun defaultIncludeWitr(school: Qada.QadaSchool): Boolean =
+            Qada.defaultIncludeWitr(school)
+
+        /** Full qadāʾ report over pre-classified periods + schedules. */
+        fun qadaReport(
+            periods: List<Qada.FiqhPeriod>,
+            schedules: List<Qada.DaySchedule>,
+            config: Qada.QadaConfig,
+        ): Qada.QadaReport = Qada.qadaReport(periods, schedules, config)
     }
 }

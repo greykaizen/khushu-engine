@@ -150,6 +150,7 @@ public final class com/khushu/engine/KhushuEngine {
 	public final fun getMushaf ()Lcom/khushu/engine/KhushuEngine$MushafApi;
 	public final fun getObservance ()Lcom/khushu/engine/KhushuEngine$ObservanceApi;
 	public final fun getPrayer ()Lcom/khushu/engine/KhushuEngine$PrayerApi;
+	public final fun getQada ()Lcom/khushu/engine/KhushuEngine$QadaApi;
 	public final fun getQibla ()Lcom/khushu/engine/KhushuEngine$QiblaApi;
 	public final fun getTasbih ()Lcom/khushu/engine/KhushuEngine$TasbihApi;
 	public final fun getZakat ()Lcom/khushu/engine/KhushuEngine$ZakatApi;
@@ -313,6 +314,12 @@ public final class com/khushu/engine/KhushuEngine$PrayerApi$WindowsApi {
 	public static synthetic fun imsak$default (Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;ILcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Ljava/time/Instant;
 	public final fun travelFacts (Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
 	public static synthetic fun travelFacts$default (Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/LocalDate;DLjava/lang/Double;Lcom/khushu/engine/prayer/PrayerConfiguration;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Prayer$TravelFacts;
+}
+
+public final class com/khushu/engine/KhushuEngine$QadaApi {
+	public final fun defaultIncludeWitr (Lcom/khushu/engine/prayer/Qada$QadaSchool;)Z
+	public final fun defaultPairing (Lcom/khushu/engine/prayer/Qada$QadaSchool;)Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+	public final fun qadaReport (Ljava/util/List;Ljava/util/List;Lcom/khushu/engine/prayer/Qada$QadaConfig;)Lcom/khushu/engine/prayer/Qada$QadaReport;
 }
 
 public final class com/khushu/engine/KhushuEngine$QiblaApi {

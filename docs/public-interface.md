@@ -844,3 +844,57 @@ definition isolation; observance (16): toggle/dedup/upsert-preserves-createdAt/
 views, mark-only streaks, domain isolation, excused reading streaks,
 progress aggregation, history windows, khatm normalization/frontier-gap/
 disjoint/projection/edges, canonical 6236; facade parity throughout.
+
+## v1.17 additions (2026-08) — qada engine + ANTI_TRANSIT_FAJR (gate dissolution)
+
+Both former deferred-queue gates dissolved by the parameter model: the
+engine implements documented scholarly positions as selectable parameters;
+the host selects per their fiqh; provenance carried in KDoc + result notes.
+
+### prayer — ANTI_TRANSIT_FAJR (HighLatitudeRule new value)
+```
+HighLatitudeRule += ANTI_TRANSIT_FAJR
+  // Opt-in: when the Fajr depression angle is unreachable (persistent
+  // twilight — sun's minimum altitude stays above the convention's Fajr
+  // angle), substitute sun.antiTransit (solar midnight) for Fajr.
+  // Muwaqqit-documented position (Ibn ʿĀbidīn, al-Ṭaḥṭāwī, Ibn Ḥajar,
+  // Quṭb al-Dīn). docs/aqrab-al-ayyam-review.md is the full dossier.
+  // Normal-latitude dates: no substitution (angle reachable).
+HighLatitudeResolution += RESOLVED_BY_ANTI_TRANSIT
+  // Audit field signals when anti-transit substitution was applied.
+Prayer.audit.warnings carries: "fajr: anti-transit substitution
+  (persistent twilight) — Muwaqqit-documented position"
+```
+
+### prayer — Qada & excused-range computation (docs/qada-design.md rev 3)
+```
+Qada.FiqhPeriod(start: Instant, end: Instant, type: HAYD | NIFAS)
+  // The host PRE-CLASSIFIES periods — the engine NEVER interprets raw
+  // bleeding. Instant-based (not LocalDate) so boundary cases during
+  // prayer windows resolve correctly.
+Qada.QadaConfig(school: QadaSchool, pairingOverride?, includeWitr?)
+  // HANAFI → UNPAIRED default + Witr included (Darul Iftaa #8301)
+  // MALIKI/SHAFII/HANBALI → PAIRED default, Witr not in qada
+  // Override any parameter — provenance emitted into result
+Qada.DaySchedule(date, fajr, dhuhr, asr, maghrib, isha, nextDayFajr, zoneId)
+Qada.qadaReport(periods, schedules, config): QadaReport
+  // suppressedPrayers + boundaryObligations + ghuslRequiredAt + provenance
+  // Boundary rules: pure during Asr → Dhuhr+Asr owed (majority PAIRED);
+  // Hanafi → only Asr owed (UNPAIRED). Host overrides via pairingOverride.
+Qada.BoundaryPairing { PAIRED, UNPAIRED }
+Qada.BoundaryRuling(prayer, owed, rule)   // per-ruling provenance
+Qada.PrayerInstance(date, kind, enteredAt)
+```
+
+### facade
+```
+engine.qada.defaultPairing(school)       // school→pairing default
+engine.qada.defaultIncludeWitr(school)   // school→witr default
+engine.qada.qadaReport(periods, schedules, config)
+```
+
+### tests (13 new)
+- AntiTransitFajrTest (4): substitution at London solstice, normal-latitude
+  unchanged, winter normal, audit carries rule+resolution+warning
+- QadaTest (9): full-day suppression, no-overlap, paired/unpaired boundary,
+  school defaults, ghusl, validation

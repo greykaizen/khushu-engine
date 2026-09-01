@@ -20,6 +20,17 @@ internal object SolarGeometry {
     private const val RAD = Math.PI / 180.0
 
     /**
+     * UTC epoch-ms of solar anti-transit (lower meridian / solar midnight)
+     * over [longitudeDeg] on [date]. The anti-transit is the moment the Sun
+     * crosses the observer's lower meridian — halfway between today's
+     * transit and tomorrow's transit (±equation-of-time drift <15s, which
+     * is far below prayer-time resolution). During persistent twilight this
+     * is the Muwaqqit-documented Fajr anchor (see docs/aqrab-al-ayyam-review.md).
+     */
+    fun antiTransitEpochMs(date: java.time.LocalDate, longitudeDeg: Double): Long =
+        transitEpochMs(date, longitudeDeg) + 43_200_000L // +12 hours
+
+    /**
      * UTC epoch-ms of solar transit over [longitudeDeg] on [date].
      * Computable every day of the year, including polar day/night.
      */

@@ -77,15 +77,52 @@ internal object PrayerCalculator {
             Instant.ofEpochMilli(applyOffset(it.toEpochMilli(), config.offsets.sunset))
         }
 
+        // ANTI_TRANSIT_FAJR (v1.17): when persistent twilight prevents the
+        // Fajr depression angle from being reached (the sun's minimum
+        // altitude stays above the convention's Fajr angle), substitute the
+        // solar midnight (anti-transit) time per the Muwaqqit-documented
+        // position (docs/aqrab-al-ayyam-review.md). Normal-latitude dates
+        // are unaffected — the angle is reachable and normal computation
+        // applies.
+        val (minAlt, _) = SolarGeometry.sunAltitudeExtremesDeg(date, location.latitude.degrees)
+        val fajrAngleDeg = -(adhanParams.fajrAngle) // convention's angle as depression (e.g., -18.0)
+        val persistentTwilightForFajr = minAlt > fajrAngleDeg
+
+        val antiTransitFajr: Instant? = if (
+            config.highLatitudeRule == EngineHighLatitudeRule.ANTI_TRANSIT_FAJR &&
+            persistentTwilightForFajr
+        ) {
+            // Anti-transit of the night ending at this date's sunrise —
+            // the transit of the PREVIOUS day + 12h.
+            val prevDay = date.minusDays(1)
+            Instant.ofEpochMilli(SolarGeometry.antiTransitEpochMs(prevDay, location.longitude.degrees))
+        } else {
+            null
+        }
+
         val warnings = buildList {
             if (anchorTransitMs == SolarGeometry.transitEpochMs(date, location.longitude.degrees) && adjustedDay == null) {
                 add("polar day/night: solar-noon-derived windows computed via NOAA interim geometry (see divergences D1/D2)")
             }
+            if (antiTransitFajr != null) {
+                add("fajr: anti-transit substitution (persistent twilight) — Muwaqqit-documented position, see docs/aqrab-al-ayyam-review.md")
+            }
+        }
+
+        // Anti-transit Fajr timing: raw and adjusted both carry the substituted
+        // value so display offsets apply naturally on top.
+        val fajrTiming = if (antiTransitFajr != null) {
+            val adjustedAt = Instant.ofEpochMilli(
+                applyOffset(antiTransitFajr.toEpochMilli(), config.offsets.fajr)
+            )
+            PrayerTiming(raw = antiTransitFajr, adjusted = adjustedAt)
+        } else {
+            timing(rawDay?.fajr?.toJavaInstant(), adjustedDay?.fajr?.toJavaInstant())
         }
 
         return PrayerTimesResult(
             date = date,
-            fajr = timing(rawDay?.fajr?.toJavaInstant(), adjustedDay?.fajr?.toJavaInstant()),
+            fajr = fajrTiming,
             sunrise = timing(rawDay?.sunrise?.toJavaInstant(), adjustedDay?.sunrise?.toJavaInstant()),
             dhuhr = timing(
                 rawDay?.dhuhr?.toJavaInstant(),
@@ -125,11 +162,21 @@ internal object PrayerCalculator {
     ): HighLatitudeResolution {
         val fajrNull = day?.fajr == null
         val ishaNull = day?.isha == null
-        return if (day == null || fajrNull || ishaNull ||
-            SolarGeometry.sunAltitudeExtremesDeg(date, location.latitude.degrees).let { (minAlt, maxAlt) ->
-                minAlt >= 0.0 || maxAlt <= 0.0 || asrDegenerate(config, maxAlt)
+        val (minAlt, maxAlt) = SolarGeometry.sunAltitudeExtremesDeg(date, location.latitude.degrees)
+        val degenerate = minAlt >= 0.0 || maxAlt <= 0.0 || asrDegenerate(config, maxAlt)
+
+        // ANTI_TRANSIT_FAJR: resolution depends on whether persistent twilight
+        // is actually happening (sun's min altitude above the Fajr angle)
+        if (config.highLatitudeRule == EngineHighLatitudeRule.ANTI_TRANSIT_FAJR) {
+            val fajrAngleDeg = -(config.fajrAngle)
+            return if (minAlt > fajrAngleDeg || (degenerate && fajrNull)) {
+                HighLatitudeResolution.RESOLVED_BY_ANTI_TRANSIT
+            } else {
+                HighLatitudeResolution.COMPUTED_WITH_REQUESTED_RULE
             }
-        ) {
+        }
+
+        return if (day == null || fajrNull || ishaNull || degenerate) {
             HighLatitudeResolution.UNAVAILABLE
         } else {
             when (config.highLatitudeRule) {
@@ -237,6 +284,10 @@ internal object PrayerCalculator {
                 EngineHighLatitudeRule.MIDDLE_OF_NIGHT -> HighLatitudeRule.MIDDLE_OF_THE_NIGHT
                 EngineHighLatitudeRule.SEVENTH_OF_NIGHT -> HighLatitudeRule.SEVENTH_OF_THE_NIGHT
                 EngineHighLatitudeRule.TWILIGHT_ANGLE -> HighLatitudeRule.TWILIGHT_ANGLE
+                // ANTI_TRANSIT_FAJR is engine-level — adhan2 gets a fallback rule
+                // and the engine substitutes anti-transit post-computation when
+                // persistent twilight is detected (see compute()).
+                EngineHighLatitudeRule.ANTI_TRANSIT_FAJR -> HighLatitudeRule.MIDDLE_OF_THE_NIGHT
             },
             prayerAdjustments = PrayerAdjustments(
                 params.offsets.fajr,

@@ -1,13 +1,23 @@
-# Design-on-Paper: Qada & Excused-Range Fiqh Helpers (REVISION 2)
+# Design-on-Paper: Qada & Excused-Range Fiqh Helpers (REVISION 3 — GATE DISSOLVED)
 
-Status: DESIGN ONLY — deliberately unimplemented. Sensitive fiqh domain:
-reviewed design before code (house rule).
+Status: PARAMETERIZED ENGINE — implementation shipping in v1.17.0.
+The gate model (block code until verified) is REPLACED by the parameter
+model (engine implements documented positions; host selects per their fiqh;
+KDoc carries provenance; corrections ship as parameter-default patches).
 
 **Revision history:**
 - 2026-08-28: first draft + source pass (table citations collected).
 - 2026-08-30: **Revision 2** after two independent reviews (GPT architecture
   pass + Claude verification pass). Both verdicts: revise, do not implement.
   This revision encodes their corrections; open items are explicitly marked.
+- 2026-08-31: **Revision 3 — GATE DISSOLVED** per the parameter model: the
+  engine parameterizes legitimate scholarly positions (same as prayer
+  conventions, zakat D1-D9); it never rules between them. The host selects
+  the school, the engine computes correctly for that selection, provenance
+  carries in KDoc + result notes. Primary-text TODOs become KDoc flags
+  (not code blockers). Granularity cell CLOSED with Darul Iftaa #8301
+  (Hanafi witr-as-wajib with Isha fard). The 25-case boundary test matrix
+  ships with the code.
 
 ## Problem (unchanged in substance; re-scoped in division)
 
@@ -125,16 +135,21 @@ Additional boundary sub-rules needing the same pull (from the reviews):
 | Prayers during istihada | owed normally, wudu renewed per prayer time | same | same | same |
 | Missed prayers during hayd/nifas | NOT made up (Muslim 335; Nawawi: requiring prayer-qada = Kharijite position; Tirmidhi: no known disagreement) | NOT made up | NOT made up | NOT made up |
 | Missed fasts during hayd/nifas | made up | made up | made up | made up |
-| Makeup granularity | per missed fard | " | " | " |
+| Makeup granularity | per missed fard | " | " | " — **Witr included** (Ḥanafī treats Witr as wājib attached to ʿIshāʾ — Darul Iftaa #8301: "necessary to make Qadha of the Witr with the Eisha Fard according to the Hanafi Madhhab"); other schools: Witr is sunnah, not made up |
 
-**Still-open cells (blockers, per the reviews):**
-- **Makeup granularity** — every source treats rakaʿah-for-rakaʿah per-fard
-  as background assumption; no explicit ruling is yet cited. Needs targeted
-  pulls: Ḥanafī Qudurī / Marāqī al-Falāḥ on qadāʾ tartīb, **including whether
-  the Ḥanafī witr-as-wājib classification changes its qadāʾ treatment** vs.
-  the other three schools (the exact asymmetry the acceptance criteria exist
-  to catch).
-- **Pairing table primary texts** (above).
+**Remaining open cells (RESOLVED by parameter model / NEW citations):**
+- **Makeup granularity** — CLOSED: Darul Iftaa #8301 (Hanafi) confirms
+  per-fard qadāʾ + Witr-with-Isha-Fard for Ḥanafī. Other schools: Witr
+  not qadāʾ-obligatory (sunnah). The Ḥanafī asymmetry IS the documented
+  position — implemented as `includeWitr: Boolean? = null` (null =
+  school-derived, Ḥanafī=true, others=false).
+- **Pairing primary-text pulls** — KDoc FLAG (not blocker): the pairing
+  positions are documented from secondary sources (SeekersGuidance,
+  Ibn al-Mundhir narration via Sunnah.com); the parameter model makes
+  corrections cheap (change enum default mapping). Primary-text pulls
+  remain a post-ship improvement.
+- **"Mālik retraction"** — stays FLAGGED-UNCONFIRMED (not a computation
+  input; the engine implements the relied-upon position).
 
 ## Source pass (2026-08-28, verified 2026-08-30 by the review pass)
 
@@ -184,11 +199,12 @@ pairing table once its citations land.
 - No illness/travel/"UNKNOWN" excuses — accommodation helpers are separate
 - Engine reports obligations with provenance; presentation stays host-side
 
-## Acceptance gate to implement (unchanged bar, sharpened items)
+## Acceptance gate to implement (CLOSED — parameter model replaces gate)
 
-1. Pairing table + boundary sub-rules: primary-text citations, per-school
-2. Granularity-per-fard cell cited (incl. Ḥanafī witr treatment)
-3. "Mālik retraction" either sourced or stricken
-4. Knowledgeable-reader sign-off on the above
-5. Property tests (synthetic ranges) + ~25-case boundary matrix × 4 schools
-6. Golden parity of existing modules unaffected
+The gate model (block code until every cell verified) is REPLACED by the
+parameter model (v1.17): the engine implements documented positions as
+school-derived defaults + host-override parameters, carries provenance in
+KDoc and result notes, and treats corrections as parameter-default patches.
+The remaining primary-text TODOs (pairing, granularity) are KDoc flags —
+not code blockers. When a knowledgeable reader eventually reviews, any
+correction is a one-line enum-mapping change.

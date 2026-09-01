@@ -42,6 +42,7 @@ public final class com/khushu/engine/prayer/ConventionInfoKt {
 
 public final class com/khushu/engine/prayer/HighLatitudeResolution : java/lang/Enum {
 	public static final field COMPUTED_WITH_REQUESTED_RULE Lcom/khushu/engine/prayer/HighLatitudeResolution;
+	public static final field RESOLVED_BY_ANTI_TRANSIT Lcom/khushu/engine/prayer/HighLatitudeResolution;
 	public static final field RESOLVED_BY_MIDDLE_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeResolution;
 	public static final field RESOLVED_BY_SEVENTH_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeResolution;
 	public static final field RESOLVED_BY_TWILIGHT_ANGLE Lcom/khushu/engine/prayer/HighLatitudeResolution;
@@ -52,6 +53,7 @@ public final class com/khushu/engine/prayer/HighLatitudeResolution : java/lang/E
 }
 
 public final class com/khushu/engine/prayer/HighLatitudeRule : java/lang/Enum {
+	public static final field ANTI_TRANSIT_FAJR Lcom/khushu/engine/prayer/HighLatitudeRule;
 	public static final field MIDDLE_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeRule;
 	public static final field SEVENTH_OF_NIGHT Lcom/khushu/engine/prayer/HighLatitudeRule;
 	public static final field TWILIGHT_ANGLE Lcom/khushu/engine/prayer/HighLatitudeRule;
@@ -430,6 +432,145 @@ public final class com/khushu/engine/prayer/PrayerTiming {
 	public final fun getRaw ()Ljava/time/Instant;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Qada {
+	public static final field HANAFI_INCLUDES_WITR Z
+	public static final field INSTANCE Lcom/khushu/engine/prayer/Qada;
+	public final fun defaultIncludeWitr (Lcom/khushu/engine/prayer/Qada$QadaSchool;)Z
+	public final fun defaultPairing (Lcom/khushu/engine/prayer/Qada$QadaSchool;)Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+	public final fun qadaReport (Ljava/util/List;Ljava/util/List;Lcom/khushu/engine/prayer/Qada$QadaConfig;)Lcom/khushu/engine/prayer/Qada$QadaReport;
+}
+
+public final class com/khushu/engine/prayer/Qada$BoundaryPairing : java/lang/Enum {
+	public static final field PAIRED Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+	public static final field UNPAIRED Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+	public static fun values ()[Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+}
+
+public final class com/khushu/engine/prayer/Qada$BoundaryRuling {
+	public fun <init> (Lcom/khushu/engine/prayer/PrayerStatus$Prayer;ZLjava/lang/String;)V
+	public final fun component1 ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Lcom/khushu/engine/prayer/PrayerStatus$Prayer;ZLjava/lang/String;)Lcom/khushu/engine/prayer/Qada$BoundaryRuling;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$BoundaryRuling;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;ZLjava/lang/String;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$BoundaryRuling;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOwed ()Z
+	public final fun getPrayer ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public final fun getRule ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Qada$DaySchedule {
+	public fun <init> (Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/ZoneId;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun component4 ()Ljava/time/Instant;
+	public final fun component5 ()Ljava/time/Instant;
+	public final fun component6 ()Ljava/time/Instant;
+	public final fun component7 ()Ljava/time/Instant;
+	public final fun component8 ()Ljava/time/ZoneId;
+	public final fun copy (Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/ZoneId;)Lcom/khushu/engine/prayer/Qada$DaySchedule;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$DaySchedule;Ljava/time/LocalDate;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/Instant;Ljava/time/ZoneId;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$DaySchedule;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAsr ()Ljava/time/Instant;
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getDhuhr ()Ljava/time/Instant;
+	public final fun getFajr ()Ljava/time/Instant;
+	public final fun getIsha ()Ljava/time/Instant;
+	public final fun getMaghrib ()Ljava/time/Instant;
+	public final fun getNextDayFajr ()Ljava/time/Instant;
+	public final fun getZoneId ()Ljava/time/ZoneId;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Qada$FiqhPeriod {
+	public fun <init> (Ljava/time/Instant;Ljava/time/Instant;Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;)V
+	public final fun component1 ()Ljava/time/Instant;
+	public final fun component2 ()Ljava/time/Instant;
+	public final fun component3 ()Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;
+	public final fun copy (Ljava/time/Instant;Ljava/time/Instant;Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;)Lcom/khushu/engine/prayer/Qada$FiqhPeriod;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$FiqhPeriod;Ljava/time/Instant;Ljava/time/Instant;Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$FiqhPeriod;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()Ljava/time/Instant;
+	public final fun getStart ()Ljava/time/Instant;
+	public final fun getType ()Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Qada$FiqhPeriodType : java/lang/Enum {
+	public static final field HAYD Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;
+	public static final field NIFAS Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;
+	public static fun values ()[Lcom/khushu/engine/prayer/Qada$FiqhPeriodType;
+}
+
+public final class com/khushu/engine/prayer/Qada$PrayerInstance {
+	public fun <init> (Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public final fun component3 ()Ljava/time/Instant;
+	public final fun copy (Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;)Lcom/khushu/engine/prayer/Qada$PrayerInstance;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$PrayerInstance;Ljava/time/LocalDate;Lcom/khushu/engine/prayer/PrayerStatus$Prayer;Ljava/time/Instant;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$PrayerInstance;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getEnteredAt ()Ljava/time/Instant;
+	public final fun getKind ()Lcom/khushu/engine/prayer/PrayerStatus$Prayer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Qada$QadaConfig {
+	public fun <init> (Lcom/khushu/engine/prayer/Qada$QadaSchool;Lcom/khushu/engine/prayer/Qada$BoundaryPairing;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Lcom/khushu/engine/prayer/Qada$QadaSchool;Lcom/khushu/engine/prayer/Qada$BoundaryPairing;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/prayer/Qada$QadaSchool;
+	public final fun component2 ()Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+	public final fun component3 ()Ljava/lang/Boolean;
+	public final fun copy (Lcom/khushu/engine/prayer/Qada$QadaSchool;Lcom/khushu/engine/prayer/Qada$BoundaryPairing;Ljava/lang/Boolean;)Lcom/khushu/engine/prayer/Qada$QadaConfig;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$QadaConfig;Lcom/khushu/engine/prayer/Qada$QadaSchool;Lcom/khushu/engine/prayer/Qada$BoundaryPairing;Ljava/lang/Boolean;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$QadaConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIncludeWitr ()Ljava/lang/Boolean;
+	public final fun getPairingOverride ()Lcom/khushu/engine/prayer/Qada$BoundaryPairing;
+	public final fun getSchool ()Lcom/khushu/engine/prayer/Qada$QadaSchool;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Qada$QadaReport {
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lcom/khushu/engine/prayer/Qada$QadaReport;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$QadaReport;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$QadaReport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBoundaryObligations ()Ljava/util/List;
+	public final fun getClassifications ()Ljava/util/List;
+	public final fun getGhuslRequiredAt ()Ljava/util/List;
+	public final fun getProvenance ()Ljava/util/List;
+	public final fun getSuppressedPrayers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/prayer/Qada$QadaSchool : java/lang/Enum {
+	public static final field HANAFI Lcom/khushu/engine/prayer/Qada$QadaSchool;
+	public static final field HANBALI Lcom/khushu/engine/prayer/Qada$QadaSchool;
+	public static final field MALIKI Lcom/khushu/engine/prayer/Qada$QadaSchool;
+	public static final field SHAFII Lcom/khushu/engine/prayer/Qada$QadaSchool;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/prayer/Qada$QadaSchool;
+	public static fun values ()[Lcom/khushu/engine/prayer/Qada$QadaSchool;
 }
 
 public final class com/khushu/engine/prayer/RoundingPolicy : java/lang/Enum {

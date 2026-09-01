@@ -31,6 +31,18 @@ enum class HighLatitudeRule {
     MIDDLE_OF_NIGHT,
     SEVENTH_OF_NIGHT,
     TWILIGHT_ANGLE,
+    /**
+     * ANTI_TRANSIT_FAJR: when the Fajr depression angle is unreachable
+     * (persistent twilight — the sun never drops below the threshold),
+     * substitute the Sun's anti-transit (lower-meridian / solar midnight)
+     * time for Fajr, per the Muwaqqit-documented position backed by Ibn
+     * ʿĀbidīn, al-Ṭaḥṭāwī, Ibn Ḥajar and Quṭb al-Dīn al-Shīrāzī.
+     * See docs/aqrab-al-ayyam-review.md for the full dossier. Opt-in —
+     * hosts/users verify this position matches their fiqh before relying
+     * on it in high-latitude areas. The computation is already validated
+     * (`sun.antiTransit`, v1.14, <2s vs Muwaqqit). Isha unchanged.
+     */
+    ANTI_TRANSIT_FAJR,
 }
 
 /** How Fajr/Isha were resolved for a given day — never lie about a time's origin. */
@@ -40,6 +52,8 @@ enum class HighLatitudeResolution {
     RESOLVED_BY_MIDDLE_OF_NIGHT,
     RESOLVED_BY_SEVENTH_OF_NIGHT,
     RESOLVED_BY_TWILIGHT_ANGLE,
+    /** Fajr substituted with anti-transit (solar midnight) during persistent twilight. */
+    RESOLVED_BY_ANTI_TRANSIT,
     /** Physically uncomputable (polar day/night). */
     UNAVAILABLE,
 }
