@@ -16,6 +16,8 @@ include(
     ":engine:qibla",
     ":engine:zakat",
     ":engine:mushaf",
+    ":engine:tasbih",
+    ":engine:observance",
     ":engine:facade",
     ":store",
     ":tools:cli",

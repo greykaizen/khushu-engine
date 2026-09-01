@@ -755,3 +755,92 @@ statements; announcements govern whole months. 15 tests: anchor derivation,
 shifts + range validation, contradiction rejection, multi-authority agreement,
 civilOf round-trip incl. offset, eid-follows-announced-Shawwal, tabular
 immutability.
+
+## v1.16 additions (2026-08) — tasbih + observance (streaks/bookmarks/reading/khatm)
+
+Two new capability modules + a shared core day-streak math namespace. Both
+are stateless over caller-supplied logs — the observance-logs doctrine
+(README §Observance logs) generalized to every domain: the host persists
+(Room/DataStore), the engine computes, optional cloud sync mirrors the
+LOGS never the derived facts.
+
+### core — shared day math (second-consumer extraction, AGENTS §2)
+```
+core.observance.DayStreakMath
+  dayClasses(first, last, isComplete, excusedRanges): List<DayClass>
+  streakFacts(days): StreakFacts(current/longest/completed/excused/span)
+  // Contract mirrors prayer.streakStats verbatim: complete-or-excused
+  // extends; silent/uncompleted BREAKS; span-bounded. excused ≠ grace —
+  // excused ranges are host-declared fiqh exemptions; no engine-invented
+  // streak-freeze anywhere. (prayer.streakStats delegates to this in 2.0.0.)
+```
+
+### tasbih — new module (counting/goals domain)
+```
+TasbihDefinition(id, name, arabic?, targetCount, dailyGoal? = null,
+                 source: PRESET|DUA|ASMA_NAME|CUSTOM, sourceRef?)
+TasbihCountLog(definitionId, date, count)
+Tasbih.PRESETS                 // 7 canonical seeds, hadith-cited KDoc:
+                               // SubhanAllah/Alhamdulillah 33, Allahu Akbar 34
+                               // (Muslim #597); Istighfar/Salawat/Tahleel/
+                               // SubhanAllahi-wa-bihamdihi 100 (Tirmidhi/
+                               // Muslim #408/Bukhari). dailyGoal null — the
+                               // engine never invents goals.
+Tasbih.ofDua(duaId, name, arabic, target)   // data-api dua → tasbih
+Tasbih.ofName(number, name, arabic, target) // 99 Names → tasbih
+Tasbih.custom(id, name, target, dailyGoal?)
+Tasbih.progressOn(logs, definition, date)
+Tasbih.dhikrStats(logs, definitions, today, excusedRanges): List<DhikrStats>
+  // todayCount, goalMetToday, goalStreak (STRICT), longest, lifetimeTotal,
+  // lastCountedDate. Freeform (null goal) → totals only.
+```
+
+### observance — new module (bookmarks/reading/khatm domain)
+```
+// CENTRALIZED bookmarking — one system for quran/sunnah/dua/names/articles:
+Bookmark(domain: QURAN|HADITH|DUA|ASMA_NAME|ARTICLE|CUSTOM,
+         ref /* opaque: "2:255", "bukhari_urn_100010", "dua_47", slug */,
+         label?, anchor? /* "18:10 word 4" */, createdAtEpochMs)
+Observance.toggle(bookmarks, domain, ref)     // add/remove/dedup
+Observance.upsert(bookmarks, candidate)       // anchor/label merge, createdAt PRESERVED
+Observance.bookmarkViews(bookmarks): byDomain/recent/all
+
+// Reading sessions (explicit marks only — scroll-past NEVER completes):
+ReadingSession(domain: QURAN|SUNNAH|DUA|ARTICLE, ref, openedAt,
+               secondsActive, versesViewed?, completedToday)
+ReadingTarget(domain, ayahsPerDay?, minutesPerDay?)
+Observance.readStats(sessions, targets, today, excusedRanges): ReadStats
+  // per-domain: versesViewedToday, minutesActiveToday, markedCompletedToday,
+  // STRICT streak (over explicit-mark days), totals, lastRead
+Observance.continueReading → Map<domain, lastSession?>   // roadmap RANK-1
+Observance.history(sessions, WEEK|MONTH, today): byDay/distinctRefs/minutes
+
+// Khatm — pure math over host-supplied tables (D4: no engine content copy):
+Observance.khatmFacts(completed: List<AyahRange>, juzRanges: List<JuzRange>,
+    today, totalAyahs = 6236, dailyRateAyahs?): KhatmFacts
+  // normalized (sorted/coalesced) ranges, coveredAyahs, progressFraction,
+  // currentJuz (frontier containment), remainingAyahs, linear projection
+```
+
+### facade
+```
+engine.tasbih.presets/ofDua/ofName/custom/progressOn/dhikrStats
+engine.observance.toggleBookmark/upsertBookmark/bookmarkViews/
+            readStats/history/khatmFacts
+```
+
+### semantics locked (roadmap §6 carried into code)
+- secondsActive (screen-visible) is the honest signal — never open-time
+- completedToday is an EXPLICIT user mark; scroll-past never completes
+- STRICT grace policy: a missed day breaks; excused ranges are the only
+  neutral state and are host-declared fiqh exemptions
+- streaks inform, never shame — hosts own presentation
+
+### tests (35+)
+core DayStreakMath (7): gaps/excused-neutral/trailing-break/silent-breaks/
+long-excused/invalid-span/zero-span; tasbih (9): presets shape, factories,
+validation, summation, freeform-vs-goal, strict break, excused-neutral,
+definition isolation; observance (16): toggle/dedup/upsert-preserves-createdAt/
+views, mark-only streaks, domain isolation, excused reading streaks,
+progress aggregation, history windows, khatm normalization/frontier-gap/
+disjoint/projection/edges, canonical 6236; facade parity throughout.

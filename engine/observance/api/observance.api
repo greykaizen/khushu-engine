@@ -1,0 +1,223 @@
+public final class com/khushu/engine/observance/AyahRange {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lcom/khushu/engine/observance/AyahRange;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/AyahRange;IIILjava/lang/Object;)Lcom/khushu/engine/observance/AyahRange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndAyahId ()I
+	public final fun getStartAyahId ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/Bookmark {
+	public fun <init> (Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
+	public synthetic fun <init> (Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/observance/BookmarkDomain;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()J
+	public final fun copy (Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Lcom/khushu/engine/observance/Bookmark;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/Bookmark;Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Lcom/khushu/engine/observance/Bookmark;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnchor ()Ljava/lang/String;
+	public final fun getCreatedAtEpochMs ()J
+	public final fun getDomain ()Lcom/khushu/engine/observance/BookmarkDomain;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getRef ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/BookmarkDomain : java/lang/Enum {
+	public static final field ARTICLE Lcom/khushu/engine/observance/BookmarkDomain;
+	public static final field ASMA_NAME Lcom/khushu/engine/observance/BookmarkDomain;
+	public static final field CUSTOM Lcom/khushu/engine/observance/BookmarkDomain;
+	public static final field DUA Lcom/khushu/engine/observance/BookmarkDomain;
+	public static final field HADITH Lcom/khushu/engine/observance/BookmarkDomain;
+	public static final field QURAN Lcom/khushu/engine/observance/BookmarkDomain;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/observance/BookmarkDomain;
+	public static fun values ()[Lcom/khushu/engine/observance/BookmarkDomain;
+}
+
+public final class com/khushu/engine/observance/BookmarkViews {
+	public fun <init> (Ljava/util/Map;Ljava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/util/Map;Ljava/util/List;Ljava/util/List;)Lcom/khushu/engine/observance/BookmarkViews;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/BookmarkViews;Ljava/util/Map;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/observance/BookmarkViews;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAll ()Ljava/util/List;
+	public final fun getByDomain ()Ljava/util/Map;
+	public final fun getRecent ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/DomainReadStats {
+	public fun <init> (Lcom/khushu/engine/observance/ReadingDomain;IIZIIIILcom/khushu/engine/observance/ReadingSession;)V
+	public final fun component1 ()Lcom/khushu/engine/observance/ReadingDomain;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()Z
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()I
+	public final fun component8 ()I
+	public final fun component9 ()Lcom/khushu/engine/observance/ReadingSession;
+	public final fun copy (Lcom/khushu/engine/observance/ReadingDomain;IIZIIIILcom/khushu/engine/observance/ReadingSession;)Lcom/khushu/engine/observance/DomainReadStats;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/DomainReadStats;Lcom/khushu/engine/observance/ReadingDomain;IIZIIIILcom/khushu/engine/observance/ReadingSession;ILjava/lang/Object;)Lcom/khushu/engine/observance/DomainReadStats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDomain ()Lcom/khushu/engine/observance/ReadingDomain;
+	public final fun getLastRead ()Lcom/khushu/engine/observance/ReadingSession;
+	public final fun getLongestStreakDays ()I
+	public final fun getMarkedCompletedToday ()Z
+	public final fun getMinutesActiveToday ()I
+	public final fun getStreakDays ()I
+	public final fun getTotalActiveMinutes ()I
+	public final fun getTotalSessions ()I
+	public final fun getVersesViewedToday ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/HistoryWindow : java/lang/Enum {
+	public static final field MONTH Lcom/khushu/engine/observance/HistoryWindow;
+	public static final field WEEK Lcom/khushu/engine/observance/HistoryWindow;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/observance/HistoryWindow;
+	public static fun values ()[Lcom/khushu/engine/observance/HistoryWindow;
+}
+
+public final class com/khushu/engine/observance/JuzRange {
+	public fun <init> (ILcom/khushu/engine/observance/AyahRange;)V
+	public final fun component1 ()I
+	public final fun component2 ()Lcom/khushu/engine/observance/AyahRange;
+	public final fun copy (ILcom/khushu/engine/observance/AyahRange;)Lcom/khushu/engine/observance/JuzRange;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/JuzRange;ILcom/khushu/engine/observance/AyahRange;ILjava/lang/Object;)Lcom/khushu/engine/observance/JuzRange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getJuz ()I
+	public final fun getRange ()Lcom/khushu/engine/observance/AyahRange;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/KhatmFacts {
+	public fun <init> (Ljava/util/List;IIDIILjava/time/LocalDate;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()D
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()Ljava/time/LocalDate;
+	public final fun copy (Ljava/util/List;IIDIILjava/time/LocalDate;)Lcom/khushu/engine/observance/KhatmFacts;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/KhatmFacts;Ljava/util/List;IIDIILjava/time/LocalDate;ILjava/lang/Object;)Lcom/khushu/engine/observance/KhatmFacts;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCoveredAyahs ()I
+	public final fun getCurrentJuz ()I
+	public final fun getNormalizedRanges ()Ljava/util/List;
+	public final fun getProgressFraction ()D
+	public final fun getProjectedCompletionDate ()Ljava/time/LocalDate;
+	public final fun getRemainingAyahs ()I
+	public final fun getTotalAyahs ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/Observance {
+	public static final field INSTANCE Lcom/khushu/engine/observance/Observance;
+	public static final field TOTAL_AYAHS I
+	public final fun bookmarkViews (Ljava/util/List;)Lcom/khushu/engine/observance/BookmarkViews;
+	public final fun history (Ljava/util/List;Lcom/khushu/engine/observance/HistoryWindow;Ljava/time/LocalDate;)Lcom/khushu/engine/observance/ReadingHistory;
+	public final fun khatmFacts (Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;ILjava/lang/Double;)Lcom/khushu/engine/observance/KhatmFacts;
+	public static synthetic fun khatmFacts$default (Lcom/khushu/engine/observance/Observance;Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;ILjava/lang/Double;ILjava/lang/Object;)Lcom/khushu/engine/observance/KhatmFacts;
+	public final fun readStats (Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;)Lcom/khushu/engine/observance/ReadStats;
+	public static synthetic fun readStats$default (Lcom/khushu/engine/observance/Observance;Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/observance/ReadStats;
+	public final fun toggle (Ljava/util/List;Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;J)Ljava/util/List;
+	public static synthetic fun toggle$default (Lcom/khushu/engine/observance/Observance;Ljava/util/List;Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;JILjava/lang/Object;)Ljava/util/List;
+	public final fun upsert (Ljava/util/List;Lcom/khushu/engine/observance/Bookmark;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/observance/ReadStats {
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;Ljava/util/Map;)Lcom/khushu/engine/observance/ReadStats;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/ReadStats;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lcom/khushu/engine/observance/ReadStats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getByDomain ()Ljava/util/Map;
+	public final fun getContinueReading ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/ReadingDomain : java/lang/Enum {
+	public static final field ARTICLE Lcom/khushu/engine/observance/ReadingDomain;
+	public static final field DUA Lcom/khushu/engine/observance/ReadingDomain;
+	public static final field QURAN Lcom/khushu/engine/observance/ReadingDomain;
+	public static final field SUNNAH Lcom/khushu/engine/observance/ReadingDomain;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/observance/ReadingDomain;
+	public static fun values ()[Lcom/khushu/engine/observance/ReadingDomain;
+}
+
+public final class com/khushu/engine/observance/ReadingHistory {
+	public fun <init> (Lcom/khushu/engine/observance/HistoryWindow;Ljava/util/Map;II)V
+	public final fun component1 ()Lcom/khushu/engine/observance/HistoryWindow;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun copy (Lcom/khushu/engine/observance/HistoryWindow;Ljava/util/Map;II)Lcom/khushu/engine/observance/ReadingHistory;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/ReadingHistory;Lcom/khushu/engine/observance/HistoryWindow;Ljava/util/Map;IIILjava/lang/Object;)Lcom/khushu/engine/observance/ReadingHistory;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getByDay ()Ljava/util/Map;
+	public final fun getDistinctRefs ()I
+	public final fun getTotalActiveMinutes ()I
+	public final fun getWindow ()Lcom/khushu/engine/observance/HistoryWindow;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/ReadingSession {
+	public fun <init> (Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/String;Ljava/time/LocalDate;ILjava/lang/Integer;Z)V
+	public synthetic fun <init> (Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/String;Ljava/time/LocalDate;ILjava/lang/Integer;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/observance/ReadingDomain;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/time/LocalDate;
+	public final fun component4 ()I
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun component6 ()Z
+	public final fun copy (Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/String;Ljava/time/LocalDate;ILjava/lang/Integer;Z)Lcom/khushu/engine/observance/ReadingSession;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/ReadingSession;Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/String;Ljava/time/LocalDate;ILjava/lang/Integer;ZILjava/lang/Object;)Lcom/khushu/engine/observance/ReadingSession;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompletedToday ()Z
+	public final fun getDomain ()Lcom/khushu/engine/observance/ReadingDomain;
+	public final fun getOpenedAt ()Ljava/time/LocalDate;
+	public final fun getRef ()Ljava/lang/String;
+	public final fun getSecondsActive ()I
+	public final fun getVersesViewed ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/observance/ReadingTarget {
+	public fun <init> (Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/khushu/engine/observance/ReadingDomain;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun copy (Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/Integer;Ljava/lang/Integer;)Lcom/khushu/engine/observance/ReadingTarget;
+	public static synthetic fun copy$default (Lcom/khushu/engine/observance/ReadingTarget;Lcom/khushu/engine/observance/ReadingDomain;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/khushu/engine/observance/ReadingTarget;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAyahsPerDay ()Ljava/lang/Integer;
+	public final fun getDomain ()Lcom/khushu/engine/observance/ReadingDomain;
+	public final fun getMinutesPerDay ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

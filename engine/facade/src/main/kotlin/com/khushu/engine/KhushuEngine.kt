@@ -31,6 +31,22 @@ import com.khushu.engine.qibla.QiblaBearing
 import com.khushu.engine.mushaf.AtlasSpec
 import com.khushu.engine.mushaf.AyahLayout
 import com.khushu.engine.mushaf.GlyphPlacement
+import com.khushu.engine.observance.AyahRange
+import com.khushu.engine.observance.Bookmark
+import com.khushu.engine.observance.BookmarkDomain
+import com.khushu.engine.observance.BookmarkViews
+import com.khushu.engine.observance.HistoryWindow
+import com.khushu.engine.observance.JuzRange
+import com.khushu.engine.observance.KhatmFacts
+import com.khushu.engine.observance.Observance
+import com.khushu.engine.observance.ReadStats
+import com.khushu.engine.observance.ReadingHistory
+import com.khushu.engine.observance.ReadingSession
+import com.khushu.engine.observance.ReadingTarget
+import com.khushu.engine.tasbih.DhikrStats
+import com.khushu.engine.tasbih.Tasbih
+import com.khushu.engine.tasbih.TasbihCountLog
+import com.khushu.engine.tasbih.TasbihDefinition
 import com.khushu.engine.mushaf.LineLayout
 import com.khushu.engine.mushaf.LineMeasure
 import com.khushu.engine.mushaf.Mushaf
@@ -69,6 +85,8 @@ class KhushuEngine {
     val qibla = QiblaApi()
     val zakat = ZakatApi()
     val mushaf = MushafApi()
+    val tasbih = TasbihApi()
+    val observance = ObservanceApi()
 
     /** Whole-day composite: every fact of one civil date in a single pass. */
     val day = com.khushu.engine.DayApi()
@@ -678,5 +696,91 @@ class KhushuEngine {
             wordGapPx: Float,
             maxLineWidthPx: Float = 0f,
         ): AyahLayout = Mushaf.layoutAyah(spec, words, fontSizePx, lineHeightPx, wordGapPx, maxLineWidthPx)
+    }
+
+    /**
+     * Tasbih (dhikr counting) surface: canonical fiqh-sourced presets,
+     * factories over data-api duas/Names, and STRICT goal streaks via the
+     * shared core day math. The host persists definitions + count logs;
+     * the engine computes statelessly over what it is given.
+     */
+    class TasbihApi internal constructor() {
+        /** The 7 canonical seeds (dailyGoal null — goals are the user's). */
+        val presets: List<TasbihDefinition> get() = Tasbih.PRESETS
+
+        /** Create a tasbih from a data-api dua (`content.dua.dua(id)`). */
+        fun ofDua(duaId: Int, name: String, arabic: String?, targetCount: Int): TasbihDefinition =
+            Tasbih.ofDua(duaId, name, arabic, targetCount)
+
+        /** Create a tasbih from one of the 99 Names (`content.dua.asmaName(...)`). */
+        fun ofName(nameNumber: Int, name: String, arabic: String, targetCount: Int): TasbihDefinition =
+            Tasbih.ofName(nameNumber, name, arabic, targetCount)
+
+        /** Fully host-defined custom tasbih. */
+        fun custom(id: String, name: String, targetCount: Int, dailyGoal: Int? = null): TasbihDefinition =
+            Tasbih.custom(id, name, targetCount, dailyGoal)
+
+        /** Total counted on [date] against one definition. */
+        fun progressOn(logs: List<TasbihCountLog>, definition: TasbihDefinition, date: LocalDate): Int =
+            Tasbih.progressOn(logs, definition, date)
+
+        /** Per-definition stats over logged spans (STRICT streaks; excused ≠ grace). */
+        fun dhikrStats(
+            logs: List<TasbihCountLog>,
+            definitions: List<TasbihDefinition>,
+            today: LocalDate,
+            excusedRanges: List<ClosedRange<LocalDate>> = emptyList(),
+        ): List<DhikrStats> = Tasbih.dhikrStats(logs, definitions, today, excusedRanges)
+    }
+
+    /**
+     * Observance surface: the SINGLE centralized bookmarking system for
+     * quran/sunnah/dua/names/articles + reading-session statistics (explicit
+     * marks only — scroll-past never completes) + khatm progress math over
+     * host-supplied ranges. Host persists; engine computes; sync mirrors
+     * logs, never derived facts.
+     */
+    class ObservanceApi internal constructor() {
+        // ── bookmarks ──────────────────────────────────────────────────────
+
+        /** Add-or-remove by (domain, ref); host persists the returned list. */
+        fun toggleBookmark(
+            bookmarks: List<Bookmark>,
+            domain: BookmarkDomain,
+            ref: String,
+            nowEpochMs: Long = System.currentTimeMillis(),
+        ): List<Bookmark> = Observance.toggle(bookmarks, domain, ref, nowEpochMs)
+
+        /** Insert/merge — same (domain, ref) keeps its original createdAt. */
+        fun upsertBookmark(bookmarks: List<Bookmark>, candidate: Bookmark): List<Bookmark> =
+            Observance.upsert(bookmarks, candidate)
+
+        /** byDomain/recent/all views. */
+        fun bookmarkViews(bookmarks: List<Bookmark>): BookmarkViews = Observance.bookmarkViews(bookmarks)
+
+        // ── reading ────────────────────────────────────────────────────────
+
+        /** Per-domain stats: today progress, explicit-mark STRICT streaks, totals, continue-reading. */
+        fun readStats(
+            sessions: List<ReadingSession>,
+            targets: List<ReadingTarget>,
+            today: LocalDate,
+            excusedRanges: List<ClosedRange<LocalDate>> = emptyList(),
+        ): ReadStats = Observance.readStats(sessions, targets, today, excusedRanges)
+
+        /** Profile history feed over the last week/month. */
+        fun history(sessions: List<ReadingSession>, window: HistoryWindow, today: LocalDate): ReadingHistory =
+            Observance.history(sessions, window, today)
+
+        // ── khatm ──────────────────────────────────────────────────────────
+
+        /** Khatm progress over host-logged ranges; juz tables from data-api navigation_ranges. */
+        fun khatmFacts(
+            completed: List<AyahRange>,
+            juzRanges: List<JuzRange>,
+            today: LocalDate,
+            totalAyahs: Int = Observance.TOTAL_AYAHS,
+            dailyRateAyahs: Double? = null,
+        ): KhatmFacts = Observance.khatmFacts(completed, juzRanges, today, totalAyahs, dailyRateAyahs)
     }
 }

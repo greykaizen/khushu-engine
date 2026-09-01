@@ -148,8 +148,10 @@ public final class com/khushu/engine/KhushuEngine {
 	public final fun getCalendar ()Lcom/khushu/engine/KhushuEngine$CalendarApi;
 	public final fun getDay ()Lcom/khushu/engine/DayApi;
 	public final fun getMushaf ()Lcom/khushu/engine/KhushuEngine$MushafApi;
+	public final fun getObservance ()Lcom/khushu/engine/KhushuEngine$ObservanceApi;
 	public final fun getPrayer ()Lcom/khushu/engine/KhushuEngine$PrayerApi;
 	public final fun getQibla ()Lcom/khushu/engine/KhushuEngine$QiblaApi;
+	public final fun getTasbih ()Lcom/khushu/engine/KhushuEngine$TasbihApi;
 	public final fun getZakat ()Lcom/khushu/engine/KhushuEngine$ZakatApi;
 }
 
@@ -254,6 +256,18 @@ public final class com/khushu/engine/KhushuEngine$MushafApi {
 	public final fun wordWidthFu (Ljava/util/List;)D
 }
 
+public final class com/khushu/engine/KhushuEngine$ObservanceApi {
+	public final fun bookmarkViews (Ljava/util/List;)Lcom/khushu/engine/observance/BookmarkViews;
+	public final fun history (Ljava/util/List;Lcom/khushu/engine/observance/HistoryWindow;Ljava/time/LocalDate;)Lcom/khushu/engine/observance/ReadingHistory;
+	public final fun khatmFacts (Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;ILjava/lang/Double;)Lcom/khushu/engine/observance/KhatmFacts;
+	public static synthetic fun khatmFacts$default (Lcom/khushu/engine/KhushuEngine$ObservanceApi;Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;ILjava/lang/Double;ILjava/lang/Object;)Lcom/khushu/engine/observance/KhatmFacts;
+	public final fun readStats (Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;)Lcom/khushu/engine/observance/ReadStats;
+	public static synthetic fun readStats$default (Lcom/khushu/engine/KhushuEngine$ObservanceApi;Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/observance/ReadStats;
+	public final fun toggleBookmark (Ljava/util/List;Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;J)Ljava/util/List;
+	public static synthetic fun toggleBookmark$default (Lcom/khushu/engine/KhushuEngine$ObservanceApi;Ljava/util/List;Lcom/khushu/engine/observance/BookmarkDomain;Ljava/lang/String;JILjava/lang/Object;)Ljava/util/List;
+	public final fun upsertBookmark (Ljava/util/List;Lcom/khushu/engine/observance/Bookmark;)Ljava/util/List;
+}
+
 public final class com/khushu/engine/KhushuEngine$PrayerApi {
 	public final fun getStats ()Lcom/khushu/engine/KhushuEngine$PrayerApi$StatsApi;
 	public final fun getWindows ()Lcom/khushu/engine/KhushuEngine$PrayerApi$WindowsApi;
@@ -308,6 +322,17 @@ public final class com/khushu/engine/KhushuEngine$QiblaApi {
 	public final fun relativeSunAngle (Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;D)Lcom/khushu/engine/qibla/SunQiblaRelation;
 	public static synthetic fun relativeSunAngle$default (Lcom/khushu/engine/KhushuEngine$QiblaApi;Lcom/khushu/engine/core/geo/Location;Ljava/time/Instant;DILjava/lang/Object;)Lcom/khushu/engine/qibla/SunQiblaRelation;
 	public final fun shadowVerification (ILcom/khushu/engine/core/geo/Location;)Ljava/util/List;
+}
+
+public final class com/khushu/engine/KhushuEngine$TasbihApi {
+	public final fun custom (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public static synthetic fun custom$default (Lcom/khushu/engine/KhushuEngine$TasbihApi;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;ILjava/lang/Object;)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public final fun dhikrStats (Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;)Ljava/util/List;
+	public static synthetic fun dhikrStats$default (Lcom/khushu/engine/KhushuEngine$TasbihApi;Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;ILjava/lang/Object;)Ljava/util/List;
+	public final fun getPresets ()Ljava/util/List;
+	public final fun ofDua (ILjava/lang/String;Ljava/lang/String;I)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public final fun ofName (ILjava/lang/String;Ljava/lang/String;I)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public final fun progressOn (Ljava/util/List;Lcom/khushu/engine/tasbih/TasbihDefinition;Ljava/time/LocalDate;)I
 }
 
 public final class com/khushu/engine/KhushuEngine$ZakatApi {

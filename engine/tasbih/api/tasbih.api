@@ -1,0 +1,91 @@
+public final class com/khushu/engine/tasbih/DhikrStats {
+	public fun <init> (Ljava/lang/String;IZIIILjava/time/LocalDate;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Z
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()Ljava/time/LocalDate;
+	public final fun copy (Ljava/lang/String;IZIIILjava/time/LocalDate;)Lcom/khushu/engine/tasbih/DhikrStats;
+	public static synthetic fun copy$default (Lcom/khushu/engine/tasbih/DhikrStats;Ljava/lang/String;IZIIILjava/time/LocalDate;ILjava/lang/Object;)Lcom/khushu/engine/tasbih/DhikrStats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDefinitionId ()Ljava/lang/String;
+	public final fun getGoalMetToday ()Z
+	public final fun getGoalStreakDays ()I
+	public final fun getLastCountedDate ()Ljava/time/LocalDate;
+	public final fun getLifetimeTotal ()I
+	public final fun getLongestGoalStreakDays ()I
+	public final fun getTodayCount ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/tasbih/Tasbih {
+	public static final field INSTANCE Lcom/khushu/engine/tasbih/Tasbih;
+	public static final field PRESET_ALHAMDULILLAH Ljava/lang/String;
+	public static final field PRESET_ALLAHU_AKBAR Ljava/lang/String;
+	public static final field PRESET_ISTIGHFAR Ljava/lang/String;
+	public static final field PRESET_SALAWAT Ljava/lang/String;
+	public static final field PRESET_SUBHANALLAH Ljava/lang/String;
+	public static final field PRESET_SUBHANALLAHI_WA_BIHAMDIHI Ljava/lang/String;
+	public static final field PRESET_TAHLEEL Ljava/lang/String;
+	public final fun custom (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public static synthetic fun custom$default (Lcom/khushu/engine/tasbih/Tasbih;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;ILjava/lang/Object;)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public final fun dhikrStats (Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;)Ljava/util/List;
+	public static synthetic fun dhikrStats$default (Lcom/khushu/engine/tasbih/Tasbih;Ljava/util/List;Ljava/util/List;Ljava/time/LocalDate;Ljava/util/List;ILjava/lang/Object;)Ljava/util/List;
+	public final fun getPRESETS ()Ljava/util/List;
+	public final fun ofDua (ILjava/lang/String;Ljava/lang/String;I)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public final fun ofName (ILjava/lang/String;Ljava/lang/String;I)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public final fun progressOn (Ljava/util/List;Lcom/khushu/engine/tasbih/TasbihDefinition;Ljava/time/LocalDate;)I
+}
+
+public final class com/khushu/engine/tasbih/TasbihCountLog {
+	public fun <init> (Ljava/lang/String;Ljava/time/LocalDate;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/time/LocalDate;
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/String;Ljava/time/LocalDate;I)Lcom/khushu/engine/tasbih/TasbihCountLog;
+	public static synthetic fun copy$default (Lcom/khushu/engine/tasbih/TasbihCountLog;Ljava/lang/String;Ljava/time/LocalDate;IILjava/lang/Object;)Lcom/khushu/engine/tasbih/TasbihCountLog;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()I
+	public final fun getDate ()Ljava/time/LocalDate;
+	public final fun getDefinitionId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/tasbih/TasbihDefinition {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;Lcom/khushu/engine/tasbih/TasbihSource;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;Lcom/khushu/engine/tasbih/TasbihSource;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()I
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun component6 ()Lcom/khushu/engine/tasbih/TasbihSource;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;Lcom/khushu/engine/tasbih/TasbihSource;Ljava/lang/String;)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public static synthetic fun copy$default (Lcom/khushu/engine/tasbih/TasbihDefinition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Integer;Lcom/khushu/engine/tasbih/TasbihSource;Ljava/lang/String;ILjava/lang/Object;)Lcom/khushu/engine/tasbih/TasbihDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArabic ()Ljava/lang/String;
+	public final fun getDailyGoal ()Ljava/lang/Integer;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSource ()Lcom/khushu/engine/tasbih/TasbihSource;
+	public final fun getSourceRef ()Ljava/lang/String;
+	public final fun getTargetCount ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/tasbih/TasbihSource : java/lang/Enum {
+	public static final field ASMA_NAME Lcom/khushu/engine/tasbih/TasbihSource;
+	public static final field CUSTOM Lcom/khushu/engine/tasbih/TasbihSource;
+	public static final field DUA Lcom/khushu/engine/tasbih/TasbihSource;
+	public static final field PRESET Lcom/khushu/engine/tasbih/TasbihSource;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/khushu/engine/tasbih/TasbihSource;
+	public static fun values ()[Lcom/khushu/engine/tasbih/TasbihSource;
+}
+

@@ -100,6 +100,45 @@ public final class com/khushu/engine/core/geo/Longitude {
 	public final synthetic fun unbox-impl ()D
 }
 
+public final class com/khushu/engine/core/observance/DayStreakMath {
+	public static final field INSTANCE Lcom/khushu/engine/core/observance/DayStreakMath;
+	public final fun dayClasses (Ljava/time/LocalDate;Ljava/time/LocalDate;Lkotlin/jvm/functions/Function1;Ljava/util/List;)Ljava/util/List;
+	public static synthetic fun dayClasses$default (Lcom/khushu/engine/core/observance/DayStreakMath;Ljava/time/LocalDate;Ljava/time/LocalDate;Lkotlin/jvm/functions/Function1;Ljava/util/List;ILjava/lang/Object;)Ljava/util/List;
+	public final fun streakFacts (Ljava/util/List;)Lcom/khushu/engine/core/observance/DayStreakMath$StreakFacts;
+}
+
+public final class com/khushu/engine/core/observance/DayStreakMath$DayClass {
+	public fun <init> (ZZ)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun copy (ZZ)Lcom/khushu/engine/core/observance/DayStreakMath$DayClass;
+	public static synthetic fun copy$default (Lcom/khushu/engine/core/observance/DayStreakMath$DayClass;ZZILjava/lang/Object;)Lcom/khushu/engine/core/observance/DayStreakMath$DayClass;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComplete ()Z
+	public final fun getExcused ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/khushu/engine/core/observance/DayStreakMath$StreakFacts {
+	public fun <init> (IIIII)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun copy (IIIII)Lcom/khushu/engine/core/observance/DayStreakMath$StreakFacts;
+	public static synthetic fun copy$default (Lcom/khushu/engine/core/observance/DayStreakMath$StreakFacts;IIIIIILjava/lang/Object;)Lcom/khushu/engine/core/observance/DayStreakMath$StreakFacts;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompletedDays ()I
+	public final fun getCurrentStreakDays ()I
+	public final fun getExcusedDays ()I
+	public final fun getLongestStreakDays ()I
+	public final fun getSpanDays ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/khushu/engine/core/units/ArcMinutes {
 	public static final synthetic fun box-impl (D)Lcom/khushu/engine/core/units/ArcMinutes;
 	public static fun constructor-impl (D)D
