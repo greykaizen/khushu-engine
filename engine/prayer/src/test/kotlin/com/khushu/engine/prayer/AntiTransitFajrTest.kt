@@ -51,9 +51,11 @@ class AntiTransitFajrTest {
         val times = Prayer.times(makkah, makkahDate, config)
         assertNotNull(times.fajr.adjusted)
         assertEquals(
-            HighLatitudeResolution.COMPUTED_WITH_REQUESTED_RULE,
+            // v2.0.1 provenance fix: report the fallback rule that actually
+            // produced fajr (MIDDLE_OF_NIGHT), not the requested ANTI_TRANSIT_FAJR.
+            HighLatitudeResolution.RESOLVED_BY_MIDDLE_OF_NIGHT,
             times.audit.highLatitudeResolution,
-            "no substitution needed when angle is reachable",
+            "no substitution needed when angle is reachable — audit names the real rule",
         )
     }
 
@@ -68,9 +70,9 @@ class AntiTransitFajrTest {
         val times = Prayer.times(london, winterDate, config)
         assertNotNull(times.fajr.adjusted)
         assertEquals(
-            HighLatitudeResolution.COMPUTED_WITH_REQUESTED_RULE,
+            HighLatitudeResolution.RESOLVED_BY_MIDDLE_OF_NIGHT,
             times.audit.highLatitudeResolution,
-            "no anti-transit substitution during winter (angle reachable)",
+            "no anti-transit substitution during winter (angle reachable) — audit names the real rule",
         )
     }
 

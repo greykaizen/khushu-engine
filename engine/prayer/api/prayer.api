@@ -545,20 +545,22 @@ public final class com/khushu/engine/prayer/Qada$QadaConfig {
 }
 
 public final class com/khushu/engine/prayer/Qada$QadaReport {
-	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Ljava/util/List;
 	public final fun component4 ()Ljava/util/List;
 	public final fun component5 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lcom/khushu/engine/prayer/Qada$QadaReport;
-	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$QadaReport;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$QadaReport;
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lcom/khushu/engine/prayer/Qada$QadaReport;
+	public static synthetic fun copy$default (Lcom/khushu/engine/prayer/Qada$QadaReport;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/khushu/engine/prayer/Qada$QadaReport;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBoundaryObligations ()Ljava/util/List;
 	public final fun getClassifications ()Ljava/util/List;
 	public final fun getGhuslRequiredAt ()Ljava/util/List;
 	public final fun getProvenance ()Ljava/util/List;
 	public final fun getSuppressedPrayers ()Ljava/util/List;
+	public final fun getWitrObligations ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

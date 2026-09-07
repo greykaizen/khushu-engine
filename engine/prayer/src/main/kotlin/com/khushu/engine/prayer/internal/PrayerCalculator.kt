@@ -172,7 +172,10 @@ internal object PrayerCalculator {
             return if (minAlt > fajrAngleDeg || (degenerate && fajrNull)) {
                 HighLatitudeResolution.RESOLVED_BY_ANTI_TRANSIT
             } else {
-                HighLatitudeResolution.COMPUTED_WITH_REQUESTED_RULE
+                // v2.0.1 provenance fix: away from persistent twilight adhan2
+                // computed with the MIDDLE_OF_NIGHT fallback (see toAdhanParams) —
+                // report the rule that actually produced fajr, not the requested one.
+                HighLatitudeResolution.RESOLVED_BY_MIDDLE_OF_NIGHT
             }
         }
 

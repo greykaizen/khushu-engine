@@ -16,6 +16,15 @@
 | Base package | `com.khushu.engine` |
 | Language/target | Pure Kotlin/JVM. **No Android, no Compose, no Context anywhere under `engine/`.** |
 
+**Family-coordinate doctrine (mirrored in khushu-orchestrator/AGENTS.md §1):**
+hosts add ONE compute+content coordinate — the orchestrator
+(`com.github.greykaizen:khushu-orchestrator:orchestrator-vX.Y.Z`) — and receive
+the engine facade transitively. The settings store (`store/`, published as
+`com.github.greykaizen.khushu-engine:store`) is the ONE sanctioned additional
+coordinate a host may need: persistence is host-side by family rule, so the
+store ships in this repo for convenience rather than through the orchestrator
+seam. "One coordinate" means one compute+content surface, not one jar total.
+
 ⚠️ **Directory collision warning:** `~/AndroidStudioProjects/` already contains
 `khushu/`, `Khushu/`, `Khushu2/`, `Khushu3/`, `Khushu4/`, `Khushu5/`, plus
 `khushu-quran-data/`, `Osprey/`, and others. Do **not** create another bare

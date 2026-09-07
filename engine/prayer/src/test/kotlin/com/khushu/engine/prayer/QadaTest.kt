@@ -126,6 +126,42 @@ class QadaTest {
         assertTrue(report.boundaryObligations.any { it.kind == PrayerStatus.Prayer.MAGHRIB }, "Maghrib owed (paired)")
     }
 
+    // ── Ḥanafī Witr (v2.0.1 regression: was deduped away as a duplicate ISHA) ─
+
+    @Test
+    fun hanafiWitrObligationsSurviveDistinct() {
+        val p = Qada.FiqhPeriod(
+            start = date.minusDays(1).atTime(20, 0).atZone(java.time.ZoneOffset.UTC).toInstant(),
+            end = date.atTime(21, 0).atZone(java.time.ZoneOffset.UTC).toInstant(),
+            type = Qada.FiqhPeriodType.HAYD,
+        )
+        val report = Qada.qadaReport(listOf(p), schedules, Qada.QadaConfig(Qada.QadaSchool.HANAFI))
+        val ishaBoundaries = report.boundaryObligations.filter { it.kind == PrayerStatus.Prayer.ISHA }
+        assertTrue(ishaBoundaries.isNotEmpty(), "Isha boundary owed")
+        assertEquals(
+            ishaBoundaries.size, report.witrObligations.size,
+            "each Isha boundary carries exactly one Witr obligation",
+        )
+        assertTrue(report.classifications.any { it.rule.contains("Witr") })
+    }
+
+    @Test
+    fun nonHanafiHasNoWitrObligations() {
+        val p = period(0, 0, 15, 0)
+        val report = Qada.qadaReport(listOf(p), schedules, Qada.QadaConfig(Qada.QadaSchool.SHAFII))
+        assertTrue(report.witrObligations.isEmpty(), "Witr is sunnah outside Ḥanafī")
+    }
+
+    @Test
+    fun sufficientTimeProvenanceIsDisclosed() {
+        val p = period(0, 0, 15, 0)
+        val report = Qada.qadaReport(listOf(p), schedules, Qada.QadaConfig(Qada.QadaSchool.HANAFI))
+        assertTrue(
+            report.provenance.any { it.contains("sufficient-time") && it.contains("docs/qada-design.md") },
+            "the OPEN Shafiʿi sufficient-time sub-rule must be disclosed in provenance",
+        )
+    }
+
     // ── school defaults ────────────────────────────────────────────────────
 
     @Test

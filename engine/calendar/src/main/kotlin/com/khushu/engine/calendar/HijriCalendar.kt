@@ -25,8 +25,14 @@ object HijriCalendar {
             InvalidParameterException("offsetDays", "$offsetDays", "must be within −2..+2")
         }
         return try {
+            // v2.0.1 fix: the library's HijrahChronology.toHijri reads Y/M/D via
+            // GregorianCalendar.getInstance() — the DEFAULT zone, no matter what
+            // zone the UmmalquraCalendar itself was built with. Anchoring the
+            // millis at default-zone midnight of the target civil date makes the
+            // RESULT device-independent: the same LocalDate converts to the same
+            // hijri date on every device (pinned by HijriTimezoneTest).
             val cal = UmmalquraCalendar()
-            cal.timeInMillis = epochOf(localDate) + offsetDays * 86_400_000L
+            cal.timeInMillis = epochOf(localDate.plusDays(offsetDays.toLong()))
             HijriDate(
                 year = cal.get(Calendar.YEAR),
                 month = cal.get(Calendar.MONTH) + 1,
@@ -225,16 +231,15 @@ object HijriCalendar {
         return out
     }
 
+    /** Default-zone midnight anchor — must match HijrahChronology.toHijri's internal default-zone field read. */
     private fun epochOf(date: LocalDate): Long =
-        date.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+        date.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
 
     fun monthName(hijriMonth1Indexed: Int): String = when (hijriMonth1Indexed) {
         1 -> "Muharram"; 2 -> "Safar"; 3 -> "Rabi al-Awwal"; 4 -> "Rabi al-Thani"
         5 -> "Jumada al-Ula"; 6 -> "Jumada al-Akhirah"; 7 -> "Rajab"; 8 -> "Sha'ban"
         9 -> "Ramadan"; 10 -> "Shawwal"; 11 -> "Dhul-Qa'dah"; else -> "Dhul-Hijjah"
     }
-
-    private fun monthNameZeroBased(zeroBased: Int): String = monthName(zeroBased + 1)
 
     /**
      * The core fixed-hijri-date event pack — single source for [events] and the

@@ -67,6 +67,10 @@ object Qada {
     data class QadaReport(
         val suppressedPrayers: List<PrayerInstance>,
         val boundaryObligations: List<PrayerInstance>,
+        /** Ḥanafī Witr (wājib attached to ʿIshāʾ) boundary obligations — kept
+         *  separate so [boundaryObligations]' distinct() can never swallow them
+         *  (v2.0.1: they were modeled as duplicate ISHA rows and deduped away). */
+        val witrObligations: List<PrayerInstance>,
         val ghuslRequiredAt: List<Instant>,
         val classifications: List<BoundaryRuling>,
         val provenance: List<String>,
@@ -240,11 +244,13 @@ object Qada {
             // check applies to whether the CURRENT prayer is owed, not the paired one)
         }
 
-        // Add Witr to boundary obligations if Ḥanafī and ʿIshāʾ is owed
+        // Add Witr to a SEPARATE obligation list if Ḥanafī and ʿIshāʾ is owed —
+        // a duplicate ISHA row here was identical to the Isha boundary instance
+        // and distinct() removed it, making Ḥanafī Witr invisible to hosts.
+        val witrObligations = mutableListOf<PrayerInstance>()
         if (includeWitr) {
-            val ishaBoundaries = boundaryObligations.filter { it.kind == PrayerStatus.Prayer.ISHA }
-            for (isha in ishaBoundaries) {
-                boundaryObligations += PrayerInstance(isha.date, PrayerStatus.Prayer.ISHA, isha.enteredAt)
+            for (isha in boundaryObligations.filter { it.kind == PrayerStatus.Prayer.ISHA }) {
+                witrObligations += isha
                 rulings += BoundaryRuling(
                     PrayerStatus.Prayer.ISHA, owed = true,
                     rule = "Ḥanafī: Witr included with ʿIshāʾ qadāʾ (Darul Iftaa #8301)",
@@ -252,9 +258,19 @@ object Qada {
             }
         }
 
+        // v2.0.1 (E6): the Shafiʿi sufficient-time sub-rule ("purity with enough
+        // time for ghusl + prayer → owed, else not") is ⬜ OPEN in
+        // docs/qada-design.md (primary-text pull pending). Until it lands, the
+        // engine conservatively owes the current prayer for EVERY school — say
+        // so in provenance instead of silently under- or over-reporting.
+        provenance +=
+            "boundary sufficient-time check pending primary-text pull (docs/qada-design.md, OPEN) — " +
+                "current prayer conservatively owed for all schools"
+
         return QadaReport(
             suppressedPrayers = suppressed.sortedWith(compareBy({ it.date }, { it.kind })),
             boundaryObligations = boundaryObligations.distinct().sortedWith(compareBy({ it.enteredAt }, { it.kind })),
+            witrObligations = witrObligations.distinct().sortedWith(compareBy({ it.enteredAt }, { it.kind })),
             ghuslRequiredAt = ghuslTimes.distinct().sorted(),
             classifications = rulings,
             provenance = provenance,

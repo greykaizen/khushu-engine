@@ -216,7 +216,7 @@ object Mushaf {
         }
 
         val widthPx = if (prepared.isEmpty()) {
-            max(fontSizePx * 0.35f, fontSizePx * 0.4f)
+            fontSizePx * 0.4f
         } else {
             currentX
         }
