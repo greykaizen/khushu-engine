@@ -111,6 +111,37 @@ data class LocationDto(
     val altitudeMeters: Double = 0.0,
 )
 
+/** Which instant opens the evening adhkar window. Mirrors the orchestrator's
+ * `EveningStart` without depending on it (this module sits below the
+ * orchestrator in the dependency order). */
+@Serializable
+enum class EveningStartMode { MAGHRIB, ASR }
+
+/**
+ * The dua/adhkar display and window settings — the host-facing half of the
+ * orchestrator's `AdaptiveContext`. Every field here changes which adaptive
+ * sections the dua card surfaces and when their windows are open; none of
+ * them is cosmetic.
+ */
+@Serializable
+data class DuaSettingsDto(
+    /** Which instant opens the evening adhkar window (maghrib vs asr). */
+    val eveningStart: EveningStartMode = EveningStartMode.MAGHRIB,
+    /** Length of the after-salah adhkar window, in minutes (0..120). */
+    val postPrayerMinutes: Int = 20,
+    /** How many adaptive sections to surface at once (1..6). */
+    val maxSections: Int = 2,
+    /** Local bedtime as "HH:mm"; null leaves the before-sleep window inactive. */
+    val bedtime: String? = null,
+    /** Local wake time as "HH:mm"; null leaves the waking-up window inactive. */
+    val wakeTime: String? = null,
+) {
+    init {
+        require(postPrayerMinutes in 0..120) { "postPrayerMinutes must be 0..120" }
+        require(maxSections in 1..6) { "maxSections must be 1..6" }
+    }
+}
+
 /**
  * Everything a host persists about engine usage: the grouped settings for
  * every computational domain plus the user's location. Versioned via
@@ -122,6 +153,7 @@ data class SettingsSnapshot(
     val prayer: PrayerSettingsDto = PrayerSettingsDto(),
     val calendar: CalendarSettingsDto = CalendarSettingsDto(),
     val zakat: ZakatSettingsDto = ZakatSettingsDto(),
+    val dua: DuaSettingsDto = DuaSettingsDto(),
     val location: LocationDto? = null,
     val schemaVersion: Int = SETTINGS_SCHEMA_VERSION,
 ) {
