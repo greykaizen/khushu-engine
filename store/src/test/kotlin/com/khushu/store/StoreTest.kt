@@ -94,6 +94,34 @@ class StoreTest {
     }
 
     @Test
+    fun quranContentSelectionsRoundTrip() {
+        val tuned = tweaked.copy(
+            quran = tweaked.quran.copy(
+                tafsirPack = "en-tafisr-ibn-kathir",
+                wbwLang = "en",
+                wbwShowTransliteration = false,
+                wbwShowTranslation = true,
+            ),
+        )
+        assertEquals(tuned, codec.decode(codec.encode(tuned)))
+        assertEquals("en-tafisr-ibn-kathir", tuned.quran.tafsirPack)
+        assertEquals("en", tuned.quran.wbwLang)
+        assertEquals(false, tuned.quran.wbwShowTransliteration)
+    }
+
+    @Test
+    fun quranContentDefaultsAreOffSoOlderFilesStayUnchanged() {
+        // a file written before the content selections existed
+        val json = """{"quran":{"arabicSizeSp":30,"mushaf":"qpc","translationPack":"en_saheeh-international"}}"""
+        val decoded = codec.decode(json.encodeToByteArray())
+        assertEquals(30, decoded.quran.arabicSizeSp)
+        assertEquals(null, decoded.quran.tafsirPack)
+        assertEquals(null, decoded.quran.wbwLang)
+        assertEquals(true, decoded.quran.wbwShowTransliteration)
+        assertEquals(true, decoded.quran.wbwShowTranslation)
+    }
+
+    @Test
     fun serializerWrapsCorruptionAndAcceptsEmptyFiles(): Unit = runBlocking {
         val serializer = KhushuSettingsSerializer()
         assertFailsWith<CorruptionException> {

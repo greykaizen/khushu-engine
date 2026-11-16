@@ -163,6 +163,21 @@ data class QuranSettingsDto(
      * silent regression for existing installs.
      */
     val translationPack: String? = "en_saheeh-international",
+    /**
+     * Tafsir book slug (e.g. "en-tafisr-ibn-kathir"); null renders no tafsir.
+     * The slug is the corpus' own book id, so the reader can resolve it to the
+     * matching `tafsir-<slug>` pack.
+     */
+    val tafsirPack: String? = null,
+    /**
+     * Word-by-word language code (the `wbw-<lang>` pack); null renders no
+     * per-word glosses.
+     */
+    val wbwLang: String? = null,
+    /** Show the transliteration line under each word when word-by-word is on. */
+    val wbwShowTransliteration: Boolean = true,
+    /** Show the meaning line under each word when word-by-word is on. */
+    val wbwShowTranslation: Boolean = true,
 ) {
     init {
         require(arabicSizeSp in 16..48) { "arabicSizeSp must be 16..48" }
