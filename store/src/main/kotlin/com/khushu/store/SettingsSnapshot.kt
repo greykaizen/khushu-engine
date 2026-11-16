@@ -143,6 +143,33 @@ data class DuaSettingsDto(
 }
 
 /**
+ * How the Qur'an reader presents the text. Every field is an input to what
+ * the reader renders, so the corpus-agnostic half (size, edition, translation)
+ * lives with the other persisted settings instead of in a UI-side store.
+ */
+@Serializable
+data class QuranSettingsDto(
+    /** Ayah text size in sp, 16..48. */
+    val arabicSizeSp: Int = 28,
+    /**
+     * Mushaf edition code from `quran_mushafs` (`qpc`, `indopak_15`, …). It
+     * selects the page layout, not just the script.
+     */
+    val mushaf: String = "qpc",
+    /**
+     * Translation pack id; null or blank renders the text alone. Defaults to
+     * the Sahih International English pack the reader has always opened with,
+     * so "translation off" stays a choice the reader makes rather than a
+     * silent regression for existing installs.
+     */
+    val translationPack: String? = "en_saheeh-international",
+) {
+    init {
+        require(arabicSizeSp in 16..48) { "arabicSizeSp must be 16..48" }
+    }
+}
+
+/**
  * Everything a host persists about engine usage: the grouped settings for
  * every computational domain plus the user's location. Versioned via
  * [schemaVersion]; forward-compatible — unknown keys are ignored and missing
@@ -154,6 +181,7 @@ data class SettingsSnapshot(
     val calendar: CalendarSettingsDto = CalendarSettingsDto(),
     val zakat: ZakatSettingsDto = ZakatSettingsDto(),
     val dua: DuaSettingsDto = DuaSettingsDto(),
+    val quran: QuranSettingsDto = QuranSettingsDto(),
     val location: LocationDto? = null,
     val schemaVersion: Int = SETTINGS_SCHEMA_VERSION,
 ) {
