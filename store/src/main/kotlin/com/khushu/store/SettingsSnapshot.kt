@@ -164,6 +164,13 @@ data class QuranSettingsDto(
      */
     val translationPack: String? = "en_saheeh-international",
     /**
+     * A second translation pack rendered under the primary, the way a reader
+     * comparing two renderings reads them (QuranApp's translation set). Null
+     * renders the primary alone. Codec is lenient (unknown keys ignored), so
+     * older stored snapshots decode with this default without a migration.
+     */
+    val secondaryTranslationPack: String? = null,
+    /**
      * Tafsir book slug (e.g. "en-tafisr-ibn-kathir"); null renders no tafsir.
      * The slug is the corpus' own book id, so the reader can resolve it to the
      * matching `tafsir-<slug>` pack.
