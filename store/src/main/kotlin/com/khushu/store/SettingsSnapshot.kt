@@ -191,9 +191,12 @@ data class QuranSettingsDto(
     val wbwShowTransliteration: Boolean = true,
     /** Show the meaning line under each word when word-by-word is on. */
     val wbwShowTranslation: Boolean = true,
+    /** Text size in sp for the word-by-word transliteration and meaning lines. */
+    val wbwSizeSp: Int = 13,
 ) {
     init {
         require(arabicSizeSp in 16..48) { "arabicSizeSp must be 16..48" }
+        require(wbwSizeSp in 10..24) { "wbwSizeSp must be 10..24" }
     }
 }
 
