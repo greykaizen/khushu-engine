@@ -157,6 +157,12 @@ data class QuranSettingsDto(
      */
     val mushaf: String = "qpc",
     /**
+     * Quran script code in ayah mode (`quran_scripts.code`, default "uthmani").
+     * Only uthmani has a bundled face here; the reader says so for the rest
+     * rather than drawing glyphs in the wrong font.
+     */
+    val script: String = "uthmani",
+    /**
      * Translation pack id; null or blank renders the text alone. Defaults to
      * the Sahih International English pack the reader has always opened with,
      * so "translation off" stays a choice the reader makes rather than a
