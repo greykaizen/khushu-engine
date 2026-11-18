@@ -146,6 +146,12 @@ class KhushuEngine {
         ): List<Prayer.Occurrence> =
             Prayer.occasionsOn(location, date, categories, config)
 
+        /** Same labels over an already computed day record — no recomputation. */
+        fun occasionsFrom(
+            times: PrayerTimesResult,
+            categories: Set<Prayer.OccasionCategory> = Prayer.OccasionCategory.entries.toSet(),
+        ): List<Prayer.Occurrence> = Prayer.occasionsFrom(times, categories)
+
         /**
          * Current-first rotation around [now]: the in-progress prayer plus the
          * next [count] - 1 occurrences — "what's next" widgets and swipe

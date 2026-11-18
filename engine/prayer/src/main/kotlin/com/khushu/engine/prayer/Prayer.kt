@@ -700,17 +700,24 @@ object Prayer {
         date: LocalDate,
         categories: Set<OccasionCategory> = OccasionCategory.entries.toSet(),
         config: PrayerConfiguration = PrayerConfiguration(),
-    ): List<Occurrence> {
-        val t = times(location, date, config)
-        return buildList {
-            t.fajr.adjusted?.let { add(Occurrence("Fajr", PrayerStatus.Prayer.FAJR, it, OccasionCategory.OBLIGATORY)) }
-            t.sunrise.adjusted?.let { add(Occurrence("Sunrise", PrayerStatus.Prayer.SUNRISE, it, OccasionCategory.BOUNDARY_EVENT)) }
-            t.dhuhrEnters?.let { add(Occurrence("Dhuhr", PrayerStatus.Prayer.DHUHR, it, OccasionCategory.OBLIGATORY)) }
-            t.asr.adjusted?.let { add(Occurrence("Asr", PrayerStatus.Prayer.ASR, it, OccasionCategory.OBLIGATORY)) }
-            t.maghrib.adjusted?.let { add(Occurrence("Maghrib", PrayerStatus.Prayer.MAGHRIB, it, OccasionCategory.OBLIGATORY)) }
-            t.isha.adjusted?.let { add(Occurrence("Isha", PrayerStatus.Prayer.ISHA, it, OccasionCategory.OBLIGATORY)) }
-            t.ishraq?.let { add(Occurrence("Duha (voluntary)", null, it, OccasionCategory.VOLUNTARY)) }
-            t.lastThirdOfNight?.let { add(Occurrence("Tahajjud preferred from", null, it, OccasionCategory.VOLUNTARY)) }
-        }.filter { it.category in categories }.sortedBy { it.instant }
-    }
+    ): List<Occurrence> = occasionsFrom(times(location, date, config), categories)
+
+    /**
+     * Same labeled list as [occasionsOn] but over an ALREADY computed day
+     * record — no second times() computation. Composers that cache a DayModel
+     * should call this so the labels ride the single per-day facts.
+     */
+    fun occasionsFrom(
+        times: PrayerTimesResult,
+        categories: Set<OccasionCategory> = OccasionCategory.entries.toSet(),
+    ): List<Occurrence> = buildList {
+        times.fajr.adjusted?.let { add(Occurrence("Fajr", PrayerStatus.Prayer.FAJR, it, OccasionCategory.OBLIGATORY)) }
+        times.sunrise.adjusted?.let { add(Occurrence("Sunrise", PrayerStatus.Prayer.SUNRISE, it, OccasionCategory.BOUNDARY_EVENT)) }
+        times.dhuhrEnters?.let { add(Occurrence("Dhuhr", PrayerStatus.Prayer.DHUHR, it, OccasionCategory.OBLIGATORY)) }
+        times.asr.adjusted?.let { add(Occurrence("Asr", PrayerStatus.Prayer.ASR, it, OccasionCategory.OBLIGATORY)) }
+        times.maghrib.adjusted?.let { add(Occurrence("Maghrib", PrayerStatus.Prayer.MAGHRIB, it, OccasionCategory.OBLIGATORY)) }
+        times.isha.adjusted?.let { add(Occurrence("Isha", PrayerStatus.Prayer.ISHA, it, OccasionCategory.OBLIGATORY)) }
+        times.ishraq?.let { add(Occurrence("Duha (voluntary)", null, it, OccasionCategory.VOLUNTARY)) }
+        times.lastThirdOfNight?.let { add(Occurrence("Tahajjud preferred from", null, it, OccasionCategory.VOLUNTARY)) }
+    }.filter { it.category in categories }.sortedBy { it.instant }
 }
