@@ -21,4 +21,5 @@ include(
     ":engine:facade",
     ":store",
     ":tools:cli",
+    ":tools:bench",
 )
